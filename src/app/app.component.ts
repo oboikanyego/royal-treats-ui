@@ -20,11 +20,11 @@ export class AppComponent{
  products=seeded;page=signal('home');menu=false;category=signal('All');categories=['All',...seeded.map(x=>x.category)];selected=signal<Product>(seeded[1]);variant=signal('6 donuts');flavour=signal('Chocolate');topping=signal('Oreo');qty=signal(1);
  cart=signal<Item[]>(stored('rt-cart',[]));orders=signal<Order[]>(stored('rt-orders',[]));latest=signal<Order|null>(null);tracked=signal<Order|null>(null);trackRef='';trackPhone='';trackSearched=false;
  name='';phone='';date='';time='';payment='Cash on Collection';notes='';
- fulfillment:'collection'|'delivery'='collection';deliveryAddress='';deliveryLat:number|null=null;deliveryLng:number|null=null;locationMessage='';
+ fulfillment:'collection'|'delivery'='collection';deliveryAddress='';deliveryLat=signal<number|null>(null);deliveryLng=signal<number|null>(null);locationMessage='';
  checkoutError='';minDate=new Date(Date.now()+86400000).toISOString().slice(0,10);times=computed(()=>Array.from({length:48},(_,i)=>String(Math.floor(i/2)).padStart(2,'0')+':'+(i%2?'30':'00')).filter(t=>this.store.inHours(t)));
  statuses=['Pending','Confirmed','Preparing','Ready for Collection','Completed','Cancelled'];
  filtered=computed(()=>this.store.products().filter(p=>(this.category()==='All'||p.category===this.category())));
- deliveryCheck=computed(()=>this.store.canDeliver(this.cart(),this.deliveryLat,this.deliveryLng));
+ deliveryCheck=computed(()=>this.store.canDeliver(this.cart(),this.deliveryLat(),this.deliveryLng()));
  eligibleForDelivery=computed(()=>this.cart().every(i=>this.store.products().some(p=>p.name===i.name&&p.deliverable&&p.available))&&this.cart().length>0);
  unitPrice=computed(()=>this.selected().variants.find(v=>v.label===this.variant())?.price??this.selected().price);
  count=computed(()=>this.cart().reduce((n,x)=>n+x.qty,0));total=computed(()=>this.cart().reduce((n,x)=>n+x.qty*x.price,0));revenue=computed(()=>this.orders().filter(x=>x.status!=='Cancelled').reduce((n,x)=>n+x.total,0));
@@ -35,7 +35,7 @@ export class AppComponent{
  add(){const p=this.selected();if(!this.store.products().find(x=>x.name===p.name)?.available)return;const item={name:p.name,image:p.image,variant:this.variant(),price:this.unitPrice(),qty:this.qty(),sauce:this.flavour(),topping:this.topping()};const items=[...this.cart()];const old=items.find(i=>i.name===item.name&&i.variant===item.variant&&i.sauce===item.sauce&&i.topping===item.topping);if(old)old.qty+=item.qty;else items.push(item);this.saveCart(items);this.go('cart')}
  change(i:Item,d:number){this.saveCart(this.cart().map(x=>x===i?{...x,qty:x.qty+d}:x).filter(x=>x.qty>0))}
  remove(i:Item){this.saveCart(this.cart().filter(x=>x!==i))}
- useDeliveryLocation(){this.locationMessage='';if(!navigator.geolocation){this.locationMessage='Geolocation is not available. Choose collection.';return}navigator.geolocation.getCurrentPosition(pos=>{this.deliveryLat=pos.coords.latitude;this.deliveryLng=pos.coords.longitude;this.locationMessage='Location captured. '+this.store.canDeliver(this.cart(),this.deliveryLat,this.deliveryLng).reason},()=>{this.locationMessage='Could not get your location. Enable location permission or choose collection.'},{enableHighAccuracy:true,timeout:15000})}
+ useDeliveryLocation(){this.locationMessage='';if(!navigator.geolocation){this.locationMessage='Geolocation is not available. Choose collection.';return}navigator.geolocation.getCurrentPosition(pos=>{this.deliveryLat.set(pos.coords.latitude);this.deliveryLng.set(pos.coords.longitude);this.locationMessage='Location captured. '+this.store.canDeliver(this.cart(),this.deliveryLat,this.deliveryLng).reason},()=>{this.locationMessage='Could not get your location. Enable location permission or choose collection.'},{enableHighAccuracy:true,timeout:15000})}
  place(){
   this.checkoutError='';
   if(this.store.session()?.role!=='customer'){this.checkoutError='Please sign in or register as a customer before placing an order.';return}
@@ -46,7 +46,7 @@ export class AppComponent{
   const user=this.store.session();
   const o:Order={id:'RT-'+Date.now().toString().slice(-8),name:this.name,phone:this.phone.replace(/\s/g,''),date:this.date,time:this.time,payment:this.fulfillment==='delivery'?'Cash on Delivery':'Cash on Collection',items:this.cart(),total:this.total(),status:'Pending'};
   this.orders.update(x=>[o,...x]);localStorage.setItem('rt-orders',JSON.stringify(this.orders()));
-  const delivery:DeliveryOrder={id:o.id,customerId:user?.id||'guest',customer:o.name,phone:o.phone,whatsapp:user?.whatsapp,address:this.fulfillment==='delivery'?this.deliveryAddress:'',latitude:this.deliveryLat??undefined,longitude:this.deliveryLng??undefined,distanceKm:this.deliveryCheck().distance??undefined,fulfillment:this.fulfillment,status:'Pending',payment:o.payment,total:o.total,items:o.items.map(i=>({name:i.name,qty:i.qty,price:i.price})),date:o.date,time:o.time};
+  const delivery:DeliveryOrder={id:o.id,customerId:user?.id||'guest',customer:o.name,phone:o.phone,whatsapp:user?.whatsapp,address:this.fulfillment==='delivery'?this.deliveryAddress:'',latitude:this.deliveryLat()??undefined,longitude:this.deliveryLng()??undefined,distanceKm:this.deliveryCheck().distance??undefined,fulfillment:this.fulfillment,status:'Pending',payment:o.payment,total:o.total,items:o.items.map(i=>({name:i.name,qty:i.qty,price:i.price})),date:o.date,time:o.time};
   this.store.record(delivery);this.latest.set(o);this.tracked.set(o);this.trackRef=o.id;this.trackPhone=o.phone;this.saveCart([]);this.go('success')
  }
  track(){this.trackSearched=true;this.tracked.set(this.orders().find(o=>o.id.toLowerCase()===this.trackRef.trim().toLowerCase()&&o.phone.replace(/\D/g,'')===this.trackPhone.replace(/\D/g,''))||null)}
