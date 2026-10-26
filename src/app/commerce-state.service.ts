@@ -4,7 +4,7 @@ export type Role = 'admin' | 'customer' | 'courier';
 export type Account = { id: string; name: string; email: string; phone: string; role: Role; password: string; active: boolean; photo?: string };
 export type CatalogueProduct = { id: string; name: string; category: string; price: number; image: string; description: string; available: boolean; deliverable: boolean; variants: { label: string; price: number }[] };
 export type Settings = { open: string; close: string; latitude: number | null; longitude: number | null; radiusKm: number; storeName: string; address: string; supportEmail: string };
-export type DeliveryOrder = { id: string; customerId: string; customer: string; phone: string; address: string; latitude?: number; longitude?: number; distanceKm?: number; fulfillment: 'delivery'|'collection'; courierId?: string; status: string; payment: string; total: number; items: {name:string;qty:number;price:number;recipient?:string}[]; date: string; time: string };
+export type DeliveryOrder = { id: string; customerId: string; customer: string; phone: string; address: string; latitude?: number; longitude?: number; distanceKm?: number; fulfillment: 'delivery'|'collection'; courierId?: string; status: string; payment: string; total: number; items: {name:string;qty:number;price:number;recipient?:string}[]; date: string; time: string; notes?: string };
 
 const seedProducts: CatalogueProduct[] = [
  { id: 'slush', name: 'Slushies', category: 'Slushies', price: 15, image: 'https://images.unsplash.com/photo-1497534446932-c925b458314e?auto=format&fit=crop&w=900&q=85', description:'Lemon Lime, Strawberry or Blueberry', available:true,deliverable:false, variants:[{label:'Small cup',price:15},{label:'Big cup',price:30}] },
