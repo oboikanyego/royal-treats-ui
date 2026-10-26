@@ -1,3 +1,27 @@
+:root {
+  /* Brand */
+  --rt-pink: #ed1680;
+  --rt-pink-light: #f82b93;
+  --rt-pink-deep: #d51672;
+  --rt-pink-dark: #b81361;
+  /* Pink surfaces and borders */
+  --rt-blush-soft: #fff8fb;
+  --rt-blush: #fff0f7;
+  --rt-pink-100: #ffe8f0;
+  --rt-pink-border: #f3d8e4;
+  /* Text */
+  --rt-ink: #16151b;
+  --rt-plum: #3c1934;
+  /* Shape */
+  --rt-radius-sm: 10px;
+  --rt-radius-md: 12px;
+  --rt-radius-lg: 16px;
+  --rt-radius-xl: 20px;
+  --rt-radius-pill: 99px;
+  /* Type */
+  --rt-font-body: Arial, Helvetica, sans-serif;
+  --rt-font-display: Georgia, serif;
+}
 * {
   box-sizing: border-box;
 }
@@ -6,9 +30,9 @@ html {
 }
 body {
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--rt-font-body);
   background: #fff;
-  color: #15151a;
+  color: var(--rt-ink);
 }
 button:focus-visible,
 a:focus-visible,

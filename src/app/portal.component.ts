@@ -8,7 +8,7 @@ import { CommerceState, CatalogueProduct, DeliveryOrder, Settings } from './comm
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './portal.component.html',
-  styleUrls: ['./portal.component.css', './operations-studio.css'],
+  styleUrls: ['./portal.component.css'],
 })
 export class PortalComponent {
   readonly store = inject(CommerceState);
