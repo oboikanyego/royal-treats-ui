@@ -1,8 +1,8 @@
-# Royal Treats UI
+# Royal Treats — Dessert Commerce UI
 
-Angular 20 frontend prototype for Royal Treats dessert pre-orders. Hosted on Netlify Free. All demo state is browser-local; **there is no backend, real authentication, payment processing, or cross-device sync**.
+An Angular 20, mobile-first dessert storefront and demonstration admin workspace for Royal Treats in Thabazimbi. **Frontend-only:** products, user profiles, orders, uploaded images and settings are stored in each device's browser for demonstration.
 
-## Start
+## Local development
 
 ```bash
 npm install
@@ -11,47 +11,44 @@ npm run build
 npm start
 ```
 
-## Customer experience
+The Netlify build uses `netlify.toml` (Node 22, `npm run build`, publish `dist/royal-treats-ui/browser`).
 
-- Register with full name, email, required call number, optional WhatsApp number and demo password
-- Sign in, browse seeded products, customise sizes/flavours/toppings, and place an order
-- Pre-order time slots follow the configurable business hours (initially 10:00–23:00)
-- Sold-out products cannot be added or checked out
-- Collection for all available products, cash on collection
-- Delivery for **in-stock mini donuts only**, cash on delivery, subject to a **5 km straight-line radius**
-- Address plus device geolocation are required for delivery
-- Order tracking in the same browser
+## Customer storefront
 
-## Admin demo
+- Branded first-visit donut loader with skip action and reduced-motion support
+- Responsive product cards, search, categories, availability-only filter, sorting and eight-item pages
+- Product variations, flavours and toppings
+- Group orders: label each line with a person's name; put multiple people's items through one checkout
+- Customers register with full name, email, required call number and a **demo-only** password
+- Signed-in profiles with styled image upload, resized to a small square and stored in the browser
+- Collection for all available products; delivery for **in-stock mini donuts only** within 5 km straight-line distance of a configured store location
+- Cash on collection or delivery; **no EFT/online checkout yet**
+- Order tracking inside the browser
 
-Sign in using **admin@royaltreats.demo** and **Demo@12345**. This account is only for UI demonstrations, not for production.
+## Business support — email only
 
-- Add and edit products, pack sizes and prices; upload small image files or enter an image URL
-- Set products in or out of stock, enable donut delivery
-- Register, activate and deactivate delivery personnel
-- Configure business opening and closing times and the store's address and coordinates
-- View and update order statuses (including Ready for Delivery)
+No messaging integrations and no owner phone numbers are displayed publicly. The support page uses the **business support email configured by an admin**, if available. A user composes a subject and message, and `mailto:` opens their own email application; the frontend **does not transmit emails**. No real support address is assumed or hardcoded.
 
-**Store coordinates must be set by the admin using a device physically at the store** (or entered accurately). Until then delivery checkout is disabled.
+## Admin & delivery workspace
 
-## Courier demo
+Demo admin credentials: `admin@royaltreats.demo` / `Demo@12345`. This is intentionally a public demo credential and is **not suitable for production**.
 
-The admin creates a delivery-person account. Sign out, then sign in with the courier account on the **same browser**. When admin marks an eligible order Ready for Delivery, a courier may accept the job, see its details and mark it delivered.
+- Dark-sidebar operations dashboard for orders, catalogue, couriers and business settings
+- Product onboarding and editing with modal, photo picker and preview, category, prices, variants, stock and delivery eligibility
+- Stock-state confirmation dialogs
+- Business address, geographical coordinates, operating times and optional support email
+- Courier registration and a browser-local available/assigned job queue
+- Staff can see recipient labels attached to shared orders
 
-## Demo-only limitations and security
+## Important data and security limitations
 
-- Passwords and profile data are stored in localStorage **in plaintext**. Use fake details only; do not enter real personal information or reuse actual passwords.
-- No actual access control: browser storage can be modified by visitors. The public demo admin credentials are not secure.
-- localStorage is per browser/device. Admin, courier and customer data won't automatically synchronise between phones.
-- Uploaded product images are saved as browser-local data URLs. Use images smaller than 400 KB; browser storage can fill quickly.
-- Distances use Haversine straight-line measurement, not driving distance. GPS accuracy, eligibility and delivery dispatch must be validated again in the future backend.
-- There is no EFT option yet. Checkout displays cash on collection/delivery only.
-- The app is **not ready to handle real orders or personal data** until backend authentication, authorization, database storage and validation have been implemented.
+**Do not enter real customer data, real passwords or real identity documents into this demo.** Passwords and account details are stored unencrypted in `localStorage`; visitors can alter local data, and there is no server-side authentication, authorization, shared database, or reliable multi-device order synchronization. Image files are stored as browser-local data URLs; sizes are limited to reduce quota problems. The 5 km restriction uses device geolocation and straight-line Haversine distance, not a server-verified driving route. Email contact launches a local mail app rather than sending email through the site.
 
-## Deployment
-
-Netlify configuration in `netlify.toml`: Node 22, build `npm run build`, publish `dist/royal-treats-ui/browser`.
+Production requires a secure API/database, authenticated accounts and permissions, server-side stock/fulfilment checks, validated media uploads, persistent orders and courier assignment, proper support email delivery, and POPIA-aware handling of personal information.
 
 ## Formatting
 
-Run `npm run format` (Prettier) or `npm run format:check`.
+- `npm run format` — format TypeScript/Angular templates and styles with Prettier
+- `npm run format:check` — verify source formatting
+
+The GitHub workflow also formats and builds on updates to `main`.
