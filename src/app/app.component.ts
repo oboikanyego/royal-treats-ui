@@ -21,7 +21,7 @@ export class AppComponent{
  cart=signal<Item[]>(stored('rt-cart',[]));orders=signal<Order[]>(stored('rt-orders',[]));latest=signal<Order|null>(null);tracked=signal<Order|null>(null);trackRef='';trackPhone='';trackSearched=false;
  name='';phone='';date='';time='';payment='Cash on Collection';notes='';
  fulfillment:'collection'|'delivery'='collection';deliveryAddress='';deliveryLat:number|null=null;deliveryLng:number|null=null;locationMessage='';
- checkoutError='';minDate=new Date(Date.now()+86400000).toISOString().slice(0,10);times=['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00'];
+ checkoutError='';minDate=new Date(Date.now()+86400000).toISOString().slice(0,10);times=computed(()=>Array.from({length:48},(_,i)=>String(Math.floor(i/2)).padStart(2,'0')+':'+(i%2?'30':'00')).filter(t=>this.store.inHours(t)));
  statuses=['Pending','Confirmed','Preparing','Ready for Collection','Completed','Cancelled'];
  filtered=computed(()=>this.store.products().filter(p=>(this.category()==='All'||p.category===this.category())));
  deliveryCheck=computed(()=>this.store.canDeliver(this.cart(),this.deliveryLat,this.deliveryLng));
@@ -29,7 +29,7 @@ export class AppComponent{
  unitPrice=computed(()=>this.selected().variants.find(v=>v.label===this.variant())?.price??this.selected().price);
  count=computed(()=>this.cart().reduce((n,x)=>n+x.qty,0));total=computed(()=>this.cart().reduce((n,x)=>n+x.qty*x.price,0));revenue=computed(()=>this.orders().filter(x=>x.status!=='Cancelled').reduce((n,x)=>n+x.total,0));
  pending=computed(()=>this.orders().filter(x=>x.status==='Pending').length);completed=computed(()=>this.orders().filter(x=>x.status==='Completed').length);
- go(p:string){this.page.set(p);this.menu=false;window.scrollTo(0,0)}
+ go(p:string){if(p.startsWith('admin'))p='portal';this.page.set(p);this.menu=false;window.scrollTo(0,0)}
  open(p:Product){if(!this.store.products().find(x=>x.name===p.name)?.available)return;this.selected.set(p);this.variant.set(p.variants[0].label);this.flavour.set('Chocolate');this.topping.set('Oreo');this.qty.set(1);this.go('product')}
  saveCart(items:Item[]){this.cart.set(items);localStorage.setItem('rt-cart',JSON.stringify(items))}
  add(){const p=this.selected();if(!this.store.products().find(x=>x.name===p.name)?.available)return;const item={name:p.name,image:p.image,variant:this.variant(),price:this.unitPrice(),qty:this.qty(),sauce:this.flavour(),topping:this.topping()};const items=[...this.cart()];const old=items.find(i=>i.name===item.name&&i.variant===item.variant&&i.sauce===item.sauce&&i.topping===item.topping);if(old)old.qty+=item.qty;else items.push(item);this.saveCart(items);this.go('cart')}
@@ -38,6 +38,7 @@ export class AppComponent{
  useDeliveryLocation(){this.locationMessage='';if(!navigator.geolocation){this.locationMessage='Geolocation is not available. Choose collection.';return}navigator.geolocation.getCurrentPosition(pos=>{this.deliveryLat=pos.coords.latitude;this.deliveryLng=pos.coords.longitude;this.locationMessage='Location captured. '+this.store.canDeliver(this.cart(),this.deliveryLat,this.deliveryLng).reason},()=>{this.locationMessage='Could not get your location. Enable location permission or choose collection.'},{enableHighAccuracy:true,timeout:15000})}
  place(){
   this.checkoutError='';
+  if(this.store.session()?.role!=='customer'){this.checkoutError='Please sign in or register as a customer before placing an order.';return}
   if(!this.name.trim()||!this.phone.trim()||!this.date||!this.time||!this.cart().length){this.checkoutError='Complete your contact details and collection time.';return}
   if(!this.store.inHours(this.time)){this.checkoutError='Choose a time within the store opening hours.';return}
   if(this.cart().some(i=>!this.store.products().some(p=>p.name===i.name&&p.available))){this.checkoutError='An item is now out of stock. Please update your cart.';return}
