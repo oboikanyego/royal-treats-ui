@@ -1,5 +1,5 @@
 <div class="portal">
- <div class="portal-top"><div class="portal-brand">♛ <b>Royal Treats</b><small>THE SWEET STUDIO · THABAZIMBI</small></div><button class="secondary" *ngIf="store.session()" (click)="logout()">Sign out</button></div>
+ <div class="portal-top"><div class="portal-brand"><span class="portal-logo-mark">♛</span><span><b>Royal Treats</b><small>THE SWEET STUDIO · THABAZIMBI</small></span></div><button class="secondary" *ngIf="store.session()" (click)="logout()">Sign out</button></div>
  <section class="auth" *ngIf="!store.session()">
   <div class="auth-head"><span>♛</span><h1>{{screen()==='register'?'Join Royal Treats':'Welcome back'}}</h1><p>{{screen()==='register'?'Create a customer profile':'Sign in to your Royal Treats account'}}</p></div>
   <form *ngIf="screen()==='signin'" (ngSubmit)="login()"><label>Email address <input name="email" type="email" required [(ngModel)]="email" autocomplete="email"></label><label>Password<input name="password" type="password" required [(ngModel)]="password" autocomplete="current-password"></label><button class="primary wide">Sign in</button><p class="helper">Admin demo: <strong>admin@royaltreats.demo</strong> / <strong>Demo@12345</strong></p><button type="button" class="link" (click)="screen.set('register')">New customer? Register here</button></form>
@@ -7,10 +7,22 @@
   <p class="error" *ngIf="error">{{error}}</p><p class="warning">Frontend prototype only. Never use a real password; profiles are stored in this browser and are not secure or shared across devices.</p>
  </section>
  <ng-container *ngIf="store.session() as user">
-  <div class="role-header"><div><small>♛ {{user.role | titlecase}} workspace</small><h1>Welcome, {{user.name}} <span class="wave">✦</span></h1><p>Your Royal Treats workspace is ready.</p></div><span class="role">{{user.role | titlecase}}</span></div>
-  <nav class="portal-nav" *ngIf="user.role==='admin'">
-   <button [class.selected]="screen()==='home'" (click)="nav('home')">Overview</button><button [class.selected]="screen()==='orders'" (click)="nav('orders')">Orders</button><button [class.selected]="screen()==='products'" (click)="nav('products')">Products</button><button [class.selected]="screen()==='couriers'" (click)="nav('couriers')">Delivery staff</button><button [class.selected]="screen()==='settings'" (click)="nav('settings')">Settings</button>
-  </nav>
+ <div class="workspace-layout" [class.admin-mode]="user.role==='admin'">
+  <aside class="workspace-sidebar" *ngIf="user.role==='admin'" aria-label="Admin navigation">
+   <div class="workspace-brand"><span class="brand-crown">♛</span><div><b>Royal Treats</b><small>OPERATIONS STUDIO</small></div></div>
+   <p class="sidebar-label">WORKSPACE</p>
+   <nav class="sidebar-navigation">
+    <button [class.active]="screen()==='home'" (click)="nav('home')"><span>▦</span> Overview</button>
+    <button [class.active]="screen()==='orders'" (click)="nav('orders')"><span>▤</span> Orders <small>{{store.deliveries().length}}</small></button>
+    <button [class.active]="screen()==='products'" (click)="nav('products')"><span>◈</span> Products <small>{{store.products().length}}</small></button>
+    <button [class.active]="screen()==='couriers'" (click)="nav('couriers')"><span>♙</span> Delivery team</button>
+    <button [class.active]="screen()==='settings'" (click)="nav('settings')"><span>⚙</span> Settings</button>
+   </nav>
+   <div class="sidebar-bottom"><div class="sidebar-avatar"><img *ngIf="user.photo" [src]="user.photo" alt=""><span *ngIf="!user.photo">{{initials(user.name)}}</span></div><div class="sidebar-identity"><b>{{user.name}}</b><small>Administrator · Demo</small></div></div>
+  </aside>
+  <div class="workspace-main">
+  <div class="role-header"><div><small>✦ {{user.role | titlecase}} workspace / Royal Treats</small><h1>{{user.role==='admin'?'Store overview':user.role==='courier'?'Delivery workspace':'Your Royal account'}}</h1><p>{{user.role==='admin'?'Manage orders, catalogue and settings in one place.':user.role==='courier'?'Manage available and assigned deliveries.':'Everything you need to order, share and enjoy your treats.'}}</p></div><div class="role-user"><div class="role-avatar"><img *ngIf="user.photo" [src]="user.photo" alt=""><span *ngIf="!user.photo">{{initials(user.name)}}</span></div><div class="role-person"><strong>{{user.name}}</strong><small>{{user.role | titlecase}} account</small></div></div></div>
+  
   <div class="alert success-alert" *ngIf="notice">{{notice}}</div><div class="alert error" *ngIf="error">{{error}}</div>
   <div *ngIf="user.role==='customer'" class="pane"><h2>Your account</h2><p><b>Email:</b> {{user.email}}</p><p><b>Call:</b> {{user.phone}}</p><h3>Your orders</h3><div class="order-card" *ngFor="let order of store.deliveries()"><ng-container *ngIf="order.customerId===user.id"><b>{{order.id}}</b><span>{{order.status}}</span><p>{{order.fulfillment | titlecase}} · R{{order.total}}</p></ng-container></div><p class="helper">Only orders created in this browser are visible until the backend is connected.</p></div>
   <div *ngIf="user.role==='courier'" class="pane"><h2>Available delivery jobs</h2><p class="helper">Jobs within the configured store delivery area, assigned by first acceptance.</p><p *ngIf="!availableOrders().length">No available jobs at the moment.</p><div class="order-card" *ngFor="let order of availableOrders()"><div><b>{{order.id}}</b><span>{{order.distanceKm?.toFixed(2)}} km from store</span></div><p>{{order.address}}</p><p>{{order.items.length}} items · R{{order.total}} · {{order.payment}}</p><button class="primary" (click)="accept(order.id)">Accept delivery</button></div><h2>My deliveries</h2><p *ngIf="!ownOrders().length">No accepted deliveries yet.</p><div class="order-card" *ngFor="let order of ownOrders()"><b>{{order.id}}</b><p>{{order.customer}} · <a [href]="'tel:'+order.phone">{{order.phone}}</a></p><p>{{order.address}}</p><p>Status: {{order.status}}</p><button class="primary" *ngIf="order.status==='Out for Delivery'" (click)="saveOrder(order.id,'Completed')">Mark delivered</button></div></div>
@@ -23,6 +35,8 @@
    <div class="pane" *ngIf="screen()==='couriers'"><h2>Delivery personnel</h2><div class="panel"><h3>Register delivery person</h3><form (ngSubmit)="createCourier()"><label>Full name<input required name="name" [(ngModel)]="courier.name"></label><label>Email<input required type="email" name="email" [(ngModel)]="courier.email"></label><label>Phone number<input required name="phone" [(ngModel)]="courier.phone"></label><label>Demo password (8+ characters)<input required minlength="8" type="password" name="password" [(ngModel)]="courier.password"></label><button class="primary">Add delivery person</button></form></div><h3>Delivery team</h3><p *ngIf="!couriers().length">No delivery staff registered yet.</p><div class="order-card" *ngFor="let c of couriers()"><b>{{c.name}}</b><p>{{c.email}} · {{c.phone}}</p><span>{{c.active?'Active':'Disabled'}}</span><button class="secondary" (click)="store.toggleAccount(c.id)">{{c.active?'Deactivate':'Reactivate'}}</button></div></div>
    <div class="pane" *ngIf="screen()==='settings'"><h2>Business settings</h2><form class="panel" (ngSubmit)="saveHours()"><label>Opening time<input type="time" required name="open" [(ngModel)]="settings.open"></label><label>Closing time<input type="time" required name="close" [(ngModel)]="settings.close"></label><label>Store address<input required name="address" [(ngModel)]="settings.address"></label><label>Business support email<input required type="email" name="supportEmail" [(ngModel)]="settings.supportEmail" placeholder="support@yourbusiness.co.za"></label><p class="helper">Visitors can contact support using their own email app. This frontend does not send messages.</p><p>Delivery radius: <strong>5 km maximum</strong> (fixed business rule).</p><label>Store latitude<input name="latitude" type="number" step="any" [(ngModel)]="settings.latitude"></label><label>Store longitude<input name="longitude" type="number" step="any" [(ngModel)]="settings.longitude"></label><button type="button" class="secondary" (click)="useStoreLocation()">Use this device's location as store</button><p class="helper">Set coordinates while physically at the store, not from another location. Distance is straight-line, not road-driving distance.</p><button class="primary wide">Save settings</button></form></div>
   </ng-container>
+  </div>
+ </div>
  </ng-container>
 </div>
 <div class="confirm-backdrop" *ngIf="pendingAvailability as p" (click)="pendingAvailability=null">
