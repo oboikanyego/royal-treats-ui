@@ -4,52 +4,10 @@ import { Title } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CommerceState, CatalogueProduct, DeliveryOrder } from './commerce-state.service';
+import { CartItem, CartService } from './cart.service';
+import { optionsFor } from './catalogue-config';
 import { PortalComponent } from './portal.component';
 import { inject } from '@angular/core';
-type Item = {
-  name: string;
-  image: string;
-  variant: string;
-  price: number;
-  qty: number;
-  sauce: string;
-  topping: string;
-  recipient?: string;
-};
-type Order = {
-  id: string;
-  name: string;
-  phone: string;
-  date: string;
-  time: string;
-  payment: string;
-  items: Item[];
-  total: number;
-  status: string;
-  notes?: string;
-};
-const flavoursFor = (category: string): string[] =>
-  category === 'Slushies'
-    ? ['Lemon Lime', 'Strawberry', 'Blueberry']
-    : category === 'Milkshakes'
-      ? ['Bubblegum', 'Chocolate', 'Strawberry', 'Vanilla']
-      : category === 'Ice Cream Sundaes'
-        ? []
-        : ['Chocolate', 'Caramel', 'Milky White'];
-const toppingsFor = (category: string): string[] =>
-  category === 'Mini Donuts'
-    ? ['Nuts', 'Oreo', 'Chocolate chips', 'Rainbow sprinkles', 'Plain sprinkles']
-    : category === 'Ice Cream Sundaes'
-      ? [
-          'Wafer',
-          'Oreo biscuit',
-          'Marshmallows',
-          'Chocolate sticks',
-          'Caramel popcorn',
-          'Gummy bears',
-          'Peanuts',
-        ]
-      : [];
 const collectionSteps = ['Pending', 'Confirmed', 'Preparing', 'Ready for Collection', 'Completed'];
 const deliverySteps = [
   'Pending',
@@ -70,13 +28,6 @@ const pagePaths: Record<string, string> = {
   contact: '/contact',
   portal: '/account',
 };
-function stored<T>(key: string, fallback: T): T {
-  try {
-    return JSON.parse(localStorage.getItem(key) || 'null') ?? fallback;
-  } catch {
-    return fallback;
-  }
-}
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -86,6 +37,7 @@ function stored<T>(key: string, fallback: T): T {
 })
 export class AppComponent {
   store = inject(CommerceState);
+  cartSvc = inject(CartService);
   router = inject(Router);
   title = inject(Title);
   products = this.store.products;
@@ -94,12 +46,14 @@ export class AppComponent {
   category = signal('All');
   categories = computed(() => ['All', ...new Set(this.store.products().map((x) => x.category))]);
   selected = signal<CatalogueProduct>(this.store.products()[1]);
+  private selectedId = '';
   variant = signal('6 donuts');
   flavour = signal('Chocolate');
   topping = signal('Oreo');
   qty = signal(1);
-  flavours = computed(() => flavoursFor(this.selected().category));
-  toppings = computed(() => toppingsFor(this.selected().category));
+  options = computed(() => optionsFor(this.selected()));
+  flavours = computed(() => this.options().flavours);
+  toppings = computed(() => this.options().toppings);
   forPerson = '';
   searchText = signal('');
   sortBy = signal('featured');
@@ -110,10 +64,10 @@ export class AppComponent {
   supportSubject = 'Order support';
   supportMessage = '';
 
-  cart = signal<Item[]>(stored('rt-cart', []));
-  orders = signal<Order[]>(stored('rt-orders', []));
-  latest = signal<Order | null>(null);
-  tracked = signal<Order | null>(null);
+  cart = this.cartSvc.items;
+  latest = signal<DeliveryOrder | null>(null);
+  trackedId = signal<string | null>(null);
+  tracked = computed(() => this.store.deliveries().find((o) => o.id === this.trackedId()) ?? null);
   trackRef = '';
   trackPhone = '';
   trackSearched = false;
@@ -162,9 +116,7 @@ export class AppComponent {
     const start = Math.max(1, Math.min(this.menuPage() - 2, total - count + 1));
     return Array.from({ length: count }, (_, index) => start + index);
   });
-  groupRecipients = computed(() => [
-    ...new Set(this.cart().map((i) => i.recipient?.trim() || 'Shared treats')),
-  ]);
+  groupRecipients = this.cartSvc.recipients;
 
   deliveryCheck = computed(() =>
     this.store.canDeliver(this.cart(), this.deliveryLat(), this.deliveryLng()),
@@ -172,7 +124,7 @@ export class AppComponent {
   eligibleForDelivery = computed(
     () =>
       this.cart().every((i) =>
-        this.store.products().some((p) => p.name === i.name && p.deliverable && p.available),
+        this.store.products().some((p) => p.id === i.productId && p.deliverable && p.available),
       ) && this.cart().length > 0,
   );
   unitPrice = computed(
@@ -180,15 +132,8 @@ export class AppComponent {
       this.selected().variants.find((v) => v.label === this.variant())?.price ??
       this.selected().price,
   );
-  count = computed(() => this.cart().reduce((n, x) => n + x.qty, 0));
-  total = computed(() => this.cart().reduce((n, x) => n + x.qty * x.price, 0));
-  revenue = computed(() =>
-    this.orders()
-      .filter((x) => x.status !== 'Cancelled')
-      .reduce((n, x) => n + x.total, 0),
-  );
-  pending = computed(() => this.orders().filter((x) => x.status === 'Pending').length);
-  completed = computed(() => this.orders().filter((x) => x.status === 'Completed').length);
+  count = this.cartSvc.count;
+  total = this.cartSvc.total;
   constructor() {
     if (this.showWelcome()) setTimeout(() => this.dismissWelcome(), 2200);
     const sub = this.router.events.subscribe((e) => {
@@ -209,7 +154,7 @@ export class AppComponent {
         this.router.navigateByUrl('/menu', { replaceUrl: true });
         return;
       }
-      if (this.selected().id !== found.id) this.select(found);
+      if (this.selectedId !== found.id) this.select(found);
     }
     if (page === 'success' && !this.latest()) {
       this.router.navigateByUrl('/track', { replaceUrl: true });
@@ -256,13 +201,11 @@ export class AppComponent {
     this.menuPage.set(Math.max(1, Math.min(this.totalPages(), n)));
     window.scrollTo(0, 220);
   }
-  itemDetails(i: Item) {
+  itemDetails(i: CartItem) {
     return [i.variant, i.sauce, i.topping].filter((x) => x).join(' · ');
   }
-  saveRecipient(item: Item, recipient: string) {
-    this.saveCart(
-      this.cart().map((x) => (x === item ? { ...x, recipient: recipient.slice(0, 45) } : x)),
-    );
+  saveRecipient(item: CartItem, recipient: string) {
+    this.cartSvc.setRecipient(item, recipient);
   }
   emailReady() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.store.settings().supportEmail || '');
@@ -284,29 +227,28 @@ export class AppComponent {
     this.router.navigateByUrl(pagePaths[p] ?? '/');
   }
   selectedAvailable() {
-    return !!this.store.products().find((p) => p.name === this.selected().name)?.available;
+    return !!this.store.products().find((p) => p.id === this.selected().id)?.available;
   }
   select(p: CatalogueProduct) {
+    this.selectedId = p.id;
     this.selected.set(p);
     this.variant.set(p.variants[0].label);
-    this.flavour.set(flavoursFor(p.category)[0] ?? '');
-    this.topping.set(toppingsFor(p.category)[0] ?? '');
+    const options = optionsFor(p);
+    this.flavour.set(options.flavours[0] ?? '');
+    this.topping.set(options.toppings[0] ?? '');
     this.qty.set(1);
     this.forPerson = '';
   }
   open(p: CatalogueProduct) {
-    if (!this.store.products().find((x) => x.name === p.name)?.available) return;
+    if (!this.store.products().find((x) => x.id === p.id)?.available) return;
     this.select(p);
     this.router.navigate(['/menu', p.id]);
   }
-  saveCart(items: Item[]) {
-    this.cart.set(items);
-    localStorage.setItem('rt-cart', JSON.stringify(items));
-  }
   add() {
     const p = this.selected();
-    if (!this.store.products().find((x) => x.name === p.name)?.available) return;
-    const item = {
+    if (!this.store.products().find((x) => x.id === p.id)?.available) return;
+    this.cartSvc.add({
+      productId: p.id,
       name: p.name,
       image: p.image,
       variant: this.variant(),
@@ -314,31 +256,15 @@ export class AppComponent {
       qty: this.qty(),
       sauce: this.flavour(),
       topping: this.topping(),
-      recipient: this.forPerson.trim().slice(0, 45),
-    };
-    const items = [...this.cart()];
-    const old = items.find(
-      (i) =>
-        i.name === item.name &&
-        i.variant === item.variant &&
-        i.sauce === item.sauce &&
-        i.topping === item.topping &&
-        (i.recipient || '') === (item.recipient || ''),
-    );
-    if (old) old.qty += item.qty;
-    else items.push(item);
-    this.saveCart(items);
+      recipient: this.forPerson,
+    });
     this.go('cart');
   }
-  change(i: Item, d: number) {
-    this.saveCart(
-      this.cart()
-        .map((x) => (x === i ? { ...x, qty: x.qty + d } : x))
-        .filter((x) => x.qty > 0),
-    );
+  change(i: CartItem, d: number) {
+    this.cartSvc.changeQty(i, d);
   }
-  remove(i: Item) {
-    this.saveCart(this.cart().filter((x) => x !== i));
+  remove(i: CartItem) {
+    this.cartSvc.remove(i);
   }
   useDeliveryLocation() {
     this.locationMessage = '';
@@ -382,7 +308,9 @@ export class AppComponent {
       return;
     }
     if (
-      this.cart().some((i) => !this.store.products().some((p) => p.name === i.name && p.available))
+      this.cart().some(
+        (i) => !this.store.products().some((p) => p.id === i.productId && p.available),
+      )
     ) {
       this.checkoutError = 'An item is now out of stock. Please update your cart.';
       return;
@@ -395,57 +323,40 @@ export class AppComponent {
       return;
     }
     const user = this.store.session();
-    const o: Order = {
+    const phone = this.phone.replace(/\s/g, '');
+    const order: DeliveryOrder = {
       id: 'RT-' + Date.now().toString().slice(-8),
-      name: this.name,
-      phone: this.phone.replace(/\s/g, ''),
-      date: this.date,
-      time: this.time,
-      payment: this.fulfillment === 'delivery' ? 'Cash on Delivery' : 'Cash on Collection',
-      items: this.cart(),
-      total: this.total(),
-      status: 'Pending',
-      notes: this.notes,
-    };
-    this.orders.update((x) => [o, ...x]);
-    localStorage.setItem('rt-orders', JSON.stringify(this.orders()));
-    const delivery: DeliveryOrder = {
-      id: o.id,
       customerId: user?.id || 'guest',
-      customer: o.name,
-      phone: o.phone,
+      customer: this.name,
+      phone,
       address: this.fulfillment === 'delivery' ? this.deliveryAddress : '',
       latitude: this.deliveryLat() ?? undefined,
       longitude: this.deliveryLng() ?? undefined,
       distanceKm: this.deliveryCheck().distance ?? undefined,
       fulfillment: this.fulfillment,
       status: 'Pending',
-      payment: o.payment,
-      total: o.total,
-      items: o.items.map((i) => ({
+      payment: this.fulfillment === 'delivery' ? 'Cash on Delivery' : 'Cash on Collection',
+      total: this.total(),
+      items: this.cart().map((i) => ({
         name: i.name,
         qty: i.qty,
         price: i.price,
         recipient: i.recipient,
       })),
-      date: o.date,
-      time: o.time,
+      date: this.date,
+      time: this.time,
       notes: this.notes,
     };
-    this.store.record(delivery);
-    this.latest.set(o);
-    this.tracked.set(o);
-    this.trackRef = o.id;
-    this.trackPhone = o.phone;
-    this.saveCart([]);
+    this.store.record(order);
+    this.latest.set(order);
+    this.trackedId.set(order.id);
+    this.trackRef = order.id;
+    this.trackPhone = phone;
+    this.cartSvc.clear();
     this.go('success');
   }
-  trackedDelivery() {
-    const id = this.tracked()?.id;
-    return this.store.deliveries().find((o) => o.id === id);
-  }
   trackSteps() {
-    return this.trackedDelivery()?.fulfillment === 'delivery' ? deliverySteps : collectionSteps;
+    return this.tracked()?.fulfillment === 'delivery' ? deliverySteps : collectionSteps;
   }
   stepDone(step: string) {
     const steps = this.trackSteps();
@@ -464,12 +375,6 @@ export class AppComponent {
           o.id.toLowerCase() === this.trackRef.trim().toLowerCase() &&
           o.phone.replace(/\D/g, '') === this.trackPhone.replace(/\D/g, ''),
       );
-    const old = this.orders().find((o) => o.id === entry?.id);
-    this.tracked.set(entry && old ? { ...old, status: entry.status } : null);
-  }
-  status(o: Order, s: string) {
-    this.orders.update((xs) => xs.map((x) => (x.id === o.id ? { ...x, status: s } : x)));
-    localStorage.setItem('rt-orders', JSON.stringify(this.orders()));
-    if (this.tracked()?.id === o.id) this.tracked.set({ ...o, status: s });
+    this.trackedId.set(entry?.id ?? null);
   }
 }

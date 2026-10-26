@@ -2,6 +2,7 @@ import { Component, HostListener, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CommerceState, CatalogueProduct, DeliveryOrder, Settings } from './commerce-state.service';
+import { isDeliverableCategory } from './catalogue-config';
 
 @Component({
   selector: 'app-portal',
@@ -226,6 +227,9 @@ export class PortalComponent {
   handleEscape(): void {
     this.closeEditor();
     this.pendingAvailability = null;
+  }
+  canBeDelivered(p: CatalogueProduct) {
+    return isDeliverableCategory(p.category);
   }
   outOfStockCount() {
     return this.store.products().filter((p) => !p.available).length;

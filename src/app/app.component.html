@@ -265,9 +265,7 @@
         {{ v.label }}<small>R{{ v.price }}</small>
       </button>
     </div>
-    <h3 *ngIf="flavours().length">
-      {{ selected().category === 'Mini Donuts' ? 'Choose sauce' : 'Choose flavour' }}
-    </h3>
+    <h3 *ngIf="flavours().length">Choose {{ options().flavourLabel }}</h3>
     <div class="variants" *ngIf="flavours().length">
       <button
         *ngFor="let f of flavours()"
@@ -535,8 +533,8 @@
         <div *ngFor="let s of trackSteps()" [class.done]="stepDone(s)">● {{ s }}</div>
       </div>
       <p>
-        {{ trackedDelivery()?.fulfillment === 'delivery' ? 'Delivery' : 'Collection' }}:
-        {{ order.date }} at {{ order.time }}
+        {{ order.fulfillment === 'delivery' ? 'Delivery' : 'Collection' }}: {{ order.date }} at
+        {{ order.time }}
       </p>
     </div>
   </section>
