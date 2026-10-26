@@ -82,7 +82,7 @@ function stored<T>(key: string, fallback: T): T {
   standalone: true,
   imports: [CommonModule, FormsModule, PortalComponent],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css', './responsive.css', './commerce-enhancements.css'],
+  styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
   store = inject(CommerceState);
