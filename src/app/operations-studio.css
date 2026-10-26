@@ -114,3 +114,8 @@
  .media-upload {flex-direction:column;align-items:flex-start;}
  .media-preview {width:100%;height:145px;flex-basis:auto;}
 }
+
+.order-recipients {display:grid;gap:7px;margin:12px 0;}
+.order-recipients>div {display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;}
+.order-recipients span {background:#fce8f2;color:#aa276b;border:1px solid #f1c9dd;border-radius:99px;padding:5px 9px;font-weight:750;font-size:11px;}
+.order-recipients b {font-weight:650;color:#554359;}
