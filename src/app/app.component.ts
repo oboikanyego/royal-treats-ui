@@ -44,6 +44,8 @@ export class AppComponent{
  constructor(){if(this.showWelcome())setTimeout(()=>this.dismissWelcome(),2200)}
  dismissWelcome(){this.showWelcome.set(false);localStorage.setItem('royal-welcome-v1','yes')}
  signOut(){this.store.signOut();this.go('home')}
+ updateSearch(value:string){this.searchText.set(value);this.menuPage.set(1)}
+ clearFilters(){this.searchText.set('');this.category.set('All');this.sortBy.set('featured');this.availableOnly.set(false);this.menuPage.set(1)}
  setCategory(cat:string){this.category.set(cat);this.menuPage.set(1)}
  setSort(value:string){this.sortBy.set(value);this.menuPage.set(1)}
  setAvailable(value:boolean){this.availableOnly.set(value);this.menuPage.set(1)}
