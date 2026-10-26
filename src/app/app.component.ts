@@ -11,7 +11,7 @@ const seeded:Product[]=[
 {name:'Milkshakes',category:'Milkshakes',price:25,image:image('photo-1572490122747-3968b75cc699'),variants:[{label:'Small',price:25},{label:'Large',price:40}]},
 {name:'Ice Cream Sundaes',category:'Ice Cream Sundaes',price:30,image:image('photo-1563805042-7684c019e1cb'),variants:[{label:'Sage',price:30},{label:'Legacy',price:50},{label:'Chocolate Classic',price:120},{label:'Royal Buffet',price:150}]}];
 function stored<T>(key:string,fallback:T):T{try{return JSON.parse(localStorage.getItem(key)||'null')??fallback}catch{return fallback}}
-@Component({selector:'app-root',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./app.component.html',styleUrl:'./app.component.css'})
+@Component({selector:'app-root',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./app.component.html',styleUrls:['./app.component.css','./responsive.css']})
 export class AppComponent{
  products=seeded;page=signal('home');menu=false;category=signal('All');categories=['All',...seeded.map(x=>x.category)];selected=signal<Product>(seeded[1]);variant=signal('6 donuts');flavour=signal('Chocolate');topping=signal('Oreo');qty=signal(1);
  cart=signal<Item[]>(stored('rt-cart',[]));orders=signal<Order[]>(stored('rt-orders',[]));latest=signal<Order|null>(null);tracked=signal<Order|null>(null);trackRef='';trackPhone='';trackSearched=false;
