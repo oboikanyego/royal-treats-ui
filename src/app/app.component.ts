@@ -29,6 +29,7 @@ export class AppComponent{
  unitPrice=computed(()=>this.selected().variants.find(v=>v.label===this.variant())?.price??this.selected().price);
  count=computed(()=>this.cart().reduce((n,x)=>n+x.qty,0));total=computed(()=>this.cart().reduce((n,x)=>n+x.qty*x.price,0));revenue=computed(()=>this.orders().filter(x=>x.status!=='Cancelled').reduce((n,x)=>n+x.total,0));
  pending=computed(()=>this.orders().filter(x=>x.status==='Pending').length);completed=computed(()=>this.orders().filter(x=>x.status==='Completed').length);
+ signOut(){this.store.signOut();this.go('home')}
  go(p:string){if(p.startsWith('admin'))p='portal';if(p==='checkout'&&this.store.session()?.role==='customer'){this.name=this.store.session()!.name;this.phone=this.store.session()!.phone}this.page.set(p);this.menu=false;window.scrollTo(0,0)}
  selectedAvailable(){return !!this.store.products().find(p=>p.name===this.selected().name)?.available}
  open(p:Product){if(!this.store.products().find(x=>x.name===p.name)?.available)return;this.selected.set(p);this.variant.set(p.variants[0].label);this.flavour.set('Chocolate');this.topping.set('Oreo');this.qty.set(1);this.go('product')}
