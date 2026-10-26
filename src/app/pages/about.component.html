@@ -1,0 +1,75 @@
+<div class="about-hero">
+  <div>
+    <span class="eyebrow">OUR LITTLE CORNER OF SWEETNESS</span>
+    <h1>Made for the moments<br /><em>worth celebrating.</em></h1>
+    <p>
+      Every celebration deserves a little something sweet. Welcome to Royal Treats — a
+      dessert-loving corner of Thabazimbi, where colourful creations and everyday joy come together.
+    </p>
+    <button class="primary" routerLink="/menu">Explore our treats ↗</button>
+  </div>
+  <img [src]="featureImage()" alt="Fresh mini donuts" />
+</div>
+<div class="about-values">
+  <div>
+    <span>01 / THE BEGINNING</span>
+    <h2>Our story started in 2021.</h2>
+  </div>
+  <div>
+    <p>
+      Royal Treats began with a simple idea: make the ordinary feel special through sweet little
+      moments. From a quick after-school treat to a box of mini donuts shared with family, we
+      believe dessert is about more than flavour — it's about the smiles that follow.
+    </p>
+    <p>
+      Our roots are in Thabazimbi, and our menu celebrates playful favourites that people love to
+      come back for.
+    </p>
+  </div>
+</div>
+<div class="about-quote">
+  “A little sweetness can turn<br />an ordinary day into a <em>royal one.</em>”<span
+    >♛ ROYAL TREATS</span
+  >
+</div>
+<div class="story-intro">
+  <span class="eyebrow">THE MENU WE LOVE</span>
+  <h2>Four delicious ways<br />to brighten your day.</h2>
+  <p>
+    Mini donuts topped your way, icy slushies, creamy milkshakes, and show-stopping sundaes — made
+    for sharing, gifting and treating yourself.
+  </p>
+</div>
+<div class="about-feature-grid">
+  <div *ngFor="let p of store.products()">
+    <img [src]="p.image" [alt]="p.name" />
+    <h3>{{ p.name }}</h3>
+    <p>{{ p.description }}</p>
+  </div>
+</div>
+<div class="about-values second">
+  <div>
+    <span>02 / WHAT MATTERS</span>
+    <h2>Community first.<br />Happiness always.</h2>
+  </div>
+  <div>
+    <p>
+      Our goal is to make ordering treats feel as joyful as enjoying them: easy pre-orders,
+      thoughtful options and friendly service. That's why we're building a storefront designed
+      around the people who support us.
+    </p>
+    <p>
+      Choose collection for the full menu, or mini donut delivery within our nearby 5 km area when
+      available.
+    </p>
+  </div>
+</div>
+<div class="about-cta">
+  <span>READY FOR A LITTLE JOY?</span>
+  <h2>Your next favourite<br />treat is waiting.</h2>
+  <button class="primary" routerLink="/menu">Shop the sweet menu →</button>
+</div>
+<p class="story-note">
+  Our story is an illustrative brand narrative based on Royal Treats' founding year, location and
+  menu. Details can be refined with the business owners before public launch.
+</p>

@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, signal } from '@angular/core';
+import { Component, HostListener, ViewEncapsulation, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CommerceState, CatalogueProduct, DeliveryOrder, Settings } from './commerce-state.service';
@@ -10,6 +10,8 @@ import { isDeliverableCategory } from './catalogue-config';
   imports: [CommonModule, FormsModule],
   templateUrl: './portal.component.html',
   styleUrls: ['./portal.component.css'],
+  // Shadow DOM keeps the global storefront stylesheet from reaching the staff workspace.
+  encapsulation: ViewEncapsulation.ShadowDom,
 })
 export class PortalComponent {
   readonly store = inject(CommerceState);

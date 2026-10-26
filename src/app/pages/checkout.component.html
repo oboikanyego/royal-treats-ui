@@ -1,0 +1,114 @@
+<div class="heading">
+  <span>♛</span>
+  <h1>Checkout</h1>
+</div>
+<p class="notice" *ngIf="store.session()?.role !== 'customer'">
+  Customer sign-in is required to place an order.
+  <button type="button" class="secondary" routerLink="/account">Sign in or register</button>
+</p>
+<form (ngSubmit)="place()">
+  <div class="panel">
+    <h3>① Your Details</h3>
+    <label
+      >Full Name<input
+        name="name"
+        required
+        [(ngModel)]="name"
+        placeholder="Enter full name" /></label
+    ><label
+      >Phone Number<input
+        name="phone"
+        required
+        pattern="[0-9+ ]{9,16}"
+        [(ngModel)]="phone"
+        placeholder="07x xxx xxxx"
+    /></label>
+  </div>
+  <div class="panel">
+    <h3>② Preferred order time</h3>
+    <p class="helper">
+      Business hours: {{ store.settings().open }}–{{ store.settings().close }} (admin configurable).
+    </p>
+    <label
+      >Preferred Date<input
+        type="date"
+        name="date"
+        required
+        [min]="minDate"
+        [(ngModel)]="date" /></label
+    ><label
+      >Preferred Time<select name="time" required [(ngModel)]="time">
+        <option value="">Select time</option>
+        <option *ngFor="let t of times()" [value]="t">{{ t }}</option>
+      </select></label
+    >
+    <p class="notice">♛ Pre-orders only. Your date and time will be confirmed by Royal Treats.</p>
+  </div>
+  <div class="panel">
+    <h3>③ Fulfilment method</h3>
+    <label class="radio"
+      ><input type="radio" name="fulfillment" [(ngModel)]="fulfillment" value="collection" />
+      Collect at the store — all available products</label
+    >
+    <label class="radio"
+      ><input
+        type="radio"
+        name="fulfillment"
+        [(ngModel)]="fulfillment"
+        value="delivery"
+        [disabled]="!eligibleForDelivery()"
+      />
+      Home delivery — mini donuts only, within 5 km</label
+    >
+    <p class="notice" *ngIf="!eligibleForDelivery()">
+      Delivery is only available when your cart contains mini donuts exclusively.
+    </p>
+    <div *ngIf="fulfillment === 'delivery'" class="delivery-fields">
+      <label
+        >Delivery address<input
+          name="deliveryAddress"
+          [(ngModel)]="deliveryAddress"
+          required
+          placeholder="Street address, suburb"
+      /></label>
+      <button class="secondary" type="button" (click)="useDeliveryLocation()">
+        📍 Check my delivery location
+      </button>
+      <p class="helper">
+        {{
+          locationMessage ||
+            'Location permission is required to check whether you are within 5 km of the store.'
+        }}
+      </p>
+      <p [class.error]="!deliveryCheck().ok">
+        {{ deliveryCheck().reason }}
+        <span *ngIf="deliveryCheck().distance !== null"
+          >({{ deliveryCheck().distance?.toFixed(2) }} km straight-line)</span
+        >
+      </p>
+    </div>
+  </div>
+  <div class="panel group-checkout-summary">
+    <h3>④ Group order summary</h3>
+    <p>One order, one payment, sorted by recipient.</p>
+    <div class="recipient-pill-row">
+      <span *ngFor="let person of groupRecipients()">{{ person }}</span>
+    </div>
+    <p>{{ count() }} treats for {{ groupRecipients().length }} recipient group(s).</p>
+  </div>
+  <div class="panel">
+    <h3>⑤ Payment</h3>
+    <p>
+      <strong>{{ fulfillment === 'delivery' ? 'Cash on Delivery' : 'Cash on Collection' }}</strong>
+    </p>
+    <p class="muted">EFT payments will be introduced later. No online payment is collected.</p>
+    <p class="notice">Orders are subject to confirmation by Royal Treats.</p>
+  </div>
+  <p class="error" *ngIf="checkoutError">{{ checkoutError }}</p>
+  <div class="total">
+    <b>Total</b><b>R{{ total() }}</b>
+  </div>
+  <button class="primary wide" [disabled]="!cart().length || store.session()?.role !== 'customer'">
+    Place Demo Order
+  </button>
+</form>

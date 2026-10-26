@@ -1,0 +1,66 @@
+<div class="section-title-row">
+  <div>
+    <span class="eyebrow">SWEET SELECTION</span>
+    <h1>
+      Your basket <span>({{ count() }})</span>
+    </h1>
+  </div>
+  <button class="secondary" routerLink="/menu">+ Add more treats</button>
+</div>
+<div class="empty-cart" *ngIf="!cart().length">
+  <span>🛒</span>
+  <h2>It looks a little empty here.</h2>
+  <p>Your next happy moment is waiting on the menu.</p>
+  <button class="primary" routerLink="/menu">Explore treats →</button>
+</div>
+<div class="group-order-hint" *ngIf="cart().length">
+  <span aria-hidden="true">♛</span>
+  <div>
+    <strong>Ordering for friends, family or a team?</strong>
+    <p>
+      Add a name to each item below. Everyone's treats will stay together in one checkout and one
+      payment.
+    </p>
+  </div>
+</div>
+<article class="cart-item group-cart-item" *ngFor="let i of cart()">
+  <img [src]="i.image" [alt]="i.name" />
+  <div class="cart-item-info">
+    <b>{{ i.name }}</b
+    ><small>{{ itemDetails(i) }}</small
+    ><label class="person-input"
+      >Who is this for?<input
+        [ngModel]="i.recipient || ''"
+        (ngModelChange)="saveRecipient(i, $event)"
+        maxlength="45"
+        placeholder="Name or group (optional)"
+    /></label>
+    <div class="quantity">
+      <div>
+        <button type="button" (click)="change(i, -1)">−</button>{{ i.qty
+        }}<button type="button" (click)="change(i, 1)">+</button>
+      </div>
+      <b>R{{ i.price * i.qty }}</b>
+    </div>
+  </div>
+  <button type="button" class="remove" (click)="remove(i)" aria-label="Remove item">✕</button>
+</article>
+<div *ngIf="cart().length" class="checkout-summary">
+  <div class="people-summary">
+    <strong>Prepared for</strong><span *ngFor="let person of groupRecipients()">{{ person }}</span>
+  </div>
+  <label
+    >Special order notes<textarea
+      [ngModel]="cartSvc.notes()"
+      (ngModelChange)="cartSvc.notes.set($event)"
+      placeholder="Packaging requests or other important notes"
+    ></textarea>
+  </label>
+  <div class="total">
+    <b>Subtotal</b><b>R{{ total() }}</b>
+  </div>
+  <div class="total">
+    <strong>Total</strong><strong>R{{ total() }}</strong>
+  </div>
+  <button class="primary wide" routerLink="/checkout">Checkout all treats together →</button>
+</div>

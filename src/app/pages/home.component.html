@@ -1,0 +1,43 @@
+<div class="hero">
+  <div class="hero-text">
+    <b>WE'RE</b>
+    <h1>REOPENING!</h1>
+    <p>With a new menu and a few additions to our <em>Royal Delights ♡</em></p>
+    <button class="primary" routerLink="/menu">Order Now →</button>
+  </div>
+  <img [src]="heroImage()" alt="Delicious milkshake" />
+</div>
+<h2 class="center">Sweet Treats, Bigger Smiles ♡</h2>
+<div class="categories">
+  <button *ngFor="let p of store.products()" (click)="open(p)">
+    <img [src]="p.image" [alt]="p.name" /><b>{{ p.name }}</b>
+  </button>
+</div>
+<div class="benefits">
+  <div><span>♙</span><b>Pre-Orders Only</b><small>Order ahead for your preferred date</small></div>
+  <div><span>♛</span><b>Freshly Made</b><small>Made with love</small></div>
+  <div><span>♡</span><b>Sweet Treats</b><small>Bigger smiles!</small></div>
+</div>
+<div class="banner">Because every treat<br />should feel like royalty! ♡</div>
+<h2>Our favourites</h2>
+<div class="grid">
+  <button
+    class="product luxury-product"
+    *ngFor="let p of store.products().slice(0, 8)"
+    (click)="open(p)"
+    [disabled]="!p.available"
+  >
+    <span class="stock-tag" *ngIf="!p.available">Sold out</span
+    ><span class="product-category-label">{{ p.category }}</span
+    ><img [src]="p.image" [alt]="p.name" />
+    <div class="product-content">
+      <b>{{ p.name }}</b>
+      <p>{{ p.description }}</p>
+      <div class="product-bottom">
+        <span
+          >From <strong>R{{ p.price }}</strong></span
+        ><span class="product-arrow" aria-hidden="true">↗</span>
+      </div>
+    </div>
+  </button>
+</div>

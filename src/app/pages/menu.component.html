@@ -1,0 +1,123 @@
+<div class="heading">
+  <span>♛</span>
+  <h1>Find your happy treat</h1>
+  <p>Discover something delicious, whatever the occasion.</p>
+</div>
+<div class="menu-toolbar">
+  <label class="menu-search" aria-label="Search desserts"
+    ><span aria-hidden="true">⌕</span
+    ><input
+      type="search"
+      [ngModel]="filters.searchText()"
+      (ngModelChange)="filters.setSearch($event)"
+      placeholder="Search donuts, milkshakes, flavours..."
+  /></label>
+  <label class="menu-sort"
+    ><span>Sort</span
+    ><select [ngModel]="filters.sortBy()" (ngModelChange)="filters.setSort($event)">
+      <option value="featured">Featured first</option>
+      <option value="name">Name A–Z</option>
+      <option value="price-low">Price: low to high</option>
+      <option value="price-high">Price: high to low</option>
+    </select></label
+  >
+</div>
+<div class="menu-layout">
+  <aside class="menu-sidebar">
+    <h3>Explore treats</h3>
+    <button
+      *ngFor="let c of filters.categories()"
+      [class.active]="filters.category() === c"
+      (click)="filters.setCategory(c)"
+    >
+      {{ c }}
+    </button>
+    <div class="availability-toggle">
+      <label
+        ><input
+          type="checkbox"
+          [ngModel]="filters.availableOnly()"
+          (ngModelChange)="filters.setAvailableOnly($event)"
+        />
+        In stock only</label
+      >
+    </div>
+    <p>Mini donuts may be delivered within 5 km. Everything else is for collection.</p>
+  </aside>
+  <div class="menu-results">
+    <div class="mobile-categories">
+      <button
+        *ngFor="let c of filters.categories()"
+        [class.active]="filters.category() === c"
+        (click)="filters.setCategory(c)"
+      >
+        {{ c }}
+      </button>
+    </div>
+    <div class="menu-result-heading">
+      <div>
+        <strong>{{ filters.filtered().length }} treats to explore</strong
+        ><small>Handpicked delights, freshly made</small>
+      </div>
+      <label class="mobile-availability"
+        ><input
+          type="checkbox"
+          [ngModel]="filters.availableOnly()"
+          (ngModelChange)="filters.setAvailableOnly($event)"
+        />
+        In stock</label
+      >
+    </div>
+    <div class="grid menu-product-grid" *ngIf="filters.visibleProducts().length">
+      <button
+        class="product luxury-product"
+        *ngFor="let p of filters.visibleProducts()"
+        (click)="open(p)"
+        [disabled]="!p.available"
+      >
+        <span class="stock-tag" *ngIf="!p.available">Sold out</span
+        ><span class="product-category-label">{{ p.category }}</span
+        ><img [src]="p.image" [alt]="p.name" loading="lazy" />
+        <div class="product-content">
+          <b>{{ p.name }}</b>
+          <p>{{ p.description }}</p>
+          <div class="product-bottom">
+            <span
+              >From <strong>R{{ p.price }}</strong></span
+            ><span class="product-arrow" aria-hidden="true">↗</span>
+          </div>
+        </div>
+      </button>
+    </div>
+    <div class="menu-empty" *ngIf="!filters.visibleProducts().length">
+      <span>🍩</span>
+      <h3>No treats found this time</h3>
+      <p>Try a different search or category.</p>
+      <button class="secondary" (click)="filters.clear()">Show all treats</button>
+    </div>
+    <div class="menu-pagination" *ngIf="filters.totalPages() > 1">
+      <button
+        (click)="filters.setPage(filters.page() - 1)"
+        [disabled]="filters.page() === 1"
+        aria-label="Previous page"
+      >
+        ←</button
+      ><button
+        *ngFor="let n of filters.pageNumbers()"
+        [class.active]="filters.page() === n"
+        (click)="filters.setPage(n)"
+      >
+        {{ n }}</button
+      ><button
+        (click)="filters.setPage(filters.page() + 1)"
+        [disabled]="filters.page() === filters.totalPages()"
+        aria-label="Next page"
+      >
+        →
+      </button>
+    </div>
+    <div class="banner">
+      ♛ Make it your own <small>Choose flavours, toppings, and who each treat is for.</small>
+    </div>
+  </div>
+</div>
