@@ -1,7 +1,7 @@
 import { Component, HostListener, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CommerceState, CatalogueProduct, Settings } from './commerce-state.service';
+import { CommerceState, CatalogueProduct, DeliveryOrder, Settings } from './commerce-state.service';
 
 @Component({selector:'app-portal',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./portal.component.html',styleUrls:['./portal.component.css','./operations-studio.css']})
 export class PortalComponent {
@@ -67,5 +67,6 @@ export class PortalComponent {
  availableOrders(){return this.store.deliveries().filter(o=>o.fulfillment==='delivery'&&o.status==='Ready for Delivery'&&!o.courierId)}
  ownOrders(){return this.store.deliveries().filter(o=>o.courierId===this.store.session()?.id)}
  accept(id:string){this.error=this.store.acceptOrder(id)?'':'Order is no longer available.';if(!this.error)this.notice='Order accepted. Contact the customer before delivery.'}
+ statusOptions(order:DeliveryOrder){return order.fulfillment==='delivery'?['Pending','Confirmed','Preparing','Ready for Delivery','Out for Delivery','Completed','Cancelled']:['Pending','Confirmed','Preparing','Ready for Collection','Completed','Cancelled']}
  saveOrder(id:string,status:string){this.store.setOrder(id,status)}
 }

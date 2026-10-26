@@ -6,6 +6,10 @@ import {PortalComponent} from './portal.component';
 import {inject} from '@angular/core';
 type Item={name:string;image:string;variant:string;price:number;qty:number;sauce:string;topping:string;recipient?:string};
 type Order={id:string;name:string;phone:string;date:string;time:string;payment:string;items:Item[];total:number;status:string;notes?:string};
+const flavoursFor=(category:string):string[]=>category==='Slushies'?['Lemon Lime','Strawberry','Blueberry']:category==='Milkshakes'?['Bubblegum','Chocolate','Strawberry','Vanilla']:category==='Ice Cream Sundaes'?[]:['Chocolate','Caramel','Milky White'];
+const toppingsFor=(category:string):string[]=>category==='Mini Donuts'?['Nuts','Oreo','Chocolate chips','Rainbow sprinkles','Plain sprinkles']:category==='Ice Cream Sundaes'?['Wafer','Oreo biscuit','Marshmallows','Chocolate sticks','Caramel popcorn','Gummy bears','Peanuts']:[];
+const collectionSteps=['Pending','Confirmed','Preparing','Ready for Collection','Completed'];
+const deliverySteps=['Pending','Confirmed','Preparing','Ready for Delivery','Out for Delivery','Completed'];
 function stored<T>(key:string,fallback:T):T{try{return JSON.parse(localStorage.getItem(key)||'null')??fallback}catch{return fallback}}
 @Component({selector:'app-root',standalone:true,imports:[CommonModule,FormsModule,PortalComponent],templateUrl:'./app.component.html',styleUrls:['./app.component.css','./responsive.css','./commerce-enhancements.css']})
 export class AppComponent{
@@ -14,6 +18,7 @@ export class AppComponent{
  category=signal('All'); categories=computed(()=>['All',...new Set(this.store.products().map(x=>x.category))]);
  selected=signal<CatalogueProduct>(this.store.products()[1]);
  variant=signal('6 donuts');flavour=signal('Chocolate');topping=signal('Oreo');qty=signal(1);
+ flavours=computed(()=>flavoursFor(this.selected().category));toppings=computed(()=>toppingsFor(this.selected().category));
  forPerson=''; searchText=signal(''); sortBy=signal('featured'); availableOnly=signal(false); menuPage=signal(1); readonly pageSize=8;
  showWelcome=signal(!localStorage.getItem('royal-welcome-v1'));
  supportSubject='Order support';supportMessage='';
@@ -22,7 +27,6 @@ export class AppComponent{
  name='';phone='';date='';time='';payment='Cash on Collection';notes='';
  fulfillment:'collection'|'delivery'='collection';deliveryAddress='';deliveryLat=signal<number|null>(null);deliveryLng=signal<number|null>(null);locationMessage='';
  checkoutError='';minDate=new Date(Date.now()+86400000).toISOString().slice(0,10);times=computed(()=>Array.from({length:48},(_,i)=>String(Math.floor(i/2)).padStart(2,'0')+':'+(i%2?'30':'00')).filter(t=>this.store.inHours(t)));
- statuses=['Pending','Confirmed','Preparing','Ready for Collection','Completed','Cancelled'];
  filtered=computed(()=>{
   let items=this.store.products().filter(p=>(this.category()==='All'||p.category===this.category())&&
     (!this.availableOnly()||p.available)&&
@@ -56,13 +60,14 @@ export class AppComponent{
  setSort(value:string){this.sortBy.set(value);this.menuPage.set(1)}
  setAvailable(value:boolean){this.availableOnly.set(value);this.menuPage.set(1)}
  setPage(n:number){this.menuPage.set(Math.max(1,Math.min(this.totalPages(),n)));window.scrollTo(0,220)}
+ itemDetails(i:Item){return [i.variant,i.sauce,i.topping].filter(x=>x).join(' · ')}
  saveRecipient(item:Item,recipient:string){this.saveCart(this.cart().map(x=>x===item?{...x,recipient:recipient.slice(0,45)}:x))}
  emailReady(){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.store.settings().supportEmail||'')}
  supportHref(){const email=this.store.settings().supportEmail;return 'mailto:'+email+'?subject='+encodeURIComponent(this.supportSubject)+'&body='+encodeURIComponent(this.supportMessage)}
 
  go(p:string){if(p.startsWith('admin'))p='portal';if(p==='checkout'&&this.store.session()?.role==='customer'){this.name=this.store.session()!.name;this.phone=this.store.session()!.phone}this.page.set(p);this.menu=false;window.scrollTo(0,0)}
  selectedAvailable(){return !!this.store.products().find(p=>p.name===this.selected().name)?.available}
- open(p:CatalogueProduct){if(!this.store.products().find(x=>x.name===p.name)?.available)return;this.selected.set(p);this.variant.set(p.variants[0].label);this.flavour.set('Chocolate');this.topping.set('Oreo');this.qty.set(1);this.forPerson='';this.go('product')}
+ open(p:CatalogueProduct){if(!this.store.products().find(x=>x.name===p.name)?.available)return;this.selected.set(p);this.variant.set(p.variants[0].label);this.flavour.set(flavoursFor(p.category)[0]??'');this.topping.set(toppingsFor(p.category)[0]??'');this.qty.set(1);this.forPerson='';this.go('product')}
  saveCart(items:Item[]){this.cart.set(items);localStorage.setItem('rt-cart',JSON.stringify(items))}
  add(){const p=this.selected();if(!this.store.products().find(x=>x.name===p.name)?.available)return;const item={name:p.name,image:p.image,variant:this.variant(),price:this.unitPrice(),qty:this.qty(),sauce:this.flavour(),topping:this.topping(),recipient:this.forPerson.trim().slice(0,45)};const items=[...this.cart()];const old=items.find(i=>i.name===item.name&&i.variant===item.variant&&i.sauce===item.sauce&&i.topping===item.topping&&(i.recipient||'')===(item.recipient||''));if(old)old.qty+=item.qty;else items.push(item);this.saveCart(items);this.go('cart')}
  change(i:Item,d:number){this.saveCart(this.cart().map(x=>x===i?{...x,qty:x.qty+d}:x).filter(x=>x.qty>0))}
@@ -81,6 +86,9 @@ export class AppComponent{
   const delivery:DeliveryOrder={id:o.id,customerId:user?.id||'guest',customer:o.name,phone:o.phone,address:this.fulfillment==='delivery'?this.deliveryAddress:'',latitude:this.deliveryLat()??undefined,longitude:this.deliveryLng()??undefined,distanceKm:this.deliveryCheck().distance??undefined,fulfillment:this.fulfillment,status:'Pending',payment:o.payment,total:o.total,items:o.items.map(i=>({name:i.name,qty:i.qty,price:i.price,recipient:i.recipient})),date:o.date,time:o.time,notes:this.notes};
   this.store.record(delivery);this.latest.set(o);this.tracked.set(o);this.trackRef=o.id;this.trackPhone=o.phone;this.saveCart([]);this.go('success')
  }
+ trackedDelivery(){const id=this.tracked()?.id;return this.store.deliveries().find(o=>o.id===id)}
+ trackSteps(){return this.trackedDelivery()?.fulfillment==='delivery'?deliverySteps:collectionSteps}
+ stepDone(step:string){const steps=this.trackSteps();const status=this.tracked()?.status??'';let current=steps.indexOf(status);if(current<0&&status.startsWith('Ready'))current=steps.findIndex(x=>x.startsWith('Ready'));return steps.indexOf(step)<=current}
  track(){this.trackSearched=true;const entry=this.store.deliveries().find(o=>o.id.toLowerCase()===this.trackRef.trim().toLowerCase()&&o.phone.replace(/\D/g,'')===this.trackPhone.replace(/\D/g,''));const old=this.orders().find(o=>o.id===entry?.id);this.tracked.set(entry&&old?{...old,status:entry.status}:null)}
  status(o:Order,s:string){this.orders.update(xs=>xs.map(x=>x.id===o.id?{...x,status:s}:x));localStorage.setItem('rt-orders',JSON.stringify(this.orders()));if(this.tracked()?.id===o.id)this.tracked.set({...o,status:s})}
 }
