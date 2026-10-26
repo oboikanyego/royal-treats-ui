@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CommerceState, CatalogueProduct, Settings } from './commerce-state.service';
 
-@Component({selector:'app-portal',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./portal.component.html',styleUrl:'./portal.component.css'})
+@Component({selector:'app-portal',standalone:true,imports:[CommonModule,FormsModule],templateUrl:'./portal.component.html',styleUrls:['./portal.component.css','./operations-studio.css']})
 export class PortalComponent {
  readonly store=inject(CommerceState);
  screen=signal<'signin'|'register'|'home'|'products'|'couriers'|'settings'|'orders'>('signin');
