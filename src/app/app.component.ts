@@ -29,7 +29,7 @@ export class AppComponent{
  unitPrice=computed(()=>this.selected().variants.find(v=>v.label===this.variant())?.price??this.selected().price);
  count=computed(()=>this.cart().reduce((n,x)=>n+x.qty,0));total=computed(()=>this.cart().reduce((n,x)=>n+x.qty*x.price,0));revenue=computed(()=>this.orders().filter(x=>x.status!=='Cancelled').reduce((n,x)=>n+x.total,0));
  pending=computed(()=>this.orders().filter(x=>x.status==='Pending').length);completed=computed(()=>this.orders().filter(x=>x.status==='Completed').length);
- go(p:string){if(p.startsWith('admin'))p='portal';this.page.set(p);this.menu=false;window.scrollTo(0,0)}
+ go(p:string){if(p.startsWith('admin'))p='portal';if(p==='checkout'&&this.store.session()?.role==='customer'){this.name=this.store.session()!.name;this.phone=this.store.session()!.phone}this.page.set(p);this.menu=false;window.scrollTo(0,0)}
  open(p:Product){if(!this.store.products().find(x=>x.name===p.name)?.available)return;this.selected.set(p);this.variant.set(p.variants[0].label);this.flavour.set('Chocolate');this.topping.set('Oreo');this.qty.set(1);this.go('product')}
  saveCart(items:Item[]){this.cart.set(items);localStorage.setItem('rt-cart',JSON.stringify(items))}
  add(){const p=this.selected();if(!this.store.products().find(x=>x.name===p.name)?.available)return;const item={name:p.name,image:p.image,variant:this.variant(),price:this.unitPrice(),qty:this.qty(),sauce:this.flavour(),topping:this.topping()};const items=[...this.cart()];const old=items.find(i=>i.name===item.name&&i.variant===item.variant&&i.sauce===item.sauce&&i.topping===item.topping);if(old)old.qty+=item.qty;else items.push(item);this.saveCart(items);this.go('cart')}
@@ -49,6 +49,6 @@ export class AppComponent{
   const delivery:DeliveryOrder={id:o.id,customerId:user?.id||'guest',customer:o.name,phone:o.phone,whatsapp:user?.whatsapp,address:this.fulfillment==='delivery'?this.deliveryAddress:'',latitude:this.deliveryLat()??undefined,longitude:this.deliveryLng()??undefined,distanceKm:this.deliveryCheck().distance??undefined,fulfillment:this.fulfillment,status:'Pending',payment:o.payment,total:o.total,items:o.items.map(i=>({name:i.name,qty:i.qty,price:i.price})),date:o.date,time:o.time};
   this.store.record(delivery);this.latest.set(o);this.tracked.set(o);this.trackRef=o.id;this.trackPhone=o.phone;this.saveCart([]);this.go('success')
  }
- track(){this.trackSearched=true;this.tracked.set(this.orders().find(o=>o.id.toLowerCase()===this.trackRef.trim().toLowerCase()&&o.phone.replace(/\D/g,'')===this.trackPhone.replace(/\D/g,''))||null)}
+ track(){this.trackSearched=true;const entry=this.store.deliveries().find(o=>o.id.toLowerCase()===this.trackRef.trim().toLowerCase()&&o.phone.replace(/\D/g,'')===this.trackPhone.replace(/\D/g,''));const old=this.orders().find(o=>o.id===entry?.id);this.tracked.set(entry&&old?{...old,status:entry.status}:null)}
  status(o:Order,s:string){this.orders.update(xs=>xs.map(x=>x.id===o.id?{...x,status:s}:x));localStorage.setItem('rt-orders',JSON.stringify(this.orders()));if(this.tracked()?.id===o.id)this.tracked.set({...o,status:s})}
 }
