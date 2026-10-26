@@ -4,6 +4,7 @@ import {FormsModule} from '@angular/forms';
 import {CommerceState, CatalogueProduct, DeliveryOrder} from './commerce-state.service';
 import {PortalComponent} from './portal.component';
 import {inject} from '@angular/core';
+type Item={name:string;image:string;variant:string;price:number;qty:number;sauce:string;topping:string;recipient?:string};
 type Order={id:string;name:string;phone:string;date:string;time:string;payment:string;items:Item[];total:number;status:string;notes?:string};
 function stored<T>(key:string,fallback:T):T{try{return JSON.parse(localStorage.getItem(key)||'null')??fallback}catch{return fallback}}
 @Component({selector:'app-root',standalone:true,imports:[CommonModule,FormsModule,PortalComponent],templateUrl:'./app.component.html',styleUrls:['./app.component.css','./responsive.css','./commerce-enhancements.css']})
