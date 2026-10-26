@@ -232,3 +232,97 @@ footer { padding: 48px 20px; }
 .radio:has(input:disabled) { opacity: .45; }
 main > section:has(app-portal) { padding: 0; }
 @media(max-width:650px) { .stock-tag { top: 8px; left: 8px; padding: 5px 7px!important; font-size: 10px!important; } .delivery-fields { padding: 12px; } }
+
+
+/* Royal Treats Luxe — distinctive, responsive commerce design */
+:host { --royal-pink:#ef287a; --royal-pink-soft:#fff0f4; --royal-ink:#26192e; --royal-border:#f2d9e4; }
+.top { background:rgba(255,250,252,.97); backdrop-filter:blur(18px); border-bottom:1px solid #f5d5e2; }
+.top .logo { color:#36182e; font-family:Georgia,serif; letter-spacing:-.5px; }
+.top .logo span { color:#eb237d; text-shadow:0 4px 15px #f354a954; }
+.desktop-nav button { color:#59415a; }
+.desktop-nav .nav-signin, .desktop-nav .nav-account {
+  border:1px solid #f5bed2; background:#fff2f7; border-radius:999px;
+  padding:10px 17px; color:#b41c61; white-space:nowrap;
+}
+.desktop-nav .nav-account { display:flex;align-items:center;gap:8px; }
+.desktop-nav .nav-account small { background:#ec3883;color:white;padding:4px 7px;border-radius:8px;font-size:10px; }
+.desktop-nav .nav-logout { color:#8a7080; font-size:12px; }
+.top > button.mobile-account-trigger { display:none; }
+main { background:radial-gradient(ellipse 950px 400px at 50% 5%,#fff0f65e,transparent 75%); }
+main > section.home { max-width:1290px; }
+.hero { background:linear-gradient(125deg,#ffedf4 10%,#fad1e4 70%);box-shadow:0 16px 70px #d6448421; }
+.hero-text h1 { color:#e91879; text-shadow:0 2px 0 #fff5; }
+.primary { background:linear-gradient(112deg,#fd408c 0%,#e61a75 64%,#b81361 100%);box-shadow:0 8px 20px #e4167825; }
+.primary:hover { box-shadow:0 12px 22px #d7247840; }
+.categories img { border:4px solid white;outline:2px solid #f7dce8; }
+.banner { background:linear-gradient(115deg,#fce1ed 0%,#f8bdd7 48%,#ffeef4 100%);color:#9e205f; }
+.luxury-product { position:relative; border-radius:22px; border:1px solid #f3d8e4; background:#fff;box-shadow:0 9px 28px #6014340b;overflow:hidden; min-height:345px; }
+.luxury-product img { height:230px; width:100%;object-fit:cover;transition:transform .4s ease; }
+.luxury-product:hover img { transform:scale(1.045); }
+.product-category-label { position:absolute;top:15px;right:13px;z-index:2;background:#fffffff0;border:1px solid #ffffff85;color:#5c3356!important;font-size:10px!important;padding:7px 10px!important;border-radius:99px;font-weight:800;letter-spacing:.4px;box-shadow:0 2px 10px #0001; }
+.luxury-product .stock-tag { z-index:3; }
+.product-content {display:flex;flex-direction:column;flex:1;padding:18px 17px 17px;gap:6px; }
+.product-content b { font:700 19px Georgia,serif; color:#321e31;padding:0;margin:0; }
+.product-content p { color:#8d7886; font-size:12px;line-height:1.55;margin:0;min-height:36px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
+.product-bottom { display:flex;align-items:center;justify-content:space-between;border-top:1px solid #f5e3eb;padding-top:13px;margin-top:auto; }
+.product-bottom span {padding:0;color:#9b5276;font-size:12px; }
+.product-bottom strong { color:#d71972;font-size:21px;letter-spacing:-.5px; }
+.product-bottom .product-arrow {background:linear-gradient(135deg,#fb4796,#d8146c);color:white;border-radius:12px;width:37px;height:37px;display:grid;place-items:center;font-size:20px;box-shadow:0 5px 13px #e6297728; }
+.about-page {max-width:1160px!important;}
+.about-hero {display:grid;grid-template-columns:1.15fr 1fr;gap:45px;align-items:center;min-height:480px;background:linear-gradient(122deg,#fff4f7,#f9d3e4);padding:45px;border-radius:32px;overflow:hidden;}
+.about-hero h1 {font:700 clamp(36px,4.2vw,60px)/1.12 Georgia,serif;color:#301a2a;letter-spacing:-1.5px;margin:20px 0;}
+.about-hero h1 em {color:#e51b7a;}
+.about-hero p {font-size:17px;line-height:1.8;color:#65495c;max-width:550px;}
+.about-hero img {width:100%;height:390px;object-fit:cover;border-radius:26px;box-shadow:0 20px 40px #5913332c;transform:rotate(2deg);}
+.eyebrow {color:#de1f75;font-size:11px;font-weight:800;letter-spacing:2.5px;}
+.about-values {display:grid;grid-template-columns:.9fr 1fr;gap:80px;align-items:start;padding:85px 30px;border-bottom:1px solid #efd8e2;}
+.about-values h2,.story-intro h2,.about-cta h2 {font:700 clamp(32px,3.5vw,48px)/1.18 Georgia,serif;letter-spacing:-1px;margin:14px 0;color:#392237;}
+.about-values p {font-size:16px;line-height:1.9;color:#775b6d;}
+.about-quote {position:relative;margin:55px 0;text-align:center;padding:65px 20px;background:linear-gradient(125deg,#461a3a,#871852 65%,#df3685);color:#fff;border-radius:26px;font:italic 34px/1.35 Georgia,serif;}
+.about-quote em {color:#ffb2d0;}
+.about-quote span {display:block;font:700 11px Arial;letter-spacing:3px;margin-top:30px;color:#ffccdf;}
+.story-intro {text-align:center;padding:35px 12px;}
+.story-intro p {font-size:15px;line-height:1.7;color:#725865;max-width:600px;margin:0 auto 25px;}
+.about-feature-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;}
+.about-feature-grid>div {border-radius:20px;overflow:hidden;background:#fff7fa;border:1px solid #f7dce8;}
+.about-feature-grid img {width:100%;height:160px;object-fit:cover;}
+.about-feature-grid h3 {font:700 18px Georgia,serif;margin:16px 15px 4px;}
+.about-feature-grid p {color:#7a6470;font-size:12px;margin:0 15px 20px;}
+.about-cta {text-align:center;border-radius:26px;background:linear-gradient(130deg,#fff2f8,#f6c5da);padding:60px 20px;margin:40px 0 15px;}
+.about-cta span {font-size:11px;color:#b6276d;letter-spacing:2px;font-weight:800;}
+.about-cta .primary {margin-top:10px;}
+.story-note {color:#927c89;font-size:11px;text-align:center;}
+@media(min-width:651px) and (max-width:1024px) {
+ .luxury-product img {height:185px}.luxury-product {min-height:310px;}
+ .desktop-nav .nav-account small {display:none;}
+ .about-hero {gap:22px;padding:30px;}.about-hero img {height:340px;}
+ .about-values {gap:35px;padding:50px 10px;}.about-feature-grid {grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:650px) {
+ .top > button.mobile-account-trigger {display:block;color:#b41a66;font-size:22px;min-width:42px;padding:5px;}
+ .top .logo {font-size:17px;}
+ .top .header-cart {min-width:40px;}
+ .hero {box-shadow:none;}
+ .luxury-product {border-radius:16px;min-height:0;}
+ .luxury-product img {height:clamp(145px,43vw,194px);}
+ .product-category-label {top:8px;right:7px;font-size:8px!important;padding:6px!important;max-width:95px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+ .product-content {padding:12px 11px;gap:5px;}
+ .product-content b {font-size:15px;}
+ .product-content p {font-size:10px;min-height:30px;}
+ .product-bottom strong {font-size:17px;}
+ .product-bottom .product-arrow {width:30px;height:30px;font-size:16px;border-radius:9px;}
+ .about-hero {grid-template-columns:1fr;gap:18px;padding:25px 20px;border-radius:22px;}
+ .about-hero h1 {font-size:37px;}
+ .about-hero p {font-size:14px;}
+ .about-hero img {height:210px;transform:none;border-radius:16px;grid-row:1;}
+ .about-values {grid-template-columns:1fr;gap:15px;padding:47px 4px;}
+ .about-values h2 {font-size:32px;}
+ .about-values p {font-size:14px;}
+ .about-quote {font-size:25px;margin:32px 0;padding:48px 13px;}
+ .story-intro h2 {font-size:34px;}
+ .about-feature-grid {grid-template-columns:repeat(2,1fr);gap:10px;}
+ .about-feature-grid img {height:120px;}
+ .about-feature-grid h3 {font-size:14px;margin:12px 10px 4px;}
+ .about-feature-grid p {font-size:10px;margin:0 10px 14px;}
+ .about-cta {padding:42px 14px;}
+}
