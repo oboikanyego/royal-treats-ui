@@ -1,96 +1,738 @@
-<div class="welcome-overlay" *ngIf="showWelcome()" role="status" aria-live="polite" aria-label="Welcome to Royal Treats">
+<div
+  class="welcome-overlay"
+  *ngIf="showWelcome()"
+  role="status"
+  aria-live="polite"
+  aria-label="Welcome to Royal Treats"
+>
   <div class="welcome-ornaments" aria-hidden="true">✦ &nbsp; ♛ &nbsp; ✧</div>
-  <div class="donut-loader" aria-hidden="true"><span class="donut-icing"></span><span class="donut-sprinkle sprinkle-one"></span><span class="donut-sprinkle sprinkle-two"></span><span class="donut-sprinkle sprinkle-three"></span><span class="donut-sprinkle sprinkle-four"></span><span class="donut-hole"></span></div>
+  <div class="donut-loader" aria-hidden="true">
+    <span class="donut-icing"></span><span class="donut-sprinkle sprinkle-one"></span
+    ><span class="donut-sprinkle sprinkle-two"></span
+    ><span class="donut-sprinkle sprinkle-three"></span
+    ><span class="donut-sprinkle sprinkle-four"></span><span class="donut-hole"></span>
+  </div>
   <span class="welcome-eyebrow">SOMETHING SWEET IS HERE</span>
   <h1>Welcome to <em>Royal Treats.</em></h1>
   <p>A sprinkle of joy is just around the corner.</p>
   <button class="welcome-skip" (click)="dismissWelcome()">Explore the menu →</button>
 </div>
 <header class="top">
-  <button class="mobile-menu-trigger" (click)="menu = !menu" [attr.aria-expanded]="menu" aria-label="Open menu">☰</button>
-  <button class="logo" (click)="go('home')" aria-label="Royal Treats home"><span>♛</span>Royal Treats<small>EST. 2021</small></button>
+  <button
+    class="mobile-menu-trigger"
+    (click)="menu = !menu"
+    [attr.aria-expanded]="menu"
+    aria-label="Open menu"
+  >
+    ☰
+  </button>
+  <button class="logo" (click)="go('home')" aria-label="Royal Treats home">
+    <span>♛</span>Royal Treats<small>EST. 2021</small>
+  </button>
   <nav class="desktop-nav" aria-label="Main navigation">
-    <button [class.current]="page()==='home'" (click)="go('home')">Home</button>
-    <button [class.current]="page()==='menu'||page()==='product'" (click)="go('menu')">Our Menu</button>
-    <button [class.current]="page()==='track'" (click)="go('track')">Track Order</button>
-    <button [class.current]="page()==='about'" (click)="go('about')">About Us</button>
-    <button [class.current]="page()==='contact'" (click)="go('contact')">Contact</button>
+    <button [class.current]="page() === 'home'" (click)="go('home')">Home</button>
+    <button [class.current]="page() === 'menu' || page() === 'product'" (click)="go('menu')">
+      Our Menu
+    </button>
+    <button [class.current]="page() === 'track'" (click)="go('track')">Track Order</button>
+    <button [class.current]="page() === 'about'" (click)="go('about')">About Us</button>
+    <button [class.current]="page() === 'contact'" (click)="go('contact')">Contact</button>
     <button *ngIf="!store.session()" class="nav-signin" (click)="go('portal')">Sign in</button>
-    <button *ngIf="store.session()" class="nav-account" (click)="go('portal')">◉ {{store.session()?.name}} <small>{{store.session()?.role | titlecase}}</small></button>
+    <button *ngIf="store.session()" class="nav-account" (click)="go('portal')">
+      ◉ {{ store.session()?.name }} <small>{{ store.session()?.role | titlecase }}</small>
+    </button>
     <button *ngIf="store.session()" class="nav-logout" (click)="signOut()">Sign out</button>
   </nav>
-  <button class="mobile-account-trigger" (click)="go('portal')" [attr.aria-label]="store.session()?'Open account':'Sign in'">{{store.session()?'◉':'♙'}}</button>
-  <button class="header-cart" *ngIf="!store.session() || store.session()?.role==='customer'" (click)="go('cart')" aria-label="View shopping cart">🛒<sup *ngIf="count()">{{count()}}</sup><span>Cart</span></button>
+  <button
+    class="mobile-account-trigger"
+    (click)="go('portal')"
+    [attr.aria-label]="store.session() ? 'Open account' : 'Sign in'"
+  >
+    {{ store.session() ? '◉' : '♙' }}
+  </button>
+  <button
+    class="header-cart"
+    *ngIf="!store.session() || store.session()?.role === 'customer'"
+    (click)="go('cart')"
+    aria-label="View shopping cart"
+  >
+    🛒<sup *ngIf="count()">{{ count() }}</sup
+    ><span>Cart</span>
+  </button>
 </header>
-<nav class="nav" *ngIf="menu"><button *ngFor="let n of ['home','menu','track','about','contact','portal']" (click)="go(n)">{{n==='track'?'Track Order':n==='portal'?(store.session()?'My account':'Sign in / Register'):n|titlecase}}</button><button *ngIf="store.session()" class="drawer-signout" (click)="signOut()">Sign out of {{store.session()?.name}}</button></nav>
-<main id="main-content"><app-portal *ngIf="page()==='portal'"></app-portal>
-<section *ngIf="page()==='home'"><div class="hero"><div class="hero-text"><b>WE'RE</b><h1>REOPENING!</h1><p>With a new menu and a few additions to our <em>Royal Delights ♡</em></p><button class="primary" (click)="go('menu')">Order Now →</button></div><img [src]="products()[2].image" alt="Delicious milkshake"></div><h2 class="center">Sweet Treats, Bigger Smiles ♡</h2><div class="categories"><button *ngFor="let p of products()" (click)="open(p)"><img [src]="p.image" [alt]="p.name"><b>{{p.name}}</b></button></div><div class="benefits"><div><span>♙</span><b>Pre-Orders Only</b><small>Order ahead for your preferred date</small></div><div><span>♛</span><b>Freshly Made</b><small>Made with love</small></div><div><span>♡</span><b>Sweet Treats</b><small>Bigger smiles!</small></div></div><div class="banner">Because every treat<br>should feel like royalty! ♡</div><h2>Our favourites</h2><div class="grid"><button class="product luxury-product" *ngFor="let p of store.products().slice(0,8)" (click)="open(p)" [disabled]="!p.available"><span class="stock-tag" *ngIf="!p.available">Sold out</span><span class="product-category-label">{{p.category}}</span><img [src]="p.image" [alt]="p.name"><div class="product-content"><b>{{p.name}}</b><p>{{p.description}}</p><div class="product-bottom"><span>From <strong>R{{p.price}}</strong></span><span class="product-arrow" aria-hidden="true">↗</span></div></div></button></div></section>
-<section class="menu-section" *ngIf="page()==='menu'">
-  <div class="heading"><span>♛</span><h1>Find your happy treat</h1><p>Discover something delicious, whatever the occasion.</p></div>
-  <div class="menu-toolbar"><label class="menu-search" aria-label="Search desserts"><span aria-hidden="true">⌕</span><input type="search" [ngModel]="searchText()" (ngModelChange)="updateSearch($event)" placeholder="Search donuts, milkshakes, flavours..."></label>
-   <label class="menu-sort"><span>Sort</span><select [ngModel]="sortBy()" (ngModelChange)="setSort($event)"><option value="featured">Featured first</option><option value="name">Name A–Z</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option></select></label></div>
-  <div class="menu-layout"><aside class="menu-sidebar"><h3>Explore treats</h3><button *ngFor="let c of categories()" [class.active]="category()===c" (click)="setCategory(c)">{{c}}</button><div class="availability-toggle"><label><input type="checkbox" [ngModel]="availableOnly()" (ngModelChange)="setAvailable($event)"> In stock only</label></div><p>Mini donuts may be delivered within 5 km. Everything else is for collection.</p></aside>
-    <div class="menu-results"><div class="mobile-categories"><button *ngFor="let c of categories()" [class.active]="category()===c" (click)="setCategory(c)">{{c}}</button></div><div class="menu-result-heading"><div><strong>{{filtered().length}} treats to explore</strong><small>Handpicked delights, freshly made</small></div><label class="mobile-availability"><input type="checkbox" [ngModel]="availableOnly()" (ngModelChange)="setAvailable($event)"> In stock</label></div>
-      <div class="grid menu-product-grid" *ngIf="visibleProducts().length"><button class="product luxury-product" *ngFor="let p of visibleProducts()" (click)="open(p)" [disabled]="!p.available"><span class="stock-tag" *ngIf="!p.available">Sold out</span><span class="product-category-label">{{p.category}}</span><img [src]="p.image" [alt]="p.name" loading="lazy"><div class="product-content"><b>{{p.name}}</b><p>{{p.description}}</p><div class="product-bottom"><span>From <strong>R{{p.price}}</strong></span><span class="product-arrow" aria-hidden="true">↗</span></div></div></button></div>
-      <div class="menu-empty" *ngIf="!visibleProducts().length"><span>🍩</span><h3>No treats found this time</h3><p>Try a different search or category.</p><button class="secondary" (click)="clearFilters()">Show all treats</button></div>
-      <div class="menu-pagination" *ngIf="totalPages()>1"><button (click)="setPage(menuPage()-1)" [disabled]="menuPage()===1" aria-label="Previous page">←</button><button *ngFor="let n of pageNumbers()" [class.active]="menuPage()===n" (click)="setPage(n)">{{n}}</button><button (click)="setPage(menuPage()+1)" [disabled]="menuPage()===totalPages()" aria-label="Next page">→</button></div>
-      <div class="banner">♛ Make it your own <small>Choose flavours, toppings, and who each treat is for.</small></div>
+<nav class="nav" *ngIf="menu">
+  <button *ngFor="let n of ['home', 'menu', 'track', 'about', 'contact', 'portal']" (click)="go(n)">
+    {{
+      n === 'track'
+        ? 'Track Order'
+        : n === 'portal'
+          ? store.session()
+            ? 'My account'
+            : 'Sign in / Register'
+          : (n | titlecase)
+    }}</button
+  ><button *ngIf="store.session()" class="drawer-signout" (click)="signOut()">
+    Sign out of {{ store.session()?.name }}
+  </button>
+</nav>
+<main id="main-content">
+  <app-portal *ngIf="page() === 'portal'"></app-portal>
+  <section *ngIf="page() === 'home'">
+    <div class="hero">
+      <div class="hero-text">
+        <b>WE'RE</b>
+        <h1>REOPENING!</h1>
+        <p>With a new menu and a few additions to our <em>Royal Delights ♡</em></p>
+        <button class="primary" (click)="go('menu')">Order Now →</button>
+      </div>
+      <img [src]="products()[2].image" alt="Delicious milkshake" />
     </div>
-  </div>
-</section>
-<section *ngIf="page()==='product'"><button class="back" (click)="go('menu')">← Back to menu</button><img class="feature-img" [src]="selected().image" [alt]="selected().name"><h1>{{selected().name}}</h1><b class="pink">From R{{selected().price}}</b><p class="muted">Freshly made, customised with your favourite flavours and toppings.</p><h3>Choose your size / box</h3><div class="variants"><button *ngFor="let v of selected().variants" [class.selected]="variant()===v.label" (click)="variant.set(v.label)">{{v.label}}<small>R{{v.price}}</small></button></div><h3 *ngIf="flavours().length">{{selected().category==='Mini Donuts'?'Choose sauce':'Choose flavour'}}</h3><div class="variants" *ngIf="flavours().length"><button *ngFor="let f of flavours()" [class.selected]="flavour()===f" (click)="flavour.set(f)">{{f}}</button></div><h3 *ngIf="toppings().length">Choose topping</h3><div class="variants" *ngIf="toppings().length"><button *ngFor="let t of toppings()" [class.selected]="topping()===t" (click)="topping.set(t)">{{t}}</button></div><div class="group-person"><label for="forPerson">Ordering for someone? <small>Optional · great for group orders</small></label><input id="forPerson" maxlength="45" [(ngModel)]="forPerson" placeholder="e.g. Lerato, Mom, Team A"></div><div class="quantity"><b>Quantity</b><div><button (click)="qty.set(qty() > 1 ? qty() - 1 : 1)">−</button><b>{{qty()}}</b><button (click)="qty.set(qty()+1)">+</button></div></div><div class="action"><h2>R{{unitPrice()*qty()}}</h2><button class="primary" [disabled]="!selectedAvailable()" (click)="add()">{{selectedAvailable() ? "🛒 Add to Cart" : "Out of stock"}}</button></div></section>
-<section class="cart-section" *ngIf="page()==='cart'"><div class="section-title-row"><div><span class="eyebrow">SWEET SELECTION</span><h1>Your basket <span>({{count()}})</span></h1></div><button class="secondary" (click)="go('menu')">+ Add more treats</button></div><div class="empty-cart" *ngIf="!cart().length"><span>🛒</span><h2>It looks a little empty here.</h2><p>Your next happy moment is waiting on the menu.</p><button class="primary" (click)="go('menu')">Explore treats →</button></div>
- <div class="group-order-hint" *ngIf="cart().length"><span aria-hidden="true">♛</span><div><strong>Ordering for friends, family or a team?</strong><p>Add a name to each item below. Everyone's treats will stay together in one checkout and one payment.</p></div></div>
- <article class="cart-item group-cart-item" *ngFor="let i of cart()"><img [src]="i.image" [alt]="i.name"><div class="cart-item-info"><b>{{i.name}}</b><small>{{itemDetails(i)}}</small><label class="person-input">Who is this for?<input [ngModel]="i.recipient||''" (ngModelChange)="saveRecipient(i,$event)" maxlength="45" placeholder="Name or group (optional)"></label><div class="quantity"><div><button type="button" (click)="change(i,-1)">−</button>{{i.qty}}<button type="button" (click)="change(i,1)">+</button></div><b>R{{i.price*i.qty}}</b></div></div><button type="button" class="remove" (click)="remove(i)" aria-label="Remove item">✕</button></article>
- <div *ngIf="cart().length" class="checkout-summary"><div class="people-summary"><strong>Prepared for</strong><span *ngFor="let person of groupRecipients()">{{person}}</span></div><label>Special order notes<textarea [(ngModel)]="notes" placeholder="Packaging requests or other important notes"></textarea></label><div class="total"><b>Subtotal</b><b>R{{total()}}</b></div><div class="total"><strong>Total</strong><strong>R{{total()}}</strong></div><button class="primary wide" (click)="go('checkout')">Checkout all treats together →</button></div>
-</section>
-<section *ngIf="page()==='checkout'"><div class="heading"><span>♛</span><h1>Checkout</h1></div><p class="notice" *ngIf="store.session()?.role!=='customer'">Customer sign-in is required to place an order. <button type="button" class="secondary" (click)="go('portal')">Sign in or register</button></p><form (ngSubmit)="place()"><div class="panel"><h3>① Your Details</h3><label>Full Name<input name="name" required [(ngModel)]="name" placeholder="Enter full name"></label><label>Phone Number<input name="phone" required pattern="[0-9+ ]{9,16}" [(ngModel)]="phone" placeholder="07x xxx xxxx"></label></div><div class="panel"><h3>② Preferred order time</h3><p class="helper">Business hours: {{store.settings().open}}–{{store.settings().close}} (admin configurable).</p><label>Preferred Date<input type="date" name="date" required [min]="minDate" [(ngModel)]="date"></label><label>Preferred Time<select name="time" required [(ngModel)]="time"><option value="">Select time</option><option *ngFor="let t of times()" [value]="t">{{t}}</option></select></label><p class="notice">♛ Pre-orders only. Your date and time will be confirmed by Royal Treats.</p></div><div class="panel"><h3>③ Fulfilment method</h3>
- <label class="radio"><input type="radio" name="fulfillment" [(ngModel)]="fulfillment" value="collection"> Collect at the store — all available products</label>
- <label class="radio"><input type="radio" name="fulfillment" [(ngModel)]="fulfillment" value="delivery" [disabled]="!eligibleForDelivery()"> Home delivery — mini donuts only, within 5 km</label>
- <p class="notice" *ngIf="!eligibleForDelivery()">Delivery is only available when your cart contains mini donuts exclusively.</p>
- <div *ngIf="fulfillment==='delivery'" class="delivery-fields">
- <label>Delivery address<input name="deliveryAddress" [(ngModel)]="deliveryAddress" required placeholder="Street address, suburb"></label>
- <button class="secondary" type="button" (click)="useDeliveryLocation()">📍 Check my delivery location</button>
- <p class="helper">{{locationMessage || 'Location permission is required to check whether you are within 5 km of the store.'}}</p>
- <p [class.error]="!deliveryCheck().ok">{{deliveryCheck().reason}} <span *ngIf="deliveryCheck().distance!==null">({{deliveryCheck().distance?.toFixed(2)}} km straight-line)</span></p>
- </div></div>
- <div class="panel group-checkout-summary"><h3>④ Group order summary</h3><p>One order, one payment, sorted by recipient.</p><div class="recipient-pill-row"><span *ngFor="let person of groupRecipients()">{{person}}</span></div><p>{{count()}} treats for {{groupRecipients().length}} recipient group(s).</p></div><div class="panel"><h3>⑤ Payment</h3><p><strong>{{fulfillment==='delivery'?'Cash on Delivery':'Cash on Collection'}}</strong></p><p class="muted">EFT payments will be introduced later. No online payment is collected.</p><p class="notice">Orders are subject to confirmation by Royal Treats.</p></div>
- <p class="error" *ngIf="checkoutError">{{checkoutError}}</p><div class="total"><b>Total</b><b>R{{total()}}</b></div><button class="primary wide" [disabled]="!cart().length || store.session()?.role!=='customer'">Place Demo Order</button></form></section>
-<section *ngIf="page()==='success'" class="success"><div class="tick">✓</div><h1>Order Placed!</h1><p>Thank you for your order.</p><p>Your order reference is:</p><div class="ref">{{latest()?.id}}</div><p>You can follow your order status in the app. Confirmation messages are not sent automatically.</p><button class="primary wide" (click)="go('track')">View Order Details</button><button class="secondary wide" (click)="go('home')">Back to Home</button></section>
-<section *ngIf="page()==='track'"><div class="heading"><span>♛</span><h1>Track Your Order</h1><p>Enter your order reference and phone number.</p></div><label>Order Reference<input [(ngModel)]="trackRef" placeholder="RT-12345678"></label><label>Phone Number<input [(ngModel)]="trackPhone" placeholder="07x xxx xxxx"></label><button class="primary wide" (click)="track()">Track Order</button><p *ngIf="trackSearched&&!tracked()" class="pink">No matching demo order found on this device.</p><div class="panel" *ngIf="tracked() as order"><h3>Order Status: {{order.status}}</h3><p>{{order.id}}</p><p class="pink" *ngIf="order.status==='Cancelled'">This order was cancelled.</p><div class="timeline" *ngIf="order.status!=='Cancelled'"><div *ngFor="let s of trackSteps()" [class.done]="stepDone(s)">● {{s}}</div></div><p>{{trackedDelivery()?.fulfillment==='delivery'?'Delivery':'Collection'}}: {{order.date}} at {{order.time}}</p></div></section>
-<section class="about-page" *ngIf="page()==='about'">
- <div class="about-hero"><div><span class="eyebrow">OUR LITTLE CORNER OF SWEETNESS</span><h1>Made for the moments<br><em>worth celebrating.</em></h1><p>Every celebration deserves a little something sweet. Welcome to Royal Treats — a dessert-loving corner of Thabazimbi, where colourful creations and everyday joy come together.</p><button class="primary" (click)="go('menu')">Explore our treats ↗</button></div><img [src]="products()[1].image" alt="Fresh mini donuts"></div>
- <div class="about-values"><div><span>01 / THE BEGINNING</span><h2>Our story started in 2021.</h2></div><div><p>Royal Treats began with a simple idea: make the ordinary feel special through sweet little moments. From a quick after-school treat to a box of mini donuts shared with family, we believe dessert is about more than flavour — it's about the smiles that follow.</p><p>Our roots are in Thabazimbi, and our menu celebrates playful favourites that people love to come back for.</p></div></div>
- <div class="about-quote">“A little sweetness can turn<br>an ordinary day into a <em>royal one.</em>”<span>♛ ROYAL TREATS</span></div>
- <div class="story-intro"><span class="eyebrow">THE MENU WE LOVE</span><h2>Four delicious ways<br>to brighten your day.</h2><p>Mini donuts topped your way, icy slushies, creamy milkshakes, and show-stopping sundaes — made for sharing, gifting and treating yourself.</p></div>
- <div class="about-feature-grid"><div *ngFor="let p of store.products()"><img [src]="p.image" [alt]="p.name"><h3>{{p.name}}</h3><p>{{p.description}}</p></div></div>
- <div class="about-values second"><div><span>02 / WHAT MATTERS</span><h2>Community first.<br>Happiness always.</h2></div><div><p>Our goal is to make ordering treats feel as joyful as enjoying them: easy pre-orders, thoughtful options and friendly service. That's why we're building a storefront designed around the people who support us.</p><p>Choose collection for the full menu, or mini donut delivery within our nearby 5 km area when available.</p></div></div>
- <div class="about-cta"><span>READY FOR A LITTLE JOY?</span><h2>Your next favourite<br>treat is waiting.</h2><button class="primary" (click)="go('menu')">Shop the sweet menu →</button></div>
- <p class="story-note">Our story is an illustrative brand narrative based on Royal Treats' founding year, location and menu. Details can be refined with the business owners before public launch.</p>
-</section>
-<section class="support-page" *ngIf="page()==='contact'">
- <div class="support-hero"><span class="eyebrow">WE'RE HERE TO HELP</span><h1>Sweet support.<br><em>No fuss.</em></h1><p>Need help with a pre-order or a product? Send Royal Treats a message by email. We'll get back to you through the address you use.</p></div>
- <div class="support-columns"><div class="support-compose"><span class="eyebrow">LET'S SORT IT OUT</span><h2>Contact Royal Treats</h2><p>Choose what you need help with and write your message. We'll prepare an email in your mail application.</p>
-  <ng-container *ngIf="emailReady(); else missingEmail">
-   <div class="configured-support"><span>✉</span><div><small>BUSINESS SUPPORT EMAIL</small><strong>{{store.settings().supportEmail}}</strong></div></div>
-   <label for="supportSubject">How can we help?<select id="supportSubject" [(ngModel)]="supportSubject"><option>Order support</option><option>Product or allergy question</option><option>Collection or delivery query</option><option>General feedback</option></select></label>
-   <label for="supportMessage">Your message<textarea id="supportMessage" rows="6" [(ngModel)]="supportMessage" placeholder="Please include your order reference if you have one."></textarea></label>
-   <a class="primary support-send" [href]="supportHref()">Open my email app ↗</a>
-   <p class="helper">This opens a draft in your own email app. Review it and press Send there; the website does not send messages automatically.</p>
-  </ng-container>
-  <ng-template #missingEmail><div class="support-unavailable"><span>✉</span><h3>Support email is being set up</h3><p>The business email hasn't been configured yet. The administrator can enable email support in Business Settings.</p></div></ng-template>
- </div>
- <div class="support-side"><div class="support-info"><span>♛</span><h3>Pre-orders, made simple</h3><p>Choose your treats, select a preferred time and follow your order's status from your account.</p><button class="secondary" (click)="go('track')">Track an order →</button></div>
- <div class="support-info"><span>⌖</span><h3>Visit us for collection</h3><p>{{store.settings().address}}</p><a href="https://www.google.com/maps/search/?api=1&query=34+10th+Avenue+Thabazimbi" target="_blank" rel="noopener">View location ↗</a></div>
- <div class="support-info"><span>◷</span><h3>Business hours</h3><p>{{store.settings().open}} – {{store.settings().close}} · Pre-orders only</p></div></div></div>
-</section>
-
+    <h2 class="center">Sweet Treats, Bigger Smiles ♡</h2>
+    <div class="categories">
+      <button *ngFor="let p of products()" (click)="open(p)">
+        <img [src]="p.image" [alt]="p.name" /><b>{{ p.name }}</b>
+      </button>
+    </div>
+    <div class="benefits">
+      <div>
+        <span>♙</span><b>Pre-Orders Only</b><small>Order ahead for your preferred date</small>
+      </div>
+      <div><span>♛</span><b>Freshly Made</b><small>Made with love</small></div>
+      <div><span>♡</span><b>Sweet Treats</b><small>Bigger smiles!</small></div>
+    </div>
+    <div class="banner">Because every treat<br />should feel like royalty! ♡</div>
+    <h2>Our favourites</h2>
+    <div class="grid">
+      <button
+        class="product luxury-product"
+        *ngFor="let p of store.products().slice(0, 8)"
+        (click)="open(p)"
+        [disabled]="!p.available"
+      >
+        <span class="stock-tag" *ngIf="!p.available">Sold out</span
+        ><span class="product-category-label">{{ p.category }}</span
+        ><img [src]="p.image" [alt]="p.name" />
+        <div class="product-content">
+          <b>{{ p.name }}</b>
+          <p>{{ p.description }}</p>
+          <div class="product-bottom">
+            <span
+              >From <strong>R{{ p.price }}</strong></span
+            ><span class="product-arrow" aria-hidden="true">↗</span>
+          </div>
+        </div>
+      </button>
+    </div>
+  </section>
+  <section class="menu-section" *ngIf="page() === 'menu'">
+    <div class="heading">
+      <span>♛</span>
+      <h1>Find your happy treat</h1>
+      <p>Discover something delicious, whatever the occasion.</p>
+    </div>
+    <div class="menu-toolbar">
+      <label class="menu-search" aria-label="Search desserts"
+        ><span aria-hidden="true">⌕</span
+        ><input
+          type="search"
+          [ngModel]="searchText()"
+          (ngModelChange)="updateSearch($event)"
+          placeholder="Search donuts, milkshakes, flavours..."
+      /></label>
+      <label class="menu-sort"
+        ><span>Sort</span
+        ><select [ngModel]="sortBy()" (ngModelChange)="setSort($event)">
+          <option value="featured">Featured first</option>
+          <option value="name">Name A–Z</option>
+          <option value="price-low">Price: low to high</option>
+          <option value="price-high">Price: high to low</option>
+        </select></label
+      >
+    </div>
+    <div class="menu-layout">
+      <aside class="menu-sidebar">
+        <h3>Explore treats</h3>
+        <button
+          *ngFor="let c of categories()"
+          [class.active]="category() === c"
+          (click)="setCategory(c)"
+        >
+          {{ c }}
+        </button>
+        <div class="availability-toggle">
+          <label
+            ><input
+              type="checkbox"
+              [ngModel]="availableOnly()"
+              (ngModelChange)="setAvailable($event)"
+            />
+            In stock only</label
+          >
+        </div>
+        <p>Mini donuts may be delivered within 5 km. Everything else is for collection.</p>
+      </aside>
+      <div class="menu-results">
+        <div class="mobile-categories">
+          <button
+            *ngFor="let c of categories()"
+            [class.active]="category() === c"
+            (click)="setCategory(c)"
+          >
+            {{ c }}
+          </button>
+        </div>
+        <div class="menu-result-heading">
+          <div>
+            <strong>{{ filtered().length }} treats to explore</strong
+            ><small>Handpicked delights, freshly made</small>
+          </div>
+          <label class="mobile-availability"
+            ><input
+              type="checkbox"
+              [ngModel]="availableOnly()"
+              (ngModelChange)="setAvailable($event)"
+            />
+            In stock</label
+          >
+        </div>
+        <div class="grid menu-product-grid" *ngIf="visibleProducts().length">
+          <button
+            class="product luxury-product"
+            *ngFor="let p of visibleProducts()"
+            (click)="open(p)"
+            [disabled]="!p.available"
+          >
+            <span class="stock-tag" *ngIf="!p.available">Sold out</span
+            ><span class="product-category-label">{{ p.category }}</span
+            ><img [src]="p.image" [alt]="p.name" loading="lazy" />
+            <div class="product-content">
+              <b>{{ p.name }}</b>
+              <p>{{ p.description }}</p>
+              <div class="product-bottom">
+                <span
+                  >From <strong>R{{ p.price }}</strong></span
+                ><span class="product-arrow" aria-hidden="true">↗</span>
+              </div>
+            </div>
+          </button>
+        </div>
+        <div class="menu-empty" *ngIf="!visibleProducts().length">
+          <span>🍩</span>
+          <h3>No treats found this time</h3>
+          <p>Try a different search or category.</p>
+          <button class="secondary" (click)="clearFilters()">Show all treats</button>
+        </div>
+        <div class="menu-pagination" *ngIf="totalPages() > 1">
+          <button
+            (click)="setPage(menuPage() - 1)"
+            [disabled]="menuPage() === 1"
+            aria-label="Previous page"
+          >
+            ←</button
+          ><button
+            *ngFor="let n of pageNumbers()"
+            [class.active]="menuPage() === n"
+            (click)="setPage(n)"
+          >
+            {{ n }}</button
+          ><button
+            (click)="setPage(menuPage() + 1)"
+            [disabled]="menuPage() === totalPages()"
+            aria-label="Next page"
+          >
+            →
+          </button>
+        </div>
+        <div class="banner">
+          ♛ Make it your own <small>Choose flavours, toppings, and who each treat is for.</small>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section *ngIf="page() === 'product'">
+    <button class="back" (click)="go('menu')">← Back to menu</button
+    ><img class="feature-img" [src]="selected().image" [alt]="selected().name" />
+    <h1>{{ selected().name }}</h1>
+    <b class="pink">From R{{ selected().price }}</b>
+    <p class="muted">Freshly made, customised with your favourite flavours and toppings.</p>
+    <h3>Choose your size / box</h3>
+    <div class="variants">
+      <button
+        *ngFor="let v of selected().variants"
+        [class.selected]="variant() === v.label"
+        (click)="variant.set(v.label)"
+      >
+        {{ v.label }}<small>R{{ v.price }}</small>
+      </button>
+    </div>
+    <h3 *ngIf="flavours().length">
+      {{ selected().category === 'Mini Donuts' ? 'Choose sauce' : 'Choose flavour' }}
+    </h3>
+    <div class="variants" *ngIf="flavours().length">
+      <button
+        *ngFor="let f of flavours()"
+        [class.selected]="flavour() === f"
+        (click)="flavour.set(f)"
+      >
+        {{ f }}
+      </button>
+    </div>
+    <h3 *ngIf="toppings().length">Choose topping</h3>
+    <div class="variants" *ngIf="toppings().length">
+      <button
+        *ngFor="let t of toppings()"
+        [class.selected]="topping() === t"
+        (click)="topping.set(t)"
+      >
+        {{ t }}
+      </button>
+    </div>
+    <div class="group-person">
+      <label for="forPerson"
+        >Ordering for someone? <small>Optional · great for group orders</small></label
+      ><input
+        id="forPerson"
+        maxlength="45"
+        [(ngModel)]="forPerson"
+        placeholder="e.g. Lerato, Mom, Team A"
+      />
+    </div>
+    <div class="quantity">
+      <b>Quantity</b>
+      <div>
+        <button (click)="qty.set(qty() > 1 ? qty() - 1 : 1)">−</button><b>{{ qty() }}</b
+        ><button (click)="qty.set(qty() + 1)">+</button>
+      </div>
+    </div>
+    <div class="action">
+      <h2>R{{ unitPrice() * qty() }}</h2>
+      <button class="primary" [disabled]="!selectedAvailable()" (click)="add()">
+        {{ selectedAvailable() ? '🛒 Add to Cart' : 'Out of stock' }}
+      </button>
+    </div>
+  </section>
+  <section class="cart-section" *ngIf="page() === 'cart'">
+    <div class="section-title-row">
+      <div>
+        <span class="eyebrow">SWEET SELECTION</span>
+        <h1>
+          Your basket <span>({{ count() }})</span>
+        </h1>
+      </div>
+      <button class="secondary" (click)="go('menu')">+ Add more treats</button>
+    </div>
+    <div class="empty-cart" *ngIf="!cart().length">
+      <span>🛒</span>
+      <h2>It looks a little empty here.</h2>
+      <p>Your next happy moment is waiting on the menu.</p>
+      <button class="primary" (click)="go('menu')">Explore treats →</button>
+    </div>
+    <div class="group-order-hint" *ngIf="cart().length">
+      <span aria-hidden="true">♛</span>
+      <div>
+        <strong>Ordering for friends, family or a team?</strong>
+        <p>
+          Add a name to each item below. Everyone's treats will stay together in one checkout and
+          one payment.
+        </p>
+      </div>
+    </div>
+    <article class="cart-item group-cart-item" *ngFor="let i of cart()">
+      <img [src]="i.image" [alt]="i.name" />
+      <div class="cart-item-info">
+        <b>{{ i.name }}</b
+        ><small>{{ itemDetails(i) }}</small
+        ><label class="person-input"
+          >Who is this for?<input
+            [ngModel]="i.recipient || ''"
+            (ngModelChange)="saveRecipient(i, $event)"
+            maxlength="45"
+            placeholder="Name or group (optional)"
+        /></label>
+        <div class="quantity">
+          <div>
+            <button type="button" (click)="change(i, -1)">−</button>{{ i.qty
+            }}<button type="button" (click)="change(i, 1)">+</button>
+          </div>
+          <b>R{{ i.price * i.qty }}</b>
+        </div>
+      </div>
+      <button type="button" class="remove" (click)="remove(i)" aria-label="Remove item">✕</button>
+    </article>
+    <div *ngIf="cart().length" class="checkout-summary">
+      <div class="people-summary">
+        <strong>Prepared for</strong
+        ><span *ngFor="let person of groupRecipients()">{{ person }}</span>
+      </div>
+      <label
+        >Special order notes<textarea
+          [(ngModel)]="notes"
+          placeholder="Packaging requests or other important notes"
+        ></textarea>
+      </label>
+      <div class="total">
+        <b>Subtotal</b><b>R{{ total() }}</b>
+      </div>
+      <div class="total">
+        <strong>Total</strong><strong>R{{ total() }}</strong>
+      </div>
+      <button class="primary wide" (click)="go('checkout')">Checkout all treats together →</button>
+    </div>
+  </section>
+  <section *ngIf="page() === 'checkout'">
+    <div class="heading">
+      <span>♛</span>
+      <h1>Checkout</h1>
+    </div>
+    <p class="notice" *ngIf="store.session()?.role !== 'customer'">
+      Customer sign-in is required to place an order.
+      <button type="button" class="secondary" (click)="go('portal')">Sign in or register</button>
+    </p>
+    <form (ngSubmit)="place()">
+      <div class="panel">
+        <h3>① Your Details</h3>
+        <label
+          >Full Name<input
+            name="name"
+            required
+            [(ngModel)]="name"
+            placeholder="Enter full name" /></label
+        ><label
+          >Phone Number<input
+            name="phone"
+            required
+            pattern="[0-9+ ]{9,16}"
+            [(ngModel)]="phone"
+            placeholder="07x xxx xxxx"
+        /></label>
+      </div>
+      <div class="panel">
+        <h3>② Preferred order time</h3>
+        <p class="helper">
+          Business hours: {{ store.settings().open }}–{{ store.settings().close }} (admin
+          configurable).
+        </p>
+        <label
+          >Preferred Date<input
+            type="date"
+            name="date"
+            required
+            [min]="minDate"
+            [(ngModel)]="date" /></label
+        ><label
+          >Preferred Time<select name="time" required [(ngModel)]="time">
+            <option value="">Select time</option>
+            <option *ngFor="let t of times()" [value]="t">{{ t }}</option>
+          </select></label
+        >
+        <p class="notice">
+          ♛ Pre-orders only. Your date and time will be confirmed by Royal Treats.
+        </p>
+      </div>
+      <div class="panel">
+        <h3>③ Fulfilment method</h3>
+        <label class="radio"
+          ><input type="radio" name="fulfillment" [(ngModel)]="fulfillment" value="collection" />
+          Collect at the store — all available products</label
+        >
+        <label class="radio"
+          ><input
+            type="radio"
+            name="fulfillment"
+            [(ngModel)]="fulfillment"
+            value="delivery"
+            [disabled]="!eligibleForDelivery()"
+          />
+          Home delivery — mini donuts only, within 5 km</label
+        >
+        <p class="notice" *ngIf="!eligibleForDelivery()">
+          Delivery is only available when your cart contains mini donuts exclusively.
+        </p>
+        <div *ngIf="fulfillment === 'delivery'" class="delivery-fields">
+          <label
+            >Delivery address<input
+              name="deliveryAddress"
+              [(ngModel)]="deliveryAddress"
+              required
+              placeholder="Street address, suburb"
+          /></label>
+          <button class="secondary" type="button" (click)="useDeliveryLocation()">
+            📍 Check my delivery location
+          </button>
+          <p class="helper">
+            {{
+              locationMessage ||
+                'Location permission is required to check whether you are within 5 km of the store.'
+            }}
+          </p>
+          <p [class.error]="!deliveryCheck().ok">
+            {{ deliveryCheck().reason }}
+            <span *ngIf="deliveryCheck().distance !== null"
+              >({{ deliveryCheck().distance?.toFixed(2) }} km straight-line)</span
+            >
+          </p>
+        </div>
+      </div>
+      <div class="panel group-checkout-summary">
+        <h3>④ Group order summary</h3>
+        <p>One order, one payment, sorted by recipient.</p>
+        <div class="recipient-pill-row">
+          <span *ngFor="let person of groupRecipients()">{{ person }}</span>
+        </div>
+        <p>{{ count() }} treats for {{ groupRecipients().length }} recipient group(s).</p>
+      </div>
+      <div class="panel">
+        <h3>⑤ Payment</h3>
+        <p>
+          <strong>{{
+            fulfillment === 'delivery' ? 'Cash on Delivery' : 'Cash on Collection'
+          }}</strong>
+        </p>
+        <p class="muted">EFT payments will be introduced later. No online payment is collected.</p>
+        <p class="notice">Orders are subject to confirmation by Royal Treats.</p>
+      </div>
+      <p class="error" *ngIf="checkoutError">{{ checkoutError }}</p>
+      <div class="total">
+        <b>Total</b><b>R{{ total() }}</b>
+      </div>
+      <button
+        class="primary wide"
+        [disabled]="!cart().length || store.session()?.role !== 'customer'"
+      >
+        Place Demo Order
+      </button>
+    </form>
+  </section>
+  <section *ngIf="page() === 'success'" class="success">
+    <div class="tick">✓</div>
+    <h1>Order Placed!</h1>
+    <p>Thank you for your order.</p>
+    <p>Your order reference is:</p>
+    <div class="ref">{{ latest()?.id }}</div>
+    <p>
+      You can follow your order status in the app. Confirmation messages are not sent automatically.
+    </p>
+    <button class="primary wide" (click)="go('track')">View Order Details</button
+    ><button class="secondary wide" (click)="go('home')">Back to Home</button>
+  </section>
+  <section *ngIf="page() === 'track'">
+    <div class="heading">
+      <span>♛</span>
+      <h1>Track Your Order</h1>
+      <p>Enter your order reference and phone number.</p>
+    </div>
+    <label>Order Reference<input [(ngModel)]="trackRef" placeholder="RT-12345678" /></label
+    ><label>Phone Number<input [(ngModel)]="trackPhone" placeholder="07x xxx xxxx" /></label
+    ><button class="primary wide" (click)="track()">Track Order</button>
+    <p *ngIf="trackSearched && !tracked()" class="pink">
+      No matching demo order found on this device.
+    </p>
+    <div class="panel" *ngIf="tracked() as order">
+      <h3>Order Status: {{ order.status }}</h3>
+      <p>{{ order.id }}</p>
+      <p class="pink" *ngIf="order.status === 'Cancelled'">This order was cancelled.</p>
+      <div class="timeline" *ngIf="order.status !== 'Cancelled'">
+        <div *ngFor="let s of trackSteps()" [class.done]="stepDone(s)">● {{ s }}</div>
+      </div>
+      <p>
+        {{ trackedDelivery()?.fulfillment === 'delivery' ? 'Delivery' : 'Collection' }}:
+        {{ order.date }} at {{ order.time }}
+      </p>
+    </div>
+  </section>
+  <section class="about-page" *ngIf="page() === 'about'">
+    <div class="about-hero">
+      <div>
+        <span class="eyebrow">OUR LITTLE CORNER OF SWEETNESS</span>
+        <h1>Made for the moments<br /><em>worth celebrating.</em></h1>
+        <p>
+          Every celebration deserves a little something sweet. Welcome to Royal Treats — a
+          dessert-loving corner of Thabazimbi, where colourful creations and everyday joy come
+          together.
+        </p>
+        <button class="primary" (click)="go('menu')">Explore our treats ↗</button>
+      </div>
+      <img [src]="products()[1].image" alt="Fresh mini donuts" />
+    </div>
+    <div class="about-values">
+      <div>
+        <span>01 / THE BEGINNING</span>
+        <h2>Our story started in 2021.</h2>
+      </div>
+      <div>
+        <p>
+          Royal Treats began with a simple idea: make the ordinary feel special through sweet little
+          moments. From a quick after-school treat to a box of mini donuts shared with family, we
+          believe dessert is about more than flavour — it's about the smiles that follow.
+        </p>
+        <p>
+          Our roots are in Thabazimbi, and our menu celebrates playful favourites that people love
+          to come back for.
+        </p>
+      </div>
+    </div>
+    <div class="about-quote">
+      “A little sweetness can turn<br />an ordinary day into a <em>royal one.</em>”<span
+        >♛ ROYAL TREATS</span
+      >
+    </div>
+    <div class="story-intro">
+      <span class="eyebrow">THE MENU WE LOVE</span>
+      <h2>Four delicious ways<br />to brighten your day.</h2>
+      <p>
+        Mini donuts topped your way, icy slushies, creamy milkshakes, and show-stopping sundaes —
+        made for sharing, gifting and treating yourself.
+      </p>
+    </div>
+    <div class="about-feature-grid">
+      <div *ngFor="let p of store.products()">
+        <img [src]="p.image" [alt]="p.name" />
+        <h3>{{ p.name }}</h3>
+        <p>{{ p.description }}</p>
+      </div>
+    </div>
+    <div class="about-values second">
+      <div>
+        <span>02 / WHAT MATTERS</span>
+        <h2>Community first.<br />Happiness always.</h2>
+      </div>
+      <div>
+        <p>
+          Our goal is to make ordering treats feel as joyful as enjoying them: easy pre-orders,
+          thoughtful options and friendly service. That's why we're building a storefront designed
+          around the people who support us.
+        </p>
+        <p>
+          Choose collection for the full menu, or mini donut delivery within our nearby 5 km area
+          when available.
+        </p>
+      </div>
+    </div>
+    <div class="about-cta">
+      <span>READY FOR A LITTLE JOY?</span>
+      <h2>Your next favourite<br />treat is waiting.</h2>
+      <button class="primary" (click)="go('menu')">Shop the sweet menu →</button>
+    </div>
+    <p class="story-note">
+      Our story is an illustrative brand narrative based on Royal Treats' founding year, location
+      and menu. Details can be refined with the business owners before public launch.
+    </p>
+  </section>
+  <section class="support-page" *ngIf="page() === 'contact'">
+    <div class="support-hero">
+      <span class="eyebrow">WE'RE HERE TO HELP</span>
+      <h1>Sweet support.<br /><em>No fuss.</em></h1>
+      <p>
+        Need help with a pre-order or a product? Send Royal Treats a message by email. We'll get
+        back to you through the address you use.
+      </p>
+    </div>
+    <div class="support-columns">
+      <div class="support-compose">
+        <span class="eyebrow">LET'S SORT IT OUT</span>
+        <h2>Contact Royal Treats</h2>
+        <p>
+          Choose what you need help with and write your message. We'll prepare an email in your mail
+          application.
+        </p>
+        <ng-container *ngIf="emailReady(); else missingEmail">
+          <div class="configured-support">
+            <span>✉</span>
+            <div>
+              <small>BUSINESS SUPPORT EMAIL</small
+              ><strong>{{ store.settings().supportEmail }}</strong>
+            </div>
+          </div>
+          <label for="supportSubject"
+            >How can we help?<select id="supportSubject" [(ngModel)]="supportSubject">
+              <option>Order support</option>
+              <option>Product or allergy question</option>
+              <option>Collection or delivery query</option>
+              <option>General feedback</option>
+            </select></label
+          >
+          <label for="supportMessage"
+            >Your message<textarea
+              id="supportMessage"
+              rows="6"
+              [(ngModel)]="supportMessage"
+              placeholder="Please include your order reference if you have one."
+            ></textarea>
+          </label>
+          <a class="primary support-send" [href]="supportHref()">Open my email app ↗</a>
+          <p class="helper">
+            This opens a draft in your own email app. Review it and press Send there; the website
+            does not send messages automatically.
+          </p>
+        </ng-container>
+        <ng-template #missingEmail
+          ><div class="support-unavailable">
+            <span>✉</span>
+            <h3>Support email is being set up</h3>
+            <p>
+              The business email hasn't been configured yet. The administrator can enable email
+              support in Business Settings.
+            </p>
+          </div></ng-template
+        >
+      </div>
+      <div class="support-side">
+        <div class="support-info">
+          <span>♛</span>
+          <h3>Pre-orders, made simple</h3>
+          <p>
+            Choose your treats, select a preferred time and follow your order's status from your
+            account.
+          </p>
+          <button class="secondary" (click)="go('track')">Track an order →</button>
+        </div>
+        <div class="support-info">
+          <span>⌖</span>
+          <h3>Visit us for collection</h3>
+          <p>{{ store.settings().address }}</p>
+          <a
+            href="https://www.google.com/maps/search/?api=1&query=34+10th+Avenue+Thabazimbi"
+            target="_blank"
+            rel="noopener"
+            >View location ↗</a
+          >
+        </div>
+        <div class="support-info">
+          <span>◷</span>
+          <h3>Business hours</h3>
+          <p>{{ store.settings().open }} – {{ store.settings().close }} · Pre-orders only</p>
+        </div>
+      </div>
+    </div>
+  </section>
 </main>
 <nav class="mobile-bottom-nav" *ngIf="!page().startsWith('admin')" aria-label="Mobile navigation">
-  <button [class.current]="page()==='home'" (click)="go('home')"><span aria-hidden="true">⌂</span>Home</button>
-  <button [class.current]="page()==='menu'||page()==='product'" (click)="go('menu')"><span aria-hidden="true">▦</span>Menu</button>
-  <button [class.current]="page()==='track'" (click)="go('track')"><span aria-hidden="true">◷</span>Track</button>
-  <button *ngIf="!store.session() || store.session()?.role==='customer'" [class.current]="page()==='cart'||page()==='checkout'" (click)="go('cart')"><span aria-hidden="true">🛒</span>Cart <small *ngIf="count()">{{count()}}</small></button>
-  <button *ngIf="store.session()?.role==='admin'||store.session()?.role==='courier'" [class.current]="page()==='portal'" (click)="go('portal')"><span aria-hidden="true">◉</span>Workspace</button>
+  <button [class.current]="page() === 'home'" (click)="go('home')">
+    <span aria-hidden="true">⌂</span>Home
+  </button>
+  <button [class.current]="page() === 'menu' || page() === 'product'" (click)="go('menu')">
+    <span aria-hidden="true">▦</span>Menu
+  </button>
+  <button [class.current]="page() === 'track'" (click)="go('track')">
+    <span aria-hidden="true">◷</span>Track
+  </button>
+  <button
+    *ngIf="!store.session() || store.session()?.role === 'customer'"
+    [class.current]="page() === 'cart' || page() === 'checkout'"
+    (click)="go('cart')"
+  >
+    <span aria-hidden="true">🛒</span>Cart <small *ngIf="count()">{{ count() }}</small>
+  </button>
+  <button
+    *ngIf="store.session()?.role === 'admin' || store.session()?.role === 'courier'"
+    [class.current]="page() === 'portal'"
+    (click)="go('portal')"
+  >
+    <span aria-hidden="true">◉</span>Workspace
+  </button>
 </nav>
-<footer><span>♛</span><b>Royal Treats</b><p>Because every treat should feel like royalty!</p><small>34 10th Avenue, Thabazimbi · EST. 2021</small></footer>
+<footer>
+  <span>♛</span><b>Royal Treats</b>
+  <p>Because every treat should feel like royalty!</p>
+  <small>34 10th Avenue, Thabazimbi · EST. 2021</small>
+</footer>
