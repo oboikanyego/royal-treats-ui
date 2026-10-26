@@ -1,4 +1,10 @@
 import { Injectable, signal } from '@angular/core';
+import {
+  CATEGORY_OPTIONS,
+  DELIVERY_RADIUS_KM,
+  isDeliverableCategory,
+  type ProductOptions,
+} from './catalogue-config';
 
 export type Role = 'admin' | 'customer' | 'courier';
 export type Account = {
@@ -21,6 +27,8 @@ export type CatalogueProduct = {
   available: boolean;
   deliverable: boolean;
   variants: { label: string; price: number }[];
+  /** Flavour/topping choices; when absent the category defaults apply. */
+  options?: ProductOptions;
 };
 export type Settings = {
   open: string;
@@ -57,6 +65,7 @@ const seedProducts: CatalogueProduct[] = [
     id: 'slush',
     name: 'Slushies',
     category: 'Slushies',
+    options: CATEGORY_OPTIONS['Slushies'],
     price: 15,
     image:
       'https://images.unsplash.com/photo-1497534446932-c925b458314e?auto=format&fit=crop&w=900&q=85',
@@ -72,6 +81,7 @@ const seedProducts: CatalogueProduct[] = [
     id: 'donuts',
     name: 'Mini Donuts',
     category: 'Mini Donuts',
+    options: CATEGORY_OPTIONS['Mini Donuts'],
     price: 25,
     image:
       'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=900&q=85',
@@ -89,6 +99,7 @@ const seedProducts: CatalogueProduct[] = [
     id: 'shake',
     name: 'Milkshakes',
     category: 'Milkshakes',
+    options: CATEGORY_OPTIONS['Milkshakes'],
     price: 25,
     image:
       'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=900&q=85',
@@ -104,6 +115,7 @@ const seedProducts: CatalogueProduct[] = [
     id: 'sundae',
     name: 'Ice Cream Sundaes',
     category: 'Ice Cream Sundaes',
+    options: CATEGORY_OPTIONS['Ice Cream Sundaes'],
     price: 30,
     image:
       'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=900&q=85',
@@ -159,7 +171,7 @@ export class CommerceState {
       close: '23:00',
       latitude: null,
       longitude: null,
-      radiusKm: 5,
+      radiusKm: DELIVERY_RADIUS_KM,
       storeName: 'Royal Treats',
       address: '34 10th Avenue, Thabazimbi',
       supportEmail: '',
@@ -264,8 +276,8 @@ export class CommerceState {
   }
   saveProduct(p: CatalogueProduct): void {
     if (this.session()?.role !== 'admin') return;
-    // The MVP supports delivery of donuts only, regardless of product configuration.
-    const product = { ...p, deliverable: p.category === 'Mini Donuts' && p.deliverable };
+    // The MVP only delivers products from deliverable categories, regardless of product configuration.
+    const product = { ...p, deliverable: isDeliverableCategory(p.category) && p.deliverable };
     this.products.update((xs) =>
       xs.some((x) => x.id === product.id)
         ? xs.map((x) => (x.id === product.id ? product : x))
@@ -275,7 +287,7 @@ export class CommerceState {
   }
   saveSettings(s: Settings): void {
     if (this.session()?.role !== 'admin') return;
-    this.settings.set({ ...s, radiusKm: 5 });
+    this.settings.set({ ...s, radiusKm: DELIVERY_RADIUS_KM });
     this.save('royal-settings-v2', this.settings, this.settings());
   }
   record(order: DeliveryOrder): void {
@@ -318,7 +330,7 @@ export class CommerceState {
     return 6371 * 2 * Math.asin(Math.min(1, Math.sqrt(a)));
   }
   canDeliver(
-    items: { name: string }[],
+    items: { productId: string }[],
     lat: number | null,
     lng: number | null,
   ): { ok: boolean; reason: string; distance: number | null } {
@@ -328,7 +340,10 @@ export class CommerceState {
         (i) =>
           !this.products().some(
             (p) =>
-              p.name === i.name && p.category === 'Mini Donuts' && p.deliverable && p.available,
+              p.id === i.productId &&
+              isDeliverableCategory(p.category) &&
+              p.deliverable &&
+              p.available,
           ),
       )
     )
@@ -341,7 +356,7 @@ export class CommerceState {
     if (lat === null || lng === null)
       return {
         ok: false,
-        reason: 'Provide your location to check the 5 km delivery area.',
+        reason: `Provide your location to check the ${DELIVERY_RADIUS_KM} km delivery area.`,
         distance: null,
       };
     const d = this.distanceKm(lat, lng);
@@ -352,8 +367,11 @@ export class CommerceState {
         distance: null,
       };
     return {
-      ok: d <= 5,
-      reason: d <= 5 ? 'Within the delivery area.' : 'Outside the 5 km delivery area.',
+      ok: d <= DELIVERY_RADIUS_KM,
+      reason:
+        d <= DELIVERY_RADIUS_KM
+          ? 'Within the delivery area.'
+          : `Outside the ${DELIVERY_RADIUS_KM} km delivery area.`,
       distance: d,
     };
   }

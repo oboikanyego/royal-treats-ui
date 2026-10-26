@@ -419,7 +419,7 @@
                         type="checkbox"
                         name="deliverable"
                         [(ngModel)]="p.deliverable"
-                        [disabled]="p.category !== 'Mini Donuts'"
+                        [disabled]="!canBeDelivered(p)"
                       />
                       Eligible for delivery (donuts only)</label
                     >
