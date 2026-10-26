@@ -75,7 +75,7 @@ export class CommerceState {
  }
  canDeliver(items:{name:string}[],lat:number|null,lng:number|null):{ok:boolean;reason:string;distance:number|null}{
   if(!items.length)return {ok:false,reason:'Your cart is empty.',distance:null};
-  if(items.some(i=>i.name!=='Mini Donuts'))return {ok:false,reason:'Only mini donuts are eligible for delivery. Remove other items or choose collection.',distance:null};
+  if(items.some(i=>!this.products().some(p=>p.name===i.name&&p.category==='Mini Donuts'&&p.deliverable&&p.available)))return {ok:false,reason:'Only in-stock mini donut products are eligible for delivery. Remove other items or choose collection.',distance:null};
   if(lat===null||lng===null)return {ok:false,reason:'Provide your location to check the 5 km delivery area.',distance:null};
   const d=this.distanceKm(lat,lng);
   if(d===null)return {ok:false,reason:'Store location needs to be configured by the admin.',distance:null};
