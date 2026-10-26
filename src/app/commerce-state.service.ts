@@ -1,10 +1,10 @@
 import { Injectable, signal } from '@angular/core';
 
 export type Role = 'admin' | 'customer' | 'courier';
-export type Account = { id: string; name: string; email: string; phone: string; whatsapp?: string; role: Role; password: string; active: boolean };
+export type Account = { id: string; name: string; email: string; phone: string; role: Role; password: string; active: boolean; photo?: string };
 export type CatalogueProduct = { id: string; name: string; category: string; price: number; image: string; description: string; available: boolean; deliverable: boolean; variants: { label: string; price: number }[] };
-export type Settings = { open: string; close: string; latitude: number | null; longitude: number | null; radiusKm: number; storeName: string; address: string };
-export type DeliveryOrder = { id: string; customerId: string; customer: string; phone: string; whatsapp?: string; address: string; latitude?: number; longitude?: number; distanceKm?: number; fulfillment: 'delivery'|'collection'; courierId?: string; status: string; payment: string; total: number; items: {name:string;qty:number;price:number}[]; date: string; time: string };
+export type Settings = { open: string; close: string; latitude: number | null; longitude: number | null; radiusKm: number; storeName: string; address: string; supportEmail: string };
+export type DeliveryOrder = { id: string; customerId: string; customer: string; phone: string; address: string; latitude?: number; longitude?: number; distanceKm?: number; fulfillment: 'delivery'|'collection'; courierId?: string; status: string; payment: string; total: number; items: {name:string;qty:number;price:number;recipient?:string}[]; date: string; time: string };
 
 const seedProducts: CatalogueProduct[] = [
  { id: 'slush', name: 'Slushies', category: 'Slushies', price: 15, image: 'https://images.unsplash.com/photo-1497534446932-c925b458314e?auto=format&fit=crop&w=900&q=85', description:'Lemon Lime, Strawberry or Blueberry', available:true,deliverable:false, variants:[{label:'Small cup',price:15},{label:'Big cup',price:30}] },
@@ -20,20 +20,22 @@ const demoAdmin: Account = { id:'admin-demo', name:'Royal Treats Admin',email:'a
 @Injectable({providedIn:'root'})
 export class CommerceState {
  readonly products = signal<CatalogueProduct[]>(read('royal-products-v2',seedProducts));
- readonly accounts = signal<Account[]>(read('royal-accounts-v2',[demoAdmin]));
+ readonly accounts = signal<Account[]>(read<Account[]>('royal-accounts-v2',[demoAdmin]).map(a=>({id:a.id,name:a.name,email:a.email,phone:a.phone,role:a.role,password:a.password,active:a.active,photo:a.photo})));
+
  readonly session = signal<Account|null>(null);
- readonly settings = signal<Settings>(read('royal-settings-v2',{open:'10:00',close:'23:00',latitude:null,longitude:null,radiusKm:5,storeName:'Royal Treats',address:'34 10th Avenue, Thabazimbi'}));
- readonly deliveries = signal<DeliveryOrder[]>(read('royal-deliveries-v2',[]));
+ readonly settings = signal<Settings>({...read('royal-settings-v2',{open:'10:00',close:'23:00',latitude:null,longitude:null,radiusKm:5,storeName:'Royal Treats',address:'34 10th Avenue, Thabazimbi',supportEmail:''}),supportEmail:read<Partial<Settings>>('royal-settings-v2',{}).supportEmail??''});
+ readonly deliveries = signal<DeliveryOrder[]>(read<DeliveryOrder[]>('royal-deliveries-v2',[]).map(o=>({...o,items:o.items.map(i=>({name:i.name,qty:i.qty,price:i.price,recipient:i.recipient}))})));
+
  constructor() {
   const id = sessionStorage.getItem('royal-demo-session');
   if(id) this.session.set(this.accounts().find(a=>a.id===id&&a.active)??null);
  }
  private save<T>(key:string,sig:{():T},value:T):void{ localStorage.setItem(key,JSON.stringify(value)); }
- register(name:string,email:string,phone:string,whatsapp:string,password:string):string|null{
+ register(name:string,email:string,phone:string,password:string):string|null{
   const normalized=email.trim().toLowerCase();
   if(!name.trim()||!normalized||!/^\+?[0-9 ]{9,16}$/.test(phone)||password.length<8) return 'Please enter a name, email, valid phone and password of at least 8 characters.';
   if(this.accounts().some(a=>a.email===normalized))return 'That email is already registered.';
-  const account:Account={id:'u-'+Date.now(),name:name.trim(),email:normalized,phone:phone.trim(),whatsapp:whatsapp.trim()||undefined,password,role:'customer',active:true};
+  const account:Account={id:'u-'+Date.now(),name:name.trim(),email:normalized,phone:phone.trim(),password,role:'customer',active:true};
   this.accounts.update(xs=>[...xs,account]);this.save('royal-accounts-v2',this.accounts,this.accounts());this.signIn(normalized,password);return null;
  }
  signIn(email:string,password:string):boolean{
@@ -41,12 +43,22 @@ export class CommerceState {
   this.session.set(a??null);if(a)sessionStorage.setItem('royal-demo-session',a.id);return !!a;
  }
  signOut():void{this.session.set(null);sessionStorage.removeItem('royal-demo-session');}
- addCourier(name:string,email:string,phone:string,whatsapp:string,password:string):string|null{
+ updateProfilePhoto(dataUrl: string): string | null {
+  const current = this.session();
+  if (!current) return 'Sign in to upload a profile picture.';
+  if (!/^data:image\/(jpeg|webp|png);base64,/.test(dataUrl) || dataUrl.length > 220_000) return 'Choose a smaller JPG, PNG or WebP picture.';
+  this.accounts.update(xs => xs.map(a => a.id === current.id ? {...a, photo:dataUrl} : a));
+  try { this.save('royal-accounts-v2', this.accounts, this.accounts()); } catch { return 'Not enough browser storage for this photo.'; }
+  this.session.set(this.accounts().find(a => a.id === current.id) ?? null);
+  return null;
+ }
+
+ addCourier(name:string,email:string,phone:string,password:string):string|null{
   if(this.session()?.role!=='admin')return 'Admin role required.';
   const normalized=email.trim().toLowerCase();
   if(!name.trim()||!normalized||!/^\+?[0-9 ]{9,16}$/.test(phone)||password.length<8)return 'Name, valid phone, email and password of at least 8 characters are required.';
   if(this.accounts().some(a=>a.email===normalized))return 'Email already registered.';
-  this.accounts.update(xs=>[...xs,{id:'courier-'+Date.now(),name,email:normalized,phone,whatsapp:whatsapp||undefined,password,role:'courier',active:true}]);this.save('royal-accounts-v2',this.accounts,this.accounts());return null;
+  this.accounts.update(xs=>[...xs,{id:'courier-'+Date.now(),name,email:normalized,phone,password,role:'courier',active:true}]);this.save('royal-accounts-v2',this.accounts,this.accounts());return null;
  }
  toggleAccount(id:string):void{if(this.session()?.role!=='admin')return;this.accounts.update(xs=>xs.map(a=>a.id===id&&a.role==='courier'?{...a,active:!a.active}:a));this.save('royal-accounts-v2',this.accounts,this.accounts());}
  saveProduct(p:CatalogueProduct):void{
