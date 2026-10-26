@@ -33,7 +33,12 @@ export class AppComponent{
  });
  totalPages=computed(()=>Math.max(1,Math.ceil(this.filtered().length/this.pageSize)));
  visibleProducts=computed(()=>this.filtered().slice((this.menuPage()-1)*this.pageSize,this.menuPage()*this.pageSize));
- pageNumbers=computed(()=>Array.from({length:this.totalPages()},(_,index)=>index+1));
+ pageNumbers=computed(()=>{
+  const total=this.totalPages();
+  const count=Math.min(5,total);
+  const start=Math.max(1,Math.min(this.menuPage()-2,total-count+1));
+  return Array.from({length:count},(_,index)=>start+index);
+ });
  groupRecipients=computed(()=>[...new Set(this.cart().map(i=>i.recipient?.trim()||'Shared treats'))]);
 
  deliveryCheck=computed(()=>this.store.canDeliver(this.cart(),this.deliveryLat(),this.deliveryLng()));
