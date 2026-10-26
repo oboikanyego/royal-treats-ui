@@ -1,4 +1,6 @@
-import {Component,signal,computed} from '@angular/core';
+import {Component,signal,computed,DestroyRef} from '@angular/core';
+import {Router,NavigationEnd} from '@angular/router';
+import {Title} from '@angular/platform-browser';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {CommerceState, CatalogueProduct, DeliveryOrder} from './commerce-state.service';
@@ -10,10 +12,11 @@ const flavoursFor=(category:string):string[]=>category==='Slushies'?['Lemon Lime
 const toppingsFor=(category:string):string[]=>category==='Mini Donuts'?['Nuts','Oreo','Chocolate chips','Rainbow sprinkles','Plain sprinkles']:category==='Ice Cream Sundaes'?['Wafer','Oreo biscuit','Marshmallows','Chocolate sticks','Caramel popcorn','Gummy bears','Peanuts']:[];
 const collectionSteps=['Pending','Confirmed','Preparing','Ready for Collection','Completed'];
 const deliverySteps=['Pending','Confirmed','Preparing','Ready for Delivery','Out for Delivery','Completed'];
+const pagePaths:Record<string,string>={home:'/',menu:'/menu',cart:'/cart',checkout:'/checkout',success:'/order-placed',track:'/track',about:'/about',contact:'/contact',portal:'/account'};
 function stored<T>(key:string,fallback:T):T{try{return JSON.parse(localStorage.getItem(key)||'null')??fallback}catch{return fallback}}
 @Component({selector:'app-root',standalone:true,imports:[CommonModule,FormsModule,PortalComponent],templateUrl:'./app.component.html',styleUrls:['./app.component.css','./responsive.css','./commerce-enhancements.css']})
 export class AppComponent{
- store=inject(CommerceState);
+ store=inject(CommerceState);router=inject(Router);title=inject(Title);
  products=this.store.products;page=signal('home');menu=false;
  category=signal('All'); categories=computed(()=>['All',...new Set(this.store.products().map(x=>x.category))]);
  selected=signal<CatalogueProduct>(this.store.products()[1]);
@@ -51,7 +54,25 @@ export class AppComponent{
  unitPrice=computed(()=>this.selected().variants.find(v=>v.label===this.variant())?.price??this.selected().price);
  count=computed(()=>this.cart().reduce((n,x)=>n+x.qty,0));total=computed(()=>this.cart().reduce((n,x)=>n+x.qty*x.price,0));revenue=computed(()=>this.orders().filter(x=>x.status!=='Cancelled').reduce((n,x)=>n+x.total,0));
  pending=computed(()=>this.orders().filter(x=>x.status==='Pending').length);completed=computed(()=>this.orders().filter(x=>x.status==='Completed').length);
- constructor(){if(this.showWelcome())setTimeout(()=>this.dismissWelcome(),2200)}
+ constructor(){
+  if(this.showWelcome())setTimeout(()=>this.dismissWelcome(),2200);
+  const sub=this.router.events.subscribe(e=>{if(e instanceof NavigationEnd)this.syncRoute()});
+  inject(DestroyRef).onDestroy(()=>sub.unsubscribe());
+ }
+ private syncRoute(){
+  let route=this.router.routerState.snapshot.root;while(route.firstChild)route=route.firstChild;
+  const page=String(route.data['page']??'home');
+  this.menu=false;this.page.set(page);
+  this.title.setTitle((route.data['title']?route.data['title']+' | ':'')+'Royal Treats');
+  if(page==='product'){
+   const found=this.store.products().find(p=>p.id===route.params['id']);
+   if(!found){this.router.navigateByUrl('/menu',{replaceUrl:true});return}
+   if(this.selected().id!==found.id)this.select(found);
+  }
+  if(page==='success'&&!this.latest()){this.router.navigateByUrl('/track',{replaceUrl:true});return}
+  const user=this.store.session();
+  if(page==='checkout'&&user?.role==='customer'){this.name=user.name;this.phone=user.phone}
+ }
  dismissWelcome(){this.showWelcome.set(false);localStorage.setItem('royal-welcome-v1','yes')}
  signOut(){this.store.signOut();this.go('home')}
  updateSearch(value:string){this.searchText.set(value);this.menuPage.set(1)}
@@ -65,9 +86,10 @@ export class AppComponent{
  emailReady(){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.store.settings().supportEmail||'')}
  supportHref(){const email=this.store.settings().supportEmail;return 'mailto:'+email+'?subject='+encodeURIComponent(this.supportSubject)+'&body='+encodeURIComponent(this.supportMessage)}
 
- go(p:string){if(p.startsWith('admin'))p='portal';if(p==='checkout'&&this.store.session()?.role==='customer'){this.name=this.store.session()!.name;this.phone=this.store.session()!.phone}this.page.set(p);this.menu=false;window.scrollTo(0,0)}
+ go(p:string){if(p.startsWith('admin'))p='portal';this.router.navigateByUrl(pagePaths[p]??'/')}
  selectedAvailable(){return !!this.store.products().find(p=>p.name===this.selected().name)?.available}
- open(p:CatalogueProduct){if(!this.store.products().find(x=>x.name===p.name)?.available)return;this.selected.set(p);this.variant.set(p.variants[0].label);this.flavour.set(flavoursFor(p.category)[0]??'');this.topping.set(toppingsFor(p.category)[0]??'');this.qty.set(1);this.forPerson='';this.go('product')}
+ select(p:CatalogueProduct){this.selected.set(p);this.variant.set(p.variants[0].label);this.flavour.set(flavoursFor(p.category)[0]??'');this.topping.set(toppingsFor(p.category)[0]??'');this.qty.set(1);this.forPerson=''}
+ open(p:CatalogueProduct){if(!this.store.products().find(x=>x.name===p.name)?.available)return;this.select(p);this.router.navigate(['/menu',p.id])}
  saveCart(items:Item[]){this.cart.set(items);localStorage.setItem('rt-cart',JSON.stringify(items))}
  add(){const p=this.selected();if(!this.store.products().find(x=>x.name===p.name)?.available)return;const item={name:p.name,image:p.image,variant:this.variant(),price:this.unitPrice(),qty:this.qty(),sauce:this.flavour(),topping:this.topping(),recipient:this.forPerson.trim().slice(0,45)};const items=[...this.cart()];const old=items.find(i=>i.name===item.name&&i.variant===item.variant&&i.sauce===item.sauce&&i.topping===item.topping&&(i.recipient||'')===(item.recipient||''));if(old)old.qty+=item.qty;else items.push(item);this.saveCart(items);this.go('cart')}
  change(i:Item,d:number){this.saveCart(this.cart().map(x=>x===i?{...x,qty:x.qty+d}:x).filter(x=>x.qty>0))}
