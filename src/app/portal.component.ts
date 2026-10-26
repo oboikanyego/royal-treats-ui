@@ -24,6 +24,9 @@ export class PortalComponent {
  upload(event:Event){const file=(event.target as HTMLInputElement).files?.[0];if(!file||!this.edited)return;this.imageError='';if(!file.type.startsWith('image/')){this.imageError='Choose an image file.';return}if(file.size>400_000){this.imageError='For this browser-only demo, choose an image under 400 KB.';return}const reader=new FileReader();reader.onload=()=>{if(this.edited)this.edited.image=String(reader.result)};reader.readAsDataURL(file)}
  saveHours(){if(this.settings.open===this.settings.close){this.error='Opening and closing time must differ.';return}if(this.settings.latitude!==null&&(this.settings.latitude< -90||this.settings.latitude>90)||this.settings.longitude!==null&&(this.settings.longitude< -180||this.settings.longitude>180)){this.error='Invalid latitude or longitude.';return}this.store.saveSettings(this.settings);this.error='';this.notice='Business settings saved.'}
  useStoreLocation(){if(!navigator.geolocation){this.error='Location is unavailable.';return}navigator.geolocation.getCurrentPosition(p=>{this.settings.latitude=p.coords.latitude;this.settings.longitude=p.coords.longitude;this.error='';this.notice='Store coordinates captured from this device. Save settings to apply.'},()=>this.error='Location permission denied. Enter store coordinates manually.')}
+ toggleAvailability(product: CatalogueProduct): void {
+  this.store.saveProduct({ ...product, available: !product.available });
+ }
  outOfStockCount(){return this.store.products().filter(p=>!p.available).length}
  couriers(){return this.store.accounts().filter(x=>x.role==='courier')}
  availableOrders(){return this.store.deliveries().filter(o=>o.fulfillment==='delivery'&&o.status==='Ready for Delivery'&&!o.courierId)}
