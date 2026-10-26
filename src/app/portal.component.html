@@ -25,3 +25,11 @@
   </ng-container>
  </ng-container>
 </div>
+<div class="confirm-backdrop" *ngIf="pendingAvailability as p" (click)="pendingAvailability=null">
+ <div class="confirm-dialog" role="alertdialog" aria-modal="true" aria-label="Confirm product availability" (click)="$event.stopPropagation()">
+  <div class="confirm-icon">{{p.available?'!':'✓'}}</div>
+  <h2>{{p.available?'Mark product out of stock?':'Make product available?'}}</h2>
+  <p>{{p.name}} {{p.available?'will no longer be available for customer orders.':'will appear as available to order again.'}}</p>
+  <div class="actions"><button type="button" class="secondary" (click)="pendingAvailability=null">Cancel</button><button type="button" class="primary" (click)="confirmAvailability()">Confirm change</button></div>
+ </div>
+</div>
