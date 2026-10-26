@@ -1,0 +1,60 @@
+<ng-container *ngIf="selected() as product">
+  <button class="back" routerLink="/menu">← Back to menu</button
+  ><img class="feature-img" [src]="product.image" [alt]="product.name" />
+  <h1>{{ product.name }}</h1>
+  <b class="pink">From R{{ product.price }}</b>
+  <p class="muted">Freshly made, customised with your favourite flavours and toppings.</p>
+  <h3>Choose your size / box</h3>
+  <div class="variants">
+    <button
+      *ngFor="let v of product.variants"
+      [class.selected]="variant() === v.label"
+      (click)="variant.set(v.label)"
+    >
+      {{ v.label }}<small>R{{ v.price }}</small>
+    </button>
+  </div>
+  <h3 *ngIf="flavours().length">Choose {{ options().flavourLabel }}</h3>
+  <div class="variants" *ngIf="flavours().length">
+    <button
+      *ngFor="let f of flavours()"
+      [class.selected]="flavour() === f"
+      (click)="flavour.set(f)"
+    >
+      {{ f }}
+    </button>
+  </div>
+  <h3 *ngIf="toppings().length">Choose topping</h3>
+  <div class="variants" *ngIf="toppings().length">
+    <button
+      *ngFor="let t of toppings()"
+      [class.selected]="topping() === t"
+      (click)="topping.set(t)"
+    >
+      {{ t }}
+    </button>
+  </div>
+  <div class="group-person">
+    <label for="forPerson"
+      >Ordering for someone? <small>Optional · great for group orders</small></label
+    ><input
+      id="forPerson"
+      maxlength="45"
+      [(ngModel)]="forPerson"
+      placeholder="e.g. Lerato, Mom, Team A"
+    />
+  </div>
+  <div class="quantity">
+    <b>Quantity</b>
+    <div>
+      <button (click)="qty.set(qty() > 1 ? qty() - 1 : 1)">−</button><b>{{ qty() }}</b
+      ><button (click)="qty.set(qty() + 1)">+</button>
+    </div>
+  </div>
+  <div class="action">
+    <h2>R{{ unitPrice() * qty() }}</h2>
+    <button class="primary" [disabled]="!selectedAvailable()" (click)="add()">
+      {{ selectedAvailable() ? '🛒 Add to Cart' : 'Out of stock' }}
+    </button>
+  </div>
+</ng-container>

@@ -1,4 +1,4 @@
-:host {
+app-root {
   display: block;
   min-height: 100vh;
   color: var(--rt-ink);
@@ -742,19 +742,19 @@ footer small {
   }
 }
 /* Responsive design system: distinct desktop and mobile experiences */
-:host {
+app-root {
   --royal-pink: var(--rt-pink);
   --royal-pink-soft: var(--rt-blush);
   --royal-ink: #28212d;
   --royal-border: #f2e5ec;
 }
-:host button {
+app-root button {
   transition:
     background-color 0.16s ease,
     box-shadow 0.16s ease,
     transform 0.16s ease;
 }
-:host button:active {
+app-root button:active {
   transform: scale(0.985);
 }
 .top {
@@ -1029,7 +1029,7 @@ footer {
   }
 }
 @media (max-width: 650px) {
-  :host {
+  app-root {
     padding-bottom: 0;
   }
   .top {
@@ -1377,7 +1377,7 @@ footer {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  :host button {
+  app-root button {
     transition: none;
   }
   html {
@@ -1436,7 +1436,7 @@ main > section:has(app-portal) {
 }
 
 /* Royal Treats Luxe — distinctive, responsive commerce design */
-:host {
+app-root {
   --royal-pink: #ef287a;
   --royal-pink-soft: var(--rt-blush);
   --royal-ink: #26192e;

@@ -19,6 +19,8 @@ const RECIPIENT_MAX = 45;
 @Injectable({ providedIn: 'root' })
 export class CartService {
   readonly items = signal<CartItem[]>([]);
+  /** Special order notes, entered on the cart page and sent with the order. */
+  readonly notes = signal('');
   readonly count = computed(() => this.items().reduce((n, x) => n + x.qty, 0));
   readonly total = computed(() => this.items().reduce((n, x) => n + x.qty * x.price, 0));
   readonly recipients = computed(() => [
@@ -69,6 +71,7 @@ export class CartService {
 
   clear(): void {
     this.set([]);
+    this.notes.set('');
   }
 
   private set(items: CartItem[]): void {

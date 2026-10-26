@@ -1,0 +1,84 @@
+<div class="support-hero">
+  <span class="eyebrow">WE'RE HERE TO HELP</span>
+  <h1>Sweet support.<br /><em>No fuss.</em></h1>
+  <p>
+    Need help with a pre-order or a product? Send Royal Treats a message by email. We'll get back to
+    you through the address you use.
+  </p>
+</div>
+<div class="support-columns">
+  <div class="support-compose">
+    <span class="eyebrow">LET'S SORT IT OUT</span>
+    <h2>Contact Royal Treats</h2>
+    <p>
+      Choose what you need help with and write your message. We'll prepare an email in your mail
+      application.
+    </p>
+    <ng-container *ngIf="emailReady(); else missingEmail">
+      <div class="configured-support">
+        <span>✉</span>
+        <div>
+          <small>BUSINESS SUPPORT EMAIL</small><strong>{{ store.settings().supportEmail }}</strong>
+        </div>
+      </div>
+      <label for="supportSubject"
+        >How can we help?<select id="supportSubject" [(ngModel)]="supportSubject">
+          <option>Order support</option>
+          <option>Product or allergy question</option>
+          <option>Collection or delivery query</option>
+          <option>General feedback</option>
+        </select></label
+      >
+      <label for="supportMessage"
+        >Your message<textarea
+          id="supportMessage"
+          rows="6"
+          [(ngModel)]="supportMessage"
+          placeholder="Please include your order reference if you have one."
+        ></textarea>
+      </label>
+      <a class="primary support-send" [href]="supportHref()">Open my email app ↗</a>
+      <p class="helper">
+        This opens a draft in your own email app. Review it and press Send there; the website does
+        not send messages automatically.
+      </p>
+    </ng-container>
+    <ng-template #missingEmail
+      ><div class="support-unavailable">
+        <span>✉</span>
+        <h3>Support email is being set up</h3>
+        <p>
+          The business email hasn't been configured yet. The administrator can enable email support
+          in Business Settings.
+        </p>
+      </div></ng-template
+    >
+  </div>
+  <div class="support-side">
+    <div class="support-info">
+      <span>♛</span>
+      <h3>Pre-orders, made simple</h3>
+      <p>
+        Choose your treats, select a preferred time and follow your order's status from your
+        account.
+      </p>
+      <button class="secondary" routerLink="/track">Track an order →</button>
+    </div>
+    <div class="support-info">
+      <span>⌖</span>
+      <h3>Visit us for collection</h3>
+      <p>{{ store.settings().address }}</p>
+      <a
+        href="https://www.google.com/maps/search/?api=1&query=34+10th+Avenue+Thabazimbi"
+        target="_blank"
+        rel="noopener"
+        >View location ↗</a
+      >
+    </div>
+    <div class="support-info">
+      <span>◷</span>
+      <h3>Business hours</h3>
+      <p>{{ store.settings().open }} – {{ store.settings().close }} · Pre-orders only</p>
+    </div>
+  </div>
+</div>

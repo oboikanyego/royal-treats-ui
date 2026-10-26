@@ -1,0 +1,10 @@
+<div class="tick">✓</div>
+<h1>Order Placed!</h1>
+<p>Thank you for your order.</p>
+<p>Your order reference is:</p>
+<div class="ref">{{ tracking.lastOrder()?.id }}</div>
+<p>
+  You can follow your order status in the app. Confirmation messages are not sent automatically.
+</p>
+<button class="primary wide" routerLink="/track">View Order Details</button
+><button class="secondary wide" routerLink="/">Back to Home</button>

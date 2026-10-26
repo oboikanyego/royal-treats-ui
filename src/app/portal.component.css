@@ -1,3 +1,14 @@
+/* Shadow DOM does not inherit the app's global rules, so repeat the two the workspace relies on. */
+* {
+  box-sizing: border-box;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid #ff8dc1;
+  outline-offset: 2px;
+}
 :host {
   display: block;
 }

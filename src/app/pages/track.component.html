@@ -1,0 +1,23 @@
+<div class="heading">
+  <span>♛</span>
+  <h1>Track Your Order</h1>
+  <p>Enter your order reference and phone number.</p>
+</div>
+<label>Order Reference<input [(ngModel)]="tracking.ref" placeholder="RT-12345678" /></label
+><label>Phone Number<input [(ngModel)]="tracking.phone" placeholder="07x xxx xxxx" /></label
+><button class="primary wide" (click)="track()">Track Order</button>
+<p *ngIf="trackSearched && !tracking.tracked()" class="pink">
+  No matching demo order found on this device.
+</p>
+<div class="panel" *ngIf="tracking.tracked() as order">
+  <h3>Order Status: {{ order.status }}</h3>
+  <p>{{ order.id }}</p>
+  <p class="pink" *ngIf="order.status === 'Cancelled'">This order was cancelled.</p>
+  <div class="timeline" *ngIf="order.status !== 'Cancelled'">
+    <div *ngFor="let s of tracking.steps()" [class.done]="tracking.stepDone(s)">● {{ s }}</div>
+  </div>
+  <p>
+    {{ order.fulfillment === 'delivery' ? 'Delivery' : 'Collection' }}: {{ order.date }} at
+    {{ order.time }}
+  </p>
+</div>
