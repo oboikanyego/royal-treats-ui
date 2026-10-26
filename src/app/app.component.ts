@@ -6,7 +6,7 @@ import {PortalComponent} from './portal.component';
 import {inject} from '@angular/core';
 type Order={id:string;name:string;phone:string;date:string;time:string;payment:string;items:Item[];total:number;status:string;notes?:string};
 function stored<T>(key:string,fallback:T):T{try{return JSON.parse(localStorage.getItem(key)||'null')??fallback}catch{return fallback}}
-@Component({selector:'app-root',standalone:true,imports:[CommonModule,FormsModule,PortalComponent],templateUrl:'./app.component.html',styleUrls:['./app.component.css','./responsive.css']})
+@Component({selector:'app-root',standalone:true,imports:[CommonModule,FormsModule,PortalComponent],templateUrl:'./app.component.html',styleUrls:['./app.component.css','./responsive.css','./commerce-enhancements.css']})
 export class AppComponent{
  store=inject(CommerceState);
  products=this.store.products;page=signal('home');menu=false;
