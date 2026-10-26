@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, HostListener, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CommerceState, CatalogueProduct, Settings } from './commerce-state.service';
@@ -9,6 +9,7 @@ export class PortalComponent {
  screen=signal<'signin'|'register'|'home'|'products'|'couriers'|'settings'|'orders'>('signin');
  error=''; notice=''; email='';password='';name='';phone='';whatsapp='';
  courier={name:'',email:'',phone:'',whatsapp:'',password:''};
+ pendingAvailability:CatalogueProduct|null=null;
  edited:CatalogueProduct|null=null;imageError='';isUploading=false;
  settings:Settings={...this.store.settings()};
  constructor(){if(this.store.session())this.screen.set('home')}
@@ -24,9 +25,17 @@ export class PortalComponent {
  upload(event:Event){const file=(event.target as HTMLInputElement).files?.[0];if(!file||!this.edited)return;this.imageError='';if(!file.type.startsWith('image/')){this.imageError='Choose an image file.';return}if(file.size>400_000){this.imageError='For this browser-only demo, choose an image under 400 KB.';return}const reader=new FileReader();reader.onload=()=>{if(this.edited)this.edited.image=String(reader.result)};reader.readAsDataURL(file)}
  saveHours(){if(this.settings.open===this.settings.close){this.error='Opening and closing time must differ.';return}if(this.settings.latitude!==null&&(this.settings.latitude< -90||this.settings.latitude>90)||this.settings.longitude!==null&&(this.settings.longitude< -180||this.settings.longitude>180)){this.error='Invalid latitude or longitude.';return}this.store.saveSettings(this.settings);this.error='';this.notice='Business settings saved.'}
  useStoreLocation(){if(!navigator.geolocation){this.error='Location is unavailable.';return}navigator.geolocation.getCurrentPosition(p=>{this.settings.latitude=p.coords.latitude;this.settings.longitude=p.coords.longitude;this.error='';this.notice='Store coordinates captured from this device. Save settings to apply.'},()=>this.error='Location permission denied. Enter store coordinates manually.')}
- toggleAvailability(product: CatalogueProduct): void {
+ toggleAvailability(product: CatalogueProduct): void { this.pendingAvailability = product; }
+ confirmAvailability(): void {
+  if (!this.pendingAvailability) return;
+  const product = this.pendingAvailability;
   this.store.saveProduct({ ...product, available: !product.available });
+  this.notice = product.available ? product.name + ' is now out of stock.' : product.name + ' is available again.';
+  this.pendingAvailability = null;
  }
+ closeEditor(): void { this.edited = null; this.imageError = ''; this.error = ''; }
+ @HostListener('document:keydown.escape')
+ handleEscape(): void { this.closeEditor(); this.pendingAvailability = null; }
  outOfStockCount(){return this.store.products().filter(p=>!p.available).length}
  couriers(){return this.store.accounts().filter(x=>x.role==='courier')}
  availableOrders(){return this.store.deliveries().filter(o=>o.fulfillment==='delivery'&&o.status==='Ready for Delivery'&&!o.courierId)}
