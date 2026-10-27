@@ -7,7 +7,7 @@ import { AttemptKeys, buildOrderRequest } from '../src/app/api/order-request';
 import type { ApiOrder } from '../src/app/api/api-types';
 import type { CartItem } from '../src/app/cart.service';
 import type { DeliveryOrder } from '../src/app/commerce-state.service';
-import { groupByRecipient, mergeOrders, stepDone, stepsFor } from '../src/app/order-view';
+import { groupByRecipient, mapsLink, mergeOrders, stepDone, stepsFor } from '../src/app/order-view';
 
 const cart: CartItem[] = [
   {
@@ -272,22 +272,57 @@ const o = (id: string, status: string): DeliveryOrder => ({
   date: 'd',
   time: 't',
 });
+const at = (id: string, status: string, createdAt: string) => ({ ...o(id, status), createdAt });
 test('refreshing merges the newest page into what is on screen', () => {
   const onScreen = [o('c', 'Pending'), o('b', 'Pending'), o('a', 'Completed')];
   const fresh = [o('d', 'Pending'), o('c', 'Confirmed'), o('b', 'Pending')];
-  const merged = mergeOrders(onScreen, fresh);
+  const merged = mergeOrders(onScreen, fresh, 3); // a full page: older orders loaded earlier stay
   assert.deepEqual(
     merged.map((x) => `${x.id}:${x.status}`),
     ['d:Pending', 'c:Confirmed', 'b:Pending', 'a:Completed'],
   );
   assert.deepEqual(
-    mergeOrders([], fresh).map((x) => x.id),
+    mergeOrders([], fresh, 3).map((x) => x.id),
     ['d', 'c', 'b'],
   );
+});
+
+test('an order that dropped out of the filtered list is removed, not left with a stale status', () => {
+  // Pending filter, page size 3: "b" was confirmed meanwhile, so it is no longer in the page.
+  const onScreen = [
+    at('d', 'Pending', '2026-10-27T10:00:00Z'),
+    at('b', 'Pending', '2026-10-27T09:00:00Z'),
+    at('a', 'Pending', '2026-10-27T08:00:00Z'),
+    at('z', 'Pending', '2026-10-27T01:00:00Z'), // loaded earlier with "show more"
+  ];
+  const fresh = [
+    at('e', 'Pending', '2026-10-27T11:00:00Z'),
+    at('d', 'Pending', '2026-10-27T10:00:00Z'),
+    at('a', 'Pending', '2026-10-27T08:00:00Z'),
+  ];
   assert.deepEqual(
-    mergeOrders(onScreen, []).map((x) => x.id),
-    ['c', 'b', 'a'],
+    mergeOrders(onScreen, fresh, 3).map((x) => x.id),
+    ['e', 'd', 'a', 'z'],
   );
+  // A short page holds every matching order, so everything else on screen is gone.
+  assert.deepEqual(
+    mergeOrders(onScreen, [fresh[0]!], 3).map((x) => x.id),
+    ['e'],
+  );
+  assert.deepEqual(mergeOrders(onScreen, [], 3), []);
+});
+
+test('a delivery links to the exact point when it has coordinates, else to the address', () => {
+  assert.equal(
+    mapsLink({ latitude: -24.59, longitude: 27.41, address: '12 Test St' }),
+    'https://www.google.com/maps/search/?api=1&query=-24.59%2C27.41',
+  );
+  assert.equal(
+    mapsLink({ address: ' 12 Test St, Thabazimbi ' }),
+    'https://www.google.com/maps/search/?api=1&query=12%20Test%20St%2C%20Thabazimbi',
+  );
+  assert.equal(mapsLink({ address: '  ' }), null);
+  assert.equal(mapsLink({}), null);
 });
 
 import {

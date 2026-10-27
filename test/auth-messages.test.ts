@@ -1,7 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { ApiRequestError } from '../src/app/api/api-errors';
-import { authErrorMessage, registrationProblem } from '../src/app/api/auth-messages';
+import {
+  authErrorMessage,
+  consentProblem,
+  passwordChangeProblem,
+  profileProblem,
+  registrationProblem,
+} from '../src/app/api/auth-messages';
 import { photoFileProblem, PHOTO_MAX_BYTES } from '../src/app/api/photo-file';
 import { fromApiUser } from '../src/app/api/api-mappers';
 
@@ -100,4 +106,51 @@ test('the API user becomes the Account the templates use, with no password', () 
     ).photo,
     undefined,
   );
+});
+
+test('registration needs the privacy notice and terms to be accepted', () => {
+  assert.equal(consentProblem(true), null);
+  assert.match(consentProblem(false)!, /accept the privacy notice and terms/);
+  assert.match(
+    authErrorMessage(invalid('acceptedTerms'), 'register'),
+    /accept the privacy notice and terms/,
+  );
+});
+
+test('profile details are checked like the API checks them', () => {
+  assert.equal(profileProblem({ name: 'Thandi', phone: '074 123 4567' }), null);
+  assert.match(profileProblem({ name: ' T ', phone: '074 123 4567' })!, /full name/);
+  assert.match(profileProblem({ name: 'Thandi', phone: 'abc' })!, /valid phone number/);
+  assert.match(authErrorMessage(invalid('phone'), 'profile'), /valid phone number/);
+  assert.match(authErrorMessage(err(500), 'profile'), /could not save your details/);
+});
+
+test('the change-password form says what is wrong', () => {
+  const ok = {
+    current: 'old-long-password',
+    next: 'new-long-password',
+    confirm: 'new-long-password',
+  };
+  assert.equal(passwordChangeProblem(ok), null);
+  assert.match(passwordChangeProblem({ ...ok, current: '' })!, /current password/);
+  assert.match(passwordChangeProblem({ ...ok, next: 'short', confirm: 'short' })!, /12 to 128/);
+  assert.match(
+    passwordChangeProblem({ ...ok, confirm: 'different-long-password' })!,
+    /do not match/,
+  );
+  assert.match(
+    passwordChangeProblem({ ...ok, next: ok.current, confirm: ok.current })!,
+    /not used just now/,
+  );
+});
+
+test('the API refusing a password change reads clearly, and a 401 asks to sign in again', () => {
+  assert.equal(
+    authErrorMessage(err(400, 'Current password is incorrect'), 'password'),
+    'Current password is incorrect',
+  );
+  assert.match(authErrorMessage(invalid('newPassword'), 'password'), /12 to 128/);
+  assert.match(authErrorMessage(err(401), 'password'), /sign in again/);
+  assert.match(authErrorMessage(err(429), 'password'), /Too many attempts/);
+  assert.match(authErrorMessage(err(500), 'password'), /could not change your password/);
 });

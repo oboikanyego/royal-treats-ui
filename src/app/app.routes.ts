@@ -76,6 +76,18 @@ export const routes: Routes = [
   // The old guest "Track order" address now leads to the signed-in orders page.
   { path: 'track', pathMatch: 'full', redirectTo: 'orders' },
   {
+    path: 'privacy',
+    title: 'Privacy Notice',
+    data: { page: 'privacy', legal: 'privacy' },
+    loadComponent: () => import('./pages/legal.component').then((m) => m.LegalComponent),
+  },
+  {
+    path: 'terms',
+    title: 'Terms of Use',
+    data: { page: 'terms', legal: 'terms' },
+    loadComponent: () => import('./pages/legal.component').then((m) => m.LegalComponent),
+  },
+  {
     path: 'about',
     title: 'About Us',
     data: { page: 'about' },

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
-import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AdminLive } from './api/admin-live.service';
 import { Busy } from './busy.service';
 import { CartService } from './cart.service';
@@ -22,7 +22,7 @@ const pagePaths: Record<string, string> = {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet],
+  imports: [CommonModule, RouterOutlet, RouterLink],
   templateUrl: './app.component.html',
 })
 export class AppComponent {

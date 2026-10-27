@@ -25,14 +25,12 @@
       <label
         >Email address
         <input name="email" type="email" required [(ngModel)]="email" autocomplete="email" /></label
-      ><label
-        >Password<input
-          name="password"
-          type="password"
-          required
-          [(ngModel)]="password"
-          autocomplete="current-password" /></label
-      ><button class="primary wide">Sign in</button>
+      ><rt-password-field
+        label="Password"
+        name="password"
+        autocomplete="current-password"
+        [(value)]="password"
+      /><button class="primary wide">Sign in</button>
       <button type="button" class="link" (click)="screen.set('register')">
         New customer? Register here
       </button>
@@ -53,14 +51,18 @@
           [(ngModel)]="phone"
           autocomplete="tel"
           placeholder="074 123 4567" /></label
-      ><label
-        >Password (at least 12 characters)<input
-          name="password"
-          type="password"
-          minlength="12"
-          required
-          [(ngModel)]="password"
-          autocomplete="new-password" /></label
+      ><rt-password-field
+        label="Password (at least 12 characters)"
+        name="password"
+        autocomplete="new-password"
+        [minlength]="12"
+        [(value)]="password"
+      /><label class="check consent"
+        ><input type="checkbox" name="consent" [(ngModel)]="consent" /><span
+          >I have read the <a href="/privacy" target="_blank" rel="noopener">Privacy Notice</a> and
+          the <a href="/terms" target="_blank" rel="noopener">Terms of Use</a> and I agree to
+          them.</span
+        ></label
       ><button class="primary wide">Register</button
       ><button type="button" class="link" (click)="screen.set('signin')">
         Already registered? Sign in
@@ -102,6 +104,9 @@
           <button [class.active]="screen() === 'settings'" (click)="nav('settings')">
             <span>⚙</span> Settings
           </button>
+          <button [class.active]="screen() === 'account'" (click)="nav('account')">
+            <span>♛</span> My account
+          </button>
         </nav>
         <div class="sidebar-bottom">
           <div class="sidebar-avatar">
@@ -119,24 +124,8 @@
         <div class="role-header">
           <div>
             <small>✦ {{ user.role | titlecase }} workspace / Royal Treats</small>
-            <h1>
-              {{
-                user.role === 'admin'
-                  ? 'Store overview'
-                  : user.role === 'courier'
-                    ? 'Delivery workspace'
-                    : 'Your Royal account'
-              }}
-            </h1>
-            <p>
-              {{
-                user.role === 'admin'
-                  ? 'Manage orders, catalogue and settings in one place.'
-                  : user.role === 'courier'
-                    ? 'Manage available and assigned deliveries.'
-                    : 'Everything you need to order, share and enjoy your treats.'
-              }}
-            </p>
+            <h1>{{ heading(user.role).title }}</h1>
+            <p>{{ heading(user.role).subtitle }}</p>
           </div>
           <div class="role-user">
             <label class="role-avatar avatar-upload" title="Upload a profile photo"
@@ -153,13 +142,20 @@
               <strong>{{ user.name }}</strong
               ><small>{{ user.role | titlecase }} · change photo ↗</small>
             </div>
+            <button
+              type="button"
+              class="secondary account-link"
+              (click)="nav(screen() === 'account' ? 'home' : 'account')"
+            >
+              {{ screen() === 'account' ? '← Back' : 'My account' }}
+            </button>
           </div>
         </div>
 
         <div class="alert success-alert" *ngIf="notice">{{ notice }}</div>
         <div class="alert error" *ngIf="error">{{ error }}</div>
         <div class="alert error" *ngIf="photoError">{{ photoError }}</div>
-        <div *ngIf="user.role === 'customer'" class="pane profile-pane">
+        <div *ngIf="user.role === 'customer' && screen() !== 'account'" class="pane profile-pane">
           <div class="profile-hero">
             <div class="profile-avatar">
               <img *ngIf="user.photo" [src]="user.photo" alt="Your profile picture" /><span
@@ -187,8 +183,9 @@
             ><span><b>Phone (calls)</b>{{ user.phone }}</span>
           </div>
         </div>
-        <rt-courier-workspace *ngIf="user.role === 'courier'" />
-        <ng-container *ngIf="user.role === 'admin'">
+        <rt-courier-workspace *ngIf="user.role === 'courier' && screen() !== 'account'" />
+        <rt-account-settings *ngIf="screen() === 'account'" />
+        <ng-container *ngIf="user.role === 'admin' && screen() !== 'account'">
           <rt-admin-overview *ngIf="screen() === 'home'" (configure)="nav('settings')" />
           <rt-admin-orders *ngIf="screen() === 'orders'" />
           <rt-admin-products *ngIf="screen() === 'products'" />

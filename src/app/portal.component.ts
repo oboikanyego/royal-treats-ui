@@ -12,14 +12,15 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { AdminLive } from './api/admin-live.service';
 import { CommerceState } from './commerce-state.service';
+import { type PortalScreen, portalHeading } from './portal-headings';
 import { AdminCouriersComponent } from './workspace/admin-couriers.component';
 import { AdminOrdersComponent } from './workspace/admin-orders.component';
 import { AdminOverviewComponent } from './workspace/admin-overview.component';
 import { AdminProductsComponent } from './workspace/admin-products.component';
 import { AdminSettingsComponent } from './workspace/admin-settings.component';
+import { AccountSettingsComponent } from './workspace/account-settings.component';
 import { CourierWorkspaceComponent } from './workspace/courier-workspace.component';
-
-type Screen = 'signin' | 'register' | 'home' | 'products' | 'couriers' | 'settings' | 'orders';
+import { PasswordFieldComponent } from './workspace/password-field.component';
 
 /** Sign-in, registration and the signed-in workspace for each role. */
 @Component({
@@ -34,6 +35,8 @@ type Screen = 'signin' | 'register' | 'home' | 'products' | 'couriers' | 'settin
     AdminCouriersComponent,
     AdminSettingsComponent,
     CourierWorkspaceComponent,
+    AccountSettingsComponent,
+    PasswordFieldComponent,
   ],
   templateUrl: './portal.component.html',
   styleUrls: ['./portal.component.css'],
@@ -43,11 +46,12 @@ type Screen = 'signin' | 'register' | 'home' | 'products' | 'couriers' | 'settin
 export class PortalComponent {
   readonly store = inject(CommerceState);
   readonly live = inject(AdminLive);
-  screen = signal<Screen>('signin');
+  screen = signal<PortalScreen>('signin');
   error = '';
   notice = '';
   email = '';
   password = '';
+  consent = false;
   name = '';
   phone = '';
   photoError = '';
@@ -83,10 +87,12 @@ export class PortalComponent {
 
   async register() {
     this.error =
-      (await this.store.register(this.name, this.email, this.phone, this.password)) ?? '';
+      (await this.store.register(this.name, this.email, this.phone, this.password, this.consent)) ??
+      '';
     if (!this.error) {
       this.screen.set('home');
       this.password = '';
+      this.consent = false;
     }
   }
 
@@ -96,7 +102,11 @@ export class PortalComponent {
     this.error = '';
   }
 
-  nav(to: 'home' | 'products' | 'couriers' | 'settings' | 'orders') {
+  heading(role: string) {
+    return portalHeading(role, this.screen());
+  }
+
+  nav(to: 'home' | 'products' | 'couriers' | 'settings' | 'orders' | 'account') {
     this.notice = '';
     this.error = '';
     this.screen.set(to);

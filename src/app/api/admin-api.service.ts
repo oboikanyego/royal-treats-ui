@@ -6,6 +6,7 @@ import { fromApiProduct, fromApiSettings } from './api-mappers';
 import type {
   ApiDashboard,
   ApiImage,
+  ApiOrder,
   ApiProduct,
   ApiSettings,
   ApiUser,
@@ -47,6 +48,15 @@ export class AdminApi {
     return fromApiSettings(
       await firstValueFrom(this.api.put<ApiSettings>('/admin/settings', payload)),
       current,
+    );
+  }
+
+  /** Hands a delivery to a courier (or to another one); it becomes Out for Delivery with them. */
+  assignCourier(orderId: string, courierId: string): Promise<ApiOrder> {
+    return firstValueFrom(
+      this.api.post<ApiOrder>(`/admin/orders/${encodeURIComponent(orderId)}/courier`, {
+        courierId,
+      }),
     );
   }
 

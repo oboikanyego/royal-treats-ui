@@ -1,7 +1,7 @@
 import type { ApiRequestError } from './api-errors';
 
 export type AdminContext =
-  'products' | 'image' | 'settings' | 'couriers' | 'orders' | 'dashboard' | 'status';
+  'products' | 'image' | 'settings' | 'couriers' | 'orders' | 'dashboard' | 'status' | 'assign';
 const TOO_MANY = 'Too many requests. Please wait a moment and try again.';
 
 const NOUN: Record<AdminContext, string> = {
@@ -12,6 +12,7 @@ const NOUN: Record<AdminContext, string> = {
   orders: 'the orders',
   dashboard: 'the overview',
   status: 'the order',
+  assign: 'the courier',
 };
 
 /** The first validation message the API reported, when it sent any (zod issue list). */
@@ -36,6 +37,13 @@ export function adminErrorMessage(error: ApiRequestError, context: AdminContext)
       return 'The picture service did not accept the upload. Please try again.';
     if (error.status === 400) return error.message || 'That file could not be used as a picture.';
     return 'We could not upload the picture. Please try again.';
+  }
+  if (context === 'assign') {
+    if (error.status === 404)
+      return 'We could not find that order or courier. Refresh and try again.';
+    if (error.status === 409)
+      return 'This delivery can no longer be given to a courier. Refresh to see its latest status.';
+    return 'We could not assign the courier. Please try again.';
   }
   if (error.status === 404) return `We could not find ${NOUN[context]}. Refresh and try again.`;
   if (error.status === 409) {

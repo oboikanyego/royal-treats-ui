@@ -55,9 +55,35 @@ export function groupByRecipient<T extends { recipient?: string }>(
 /**
  * Folds a freshly fetched first page into the orders already on screen: fresh orders come first
  * (newest first, as the API sorts them) with their latest status, then any older ones that were
- * loaded earlier with "show more".
+ * loaded earlier with "show more". An order on screen that the first page no longer contains, though
+ * it is newer than the page's oldest order, has dropped out of the list (for example it no longer
+ * matches the status filter), so it is removed rather than left showing a stale status.
  */
-export function mergeOrders(existing: DeliveryOrder[], fresh: DeliveryOrder[]): DeliveryOrder[] {
+export function mergeOrders(
+  existing: DeliveryOrder[],
+  fresh: DeliveryOrder[],
+  pageSize: number,
+): DeliveryOrder[] {
   const freshIds = new Set(fresh.map((o) => o.id));
-  return [...fresh, ...existing.filter((o) => !freshIds.has(o.id))];
+  const fullPage = fresh.length >= pageSize;
+  const oldest = fresh[fresh.length - 1]?.createdAt;
+  const keep = (o: DeliveryOrder) => {
+    if (freshIds.has(o.id)) return false; // replaced by its fresh copy
+    if (!fullPage) return false; // a short page holds every matching order, so this one is gone
+    return !oldest || !o.createdAt || o.createdAt < oldest; // older than the page: loaded earlier
+  };
+  return [...fresh, ...existing.filter(keep)];
+}
+
+/** A map link for a delivery: the exact point when we have coordinates, else the address text. */
+export function mapsLink(order: {
+  latitude?: number;
+  longitude?: number;
+  address?: string;
+}): string | null {
+  const base = 'https://www.google.com/maps/search/?api=1&query=';
+  if (typeof order.latitude === 'number' && typeof order.longitude === 'number')
+    return base + encodeURIComponent(`${order.latitude},${order.longitude}`);
+  const address = order.address?.trim();
+  return address ? base + encodeURIComponent(address) : null;
 }
