@@ -1,6 +1,6 @@
 import type { ApiRequestError } from './api-errors';
 
-export type OrderContext = 'place' | 'list' | 'cancel';
+export type OrderContext = 'place' | 'list';
 const TOO_MANY = 'Too many requests. Please wait a moment and try again.';
 
 /** Known 409 texts from the API, as something a customer can act on. */
@@ -20,12 +20,6 @@ export function orderErrorMessage(error: ApiRequestError, context: OrderContext)
   if (error.status === 429) return TOO_MANY;
   if (error.status === 401) return 'Please sign in again to continue.';
   if (context === 'list') return 'We could not load your orders. Please try again.';
-  if (context === 'cancel') {
-    if (error.status === 403 || error.status === 409)
-      return 'This order can no longer be cancelled. It may already be in progress.';
-    if (error.status === 404) return 'We could not find that order.';
-    return 'We could not cancel the order. Please try again.';
-  }
   if (error.status === 403) return 'Only customer accounts can place orders.';
   if (error.status === 409) return CONFLICTS[error.message] ?? error.message;
   if (error.status === 400)

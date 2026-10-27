@@ -147,10 +147,7 @@ test('checkout errors say what to do', () => {
     'something unexpected',
   );
 });
-test('cancel and list errors', () => {
-  assert.match(orderErrorMessage(err(403), 'cancel'), /no longer be cancelled/);
-  assert.match(orderErrorMessage(err(409), 'cancel'), /no longer be cancelled/);
-  assert.match(orderErrorMessage(err(404), 'cancel'), /could not find/);
+test('list errors', () => {
   assert.match(orderErrorMessage(err(500), 'list'), /could not load your orders/);
 });
 

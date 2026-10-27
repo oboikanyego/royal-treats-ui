@@ -13,7 +13,7 @@ import { RandPipe } from '../rand.pipe';
 const PAGE_SIZE = 20;
 const REFRESH_MS = 30_000;
 
-/** The signed-in customer's orders, with live status and cancellation while an order is Pending. */
+/** The signed-in customer's orders, with live status. Only the shop can cancel an order. */
 @Component({
   selector: 'section[rt-orders]',
   standalone: true,
@@ -33,9 +33,6 @@ export class OrdersComponent {
   readonly status = this.feed.status;
   readonly loadingMore = this.feed.loadingMore;
   readonly message = signal<{ kind: 'error' | 'notice'; text: string } | null>(null);
-  /** The order whose "cancel" is awaiting confirmation, and the one being cancelled. */
-  readonly confirming = signal<string | null>(null);
-  readonly cancelling = signal<string | null>(null);
   readonly isCustomer = computed(() => this.store.session()?.role === 'customer');
 
   readonly stepsFor = stepsFor;
@@ -80,24 +77,5 @@ export class OrdersComponent {
     const failure = await this.feed.loadMore();
     if (failure)
       this.message.set({ kind: 'error', text: orderErrorMessage(toApiError(failure), 'list') });
-  }
-
-  canCancel(order: DeliveryOrder): boolean {
-    return !!order.allowedStatuses?.includes('Cancelled');
-  }
-
-  async cancel(order: DeliveryOrder) {
-    this.cancelling.set(order.id);
-    try {
-      const updated = fromApiOrder(await this.ordersApi.setStatus(order.id, 'Cancelled'));
-      this.feed.replace(updated);
-      this.message.set({ kind: 'notice', text: `Order ${updated.ref} was cancelled.` });
-    } catch (error) {
-      this.message.set({ kind: 'error', text: orderErrorMessage(toApiError(error), 'cancel') });
-      void this.refresh(false); // the order has probably moved on; show how
-    } finally {
-      this.cancelling.set(null);
-      this.confirming.set(null);
-    }
   }
 }
