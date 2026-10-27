@@ -7,12 +7,13 @@ import { toCourierRequest } from '../api/admin-payloads';
 import { toApiError } from '../api/api-errors';
 import type { ApiUser } from '../api/api-types';
 import { registrationProblem } from '../api/auth-messages';
+import { PasswordFieldComponent } from './password-field.component';
 
 /** Delivery personnel: add a courier, and deactivate or reactivate their sign-in. */
 @Component({
   selector: 'rt-admin-couriers',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PasswordFieldComponent],
   templateUrl: './admin-couriers.component.html',
   encapsulation: ViewEncapsulation.None,
 })

@@ -9,7 +9,13 @@ import type { ApiUser, AuthResponse } from './api-types';
 export class AuthApi {
   private readonly api = inject(ApiClient);
 
-  register(input: { name: string; email: string; phone: string; password: string }) {
+  register(input: {
+    name: string;
+    email: string;
+    phone: string;
+    password: string;
+    acceptedTerms: true;
+  }) {
     return firstValueFrom(this.api.post<AuthResponse>('/auth/register', input));
   }
   login(email: string, password: string) {
@@ -21,6 +27,14 @@ export class AuthApi {
   }
   me() {
     return firstValueFrom(this.api.get<ApiUser>('/me'));
+  }
+  /** Changes name and phone (the email and role cannot be changed). */
+  updateProfile(input: { name: string; phone: string }) {
+    return firstValueFrom(this.api.patch<ApiUser>('/me', input));
+  }
+  /** Every other sign-in of this user is ended by the API; this one stays. */
+  changePassword(currentPassword: string, newPassword: string) {
+    return firstValueFrom(this.api.post<void>('/me/password', { currentPassword, newPassword }));
   }
   uploadPhoto(file: File) {
     const form = new FormData();

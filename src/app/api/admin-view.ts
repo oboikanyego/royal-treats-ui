@@ -48,20 +48,21 @@ export function dashboardSummary(d: ApiDashboard): DashboardSummary {
   };
 }
 
-/** The filters on the admin orders list, applied to the orders already loaded. */
+/** The filters on the admin orders list. The API applies them, so they cover every order. */
 export type OrderFilter = 'all' | 'pending' | 'active' | 'completed' | 'cancelled';
-export function matchesFilter(status: string, filter: OrderFilter): boolean {
+/** The statuses a filter stands for, for `GET /orders?status=`; undefined means no filter. */
+export function statusesFor(filter: OrderFilter): string[] | undefined {
   switch (filter) {
     case 'all':
-      return true;
+      return undefined;
     case 'pending':
-      return status === 'Pending';
+      return ['Pending'];
     case 'active':
-      return ACTIVE.includes(status);
+      return [...ACTIVE];
     case 'completed':
-      return status === 'Completed';
+      return ['Completed'];
     case 'cancelled':
-      return status === 'Cancelled';
+      return ['Cancelled'];
   }
 }
 

@@ -227,7 +227,7 @@ test('admin error messages are plain and specific', () => {
   assert.match(adminErrorMessage(err(500), 'settings'), /could not save the settings/);
 });
 
-import { dashboardSummary, matchesFilter, statusActionLabel } from '../src/app/api/admin-view';
+import { dashboardSummary, statusActionLabel, statusesFor } from '../src/app/api/admin-view';
 
 test('the dashboard summary counts orders by group and orders the breakdown', () => {
   const summary = dashboardSummary({
@@ -258,11 +258,18 @@ test('the dashboard summary counts orders by group and orders the breakdown', ()
   );
 });
 
-test('order filters and action labels', () => {
-  assert.ok(matchesFilter('Preparing', 'active') && matchesFilter('Out for Delivery', 'active'));
-  assert.ok(!matchesFilter('Pending', 'active') && !matchesFilter('Completed', 'active'));
-  assert.ok(matchesFilter('Pending', 'pending') && matchesFilter('Cancelled', 'cancelled'));
-  assert.ok(matchesFilter('Anything', 'all'));
+test('order filters stand for server-side status lists, and action labels follow the fulfilment', () => {
+  assert.equal(statusesFor('all'), undefined);
+  assert.deepEqual(statusesFor('pending'), ['Pending']);
+  assert.deepEqual(statusesFor('active'), [
+    'Confirmed',
+    'Preparing',
+    'Ready for Collection',
+    'Ready for Delivery',
+    'Out for Delivery',
+  ]);
+  assert.deepEqual(statusesFor('completed'), ['Completed']);
+  assert.deepEqual(statusesFor('cancelled'), ['Cancelled']);
   assert.equal(statusActionLabel('Confirmed', 'collection'), 'Mark Confirmed');
   assert.equal(statusActionLabel('Cancelled', 'delivery'), 'Cancel order');
   assert.equal(statusActionLabel('Completed', 'collection'), 'Mark Collected');
@@ -285,4 +292,11 @@ test('the dashboard names the finished group for both ways of fulfilling an orde
       ['Completed', 'Collected / delivered'],
     ],
   );
+});
+
+test('assigning a courier has its own plain messages', () => {
+  assert.match(adminErrorMessage(err(404), 'assign'), /find that order or courier/);
+  assert.match(adminErrorMessage(err(409), 'assign'), /can no longer be given to a courier/);
+  assert.match(adminErrorMessage(err(500), 'assign'), /could not assign the courier/);
+  assert.match(adminErrorMessage(err(429), 'assign'), /Too many requests/);
 });

@@ -44,6 +44,9 @@
       {{ order.customer }} · <a [href]="'tel:' + order.phone">{{ order.phone }}</a>
     </p>
     <p>{{ order.address }}</p>
+    <p *ngIf="mapsLink(order) as map">
+      <a class="maps-link" [href]="map" target="_blank" rel="noopener">Open in Maps ↗</a>
+    </p>
     <div class="order-recipients">
       <ng-container *ngFor="let group of groupByRecipient(order.items)">
         <div *ngFor="let line of group.items">

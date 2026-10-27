@@ -4,7 +4,6 @@ import {
   DestroyRef,
   OnInit,
   ViewEncapsulation,
-  computed,
   effect,
   inject,
   signal,
@@ -14,13 +13,14 @@ import { FormsModule } from '@angular/forms';
 import { AdminApi } from '../api/admin-api.service';
 import { AdminLive } from '../api/admin-live.service';
 import { adminErrorMessage } from '../api/admin-messages';
-import { type OrderFilter, matchesFilter, statusActionLabel } from '../api/admin-view';
+import { type OrderFilter, statusActionLabel, statusesFor } from '../api/admin-view';
 import { toApiError } from '../api/api-errors';
 import { fromApiOrder } from '../api/api-mappers';
 import { OrderFeed } from '../api/order-feed';
 import { OrdersApi } from '../api/orders-api.service';
 import type { DeliveryOrder } from '../commerce-state.service';
-import { groupByRecipient, statusLabel } from '../order-view';
+import type { ApiUser } from '../api/api-types';
+import { groupByRecipient, mapsLink, statusLabel } from '../order-view';
 import { RandPipe } from '../rand.pipe';
 
 const REFRESH_MS = 30_000;
@@ -37,25 +37,32 @@ export class AdminOrdersComponent implements OnInit {
   private readonly ordersApi = inject(OrdersApi);
   private readonly admin = inject(AdminApi);
   readonly live = inject(AdminLive);
-  private readonly feed = new OrderFeed((page, limit) => this.ordersApi.list(page, limit), 20);
+  private readonly feed = new OrderFeed(
+    (page, limit) => this.ordersApi.list(page, limit, statusesFor(this.filter())),
+    20,
+  );
   readonly status = this.feed.status;
   readonly total = this.feed.total;
   readonly loaded = this.feed.orders;
   readonly loadingMore = this.feed.loadingMore;
 
+  /** The filter is applied by the API, so it covers every order, not just the ones loaded. */
   readonly filter = signal<OrderFilter>('all');
-  readonly orders = computed(() =>
-    this.loaded().filter((o) => matchesFilter(o.status, this.filter())),
-  );
+  readonly orders = this.feed.orders;
   readonly message = signal<{ kind: 'error' | 'notice'; text: string } | null>(null);
   readonly confirming = signal<string | null>(null);
   readonly busy = signal<string | null>(null);
   readonly courierNames = signal<Record<string, string>>({});
+  /** Couriers an order can be given to (active ones), and the one picked on each order's card. */
+  readonly couriers = signal<ApiUser[]>([]);
+  readonly choice = signal<Record<string, string>>({});
+  readonly assigning = signal<string | null>(null);
 
   readonly groupByRecipient = groupByRecipient;
   readonly actionLabel = statusActionLabel;
   readonly statusText = (order: DeliveryOrder) => statusLabel(order.status, order.fulfillment);
   readonly isSet = (value: string | undefined) => !!value;
+  readonly mapsLink = mapsLink;
 
   constructor() {
     // A new order, or a change reported by the API, shows up without waiting for the 30 s refresh.
@@ -78,6 +85,11 @@ export class AdminOrdersComponent implements OnInit {
     void this.loadCourierNames();
   }
 
+  setFilter(filter: OrderFilter) {
+    this.filter.set(filter);
+    void this.refresh();
+  }
+
   async refresh() {
     const failure = await this.feed.refresh(true);
     this.message.set(
@@ -96,6 +108,7 @@ export class AdminOrdersComponent implements OnInit {
     try {
       const page = await this.admin.couriers(1, 100);
       this.courierNames.set(Object.fromEntries(page.items.map((c) => [c.id, c.name])));
+      this.couriers.set(page.items.filter((c) => c.active));
     } catch {
       // Orders then show "a courier" instead of a name.
     }
@@ -109,11 +122,58 @@ export class AdminOrdersComponent implements OnInit {
     return order.status === 'Ready for Delivery' && !order.courierId;
   }
 
+  /** A delivery that is ready, or already out, can be handed to a courier (or to another one). */
+  canAssign(order: DeliveryOrder): boolean {
+    return (
+      order.fulfillment === 'delivery' &&
+      (order.status === 'Ready for Delivery' || order.status === 'Out for Delivery') &&
+      this.couriers().length > 0
+    );
+  }
+
+  /** The courier shown in the order's box: the one picked, else the one already assigned. */
+  chosen(order: DeliveryOrder): string {
+    return this.choice()[order.id] ?? order.courierId ?? '';
+  }
+
+  pick(order: DeliveryOrder, courierId: string) {
+    this.choice.update((c) => ({ ...c, [order.id]: courierId }));
+  }
+
+  async assign(order: DeliveryOrder) {
+    const courierId = this.chosen(order);
+    if (!courierId) {
+      this.message.set({ kind: 'error', text: 'Choose a courier first.' });
+      return;
+    }
+    this.assigning.set(order.id);
+    try {
+      const updated = fromApiOrder(await this.admin.assignCourier(order.id, courierId));
+      this.show(updated);
+      this.message.set({
+        kind: 'notice',
+        text: `${updated.ref} was given to ${this.courierNames()[courierId] ?? 'the courier'}.`,
+      });
+    } catch (failure) {
+      this.message.set({ kind: 'error', text: adminErrorMessage(toApiError(failure), 'assign') });
+      void this.feed.refresh(false);
+    } finally {
+      this.assigning.set(null);
+    }
+  }
+
+  /** Puts an updated order in the list, or takes it out if it no longer matches the filter. */
+  private show(updated: DeliveryOrder) {
+    const wanted = statusesFor(this.filter());
+    if (wanted && !wanted.includes(updated.status)) this.feed.remove(updated.id);
+    else this.feed.replace(updated);
+  }
+
   async change(order: DeliveryOrder, status: string) {
     this.busy.set(order.id);
     try {
       const updated = fromApiOrder(await this.ordersApi.setStatus(order.id, status));
-      this.feed.replace(updated);
+      this.show(updated);
       this.message.set({
         kind: 'notice',
         text: `${updated.ref} is now ${this.statusText(updated)}.`,

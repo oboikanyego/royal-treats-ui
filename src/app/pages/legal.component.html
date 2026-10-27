@@ -1,0 +1,19 @@
+<div class="heading">
+  <span>♛</span>
+  <h1>{{ title }}</h1>
+  <p>Last updated {{ updated }}</p>
+</div>
+<article class="legal-body">
+  <section *ngFor="let section of sections()">
+    <h2>{{ section.heading }}</h2>
+    <p *ngFor="let paragraph of section.paragraphs">{{ paragraph }}</p>
+    <ul *ngIf="section.bullets?.length">
+      <li *ngFor="let bullet of section.bullets">{{ bullet }}</li>
+    </ul>
+  </section>
+  <p class="legal-links">
+    <a *ngIf="kind === 'terms'" routerLink="/privacy">Read the Privacy Notice</a>
+    <a *ngIf="kind === 'privacy'" routerLink="/terms">Read the Terms of Use</a>
+    · <a routerLink="/contact">Contact us</a>
+  </p>
+</article>

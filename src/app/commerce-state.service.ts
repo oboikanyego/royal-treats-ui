@@ -2,7 +2,14 @@ import { Injectable, effect, inject, signal, untracked } from '@angular/core';
 import { fromApiUser } from './api/api-mappers';
 import { toApiError } from './api/api-errors';
 import { AuthApi } from './api/auth-api.service';
-import { authErrorMessage, registrationProblem, type AuthContext } from './api/auth-messages';
+import {
+  authErrorMessage,
+  consentProblem,
+  passwordChangeProblem,
+  profileProblem,
+  registrationProblem,
+  type AuthContext,
+} from './api/auth-messages';
 import { CatalogueApi } from './api/catalogue-api.service';
 import { photoFileProblem } from './api/photo-file';
 import { SessionService } from './api/session.service';
@@ -173,8 +180,10 @@ export class CommerceState {
     email: string,
     phone: string,
     password: string,
+    acceptedTerms: boolean,
   ): Promise<string | null> {
-    const problem = registrationProblem({ name, email, phone, password });
+    const problem =
+      registrationProblem({ name, email, phone, password }) ?? consentProblem(acceptedTerms);
     if (problem) return problem;
     return this.startApiSession(
       () =>
@@ -183,9 +192,34 @@ export class CommerceState {
           email: email.trim().toLowerCase(),
           phone: phone.trim(),
           password,
+          acceptedTerms: true,
         }),
       'register',
     );
+  }
+  /** Changes the signed-in user's name and phone. Resolves to an error message, or null on success. */
+  async updateProfile(name: string, phone: string): Promise<string | null> {
+    const problem = profileProblem({ name, phone });
+    if (problem) return problem;
+    try {
+      this.sessions.user.set(
+        await this.authApi.updateProfile({ name: name.trim(), phone: phone.trim() }),
+      );
+      return null;
+    } catch (error) {
+      return authErrorMessage(toApiError(error), 'profile');
+    }
+  }
+  /** Changes the password; the API ends every other sign-in. Resolves to an error message, or null. */
+  async changePassword(current: string, next: string, confirm: string): Promise<string | null> {
+    const problem = passwordChangeProblem({ current, next, confirm });
+    if (problem) return problem;
+    try {
+      await this.authApi.changePassword(current, next);
+      return null;
+    } catch (error) {
+      return authErrorMessage(toApiError(error), 'password');
+    }
   }
   async signIn(email: string, password: string): Promise<string | null> {
     return this.startApiSession(

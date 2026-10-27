@@ -8,15 +8,13 @@
       <label>Full name<input required name="name" [(ngModel)]="courier.name" /></label
       ><label>Email<input required type="email" name="email" [(ngModel)]="courier.email" /></label
       ><label>Phone number<input required name="phone" [(ngModel)]="courier.phone" /></label
-      ><label
-        >Password (at least 12 characters)<input
-          required
-          minlength="12"
-          maxlength="128"
-          type="password"
-          name="password"
-          autocomplete="new-password"
-          [(ngModel)]="courier.password" /></label
+      ><rt-password-field
+        label="Password (at least 12 characters)"
+        name="password"
+        autocomplete="new-password"
+        [minlength]="12"
+        [(value)]="courier.password"
+      />
       ><button class="primary" [disabled]="saving()">
         {{ saving() ? 'Adding…' : 'Add delivery person' }}
       </button>

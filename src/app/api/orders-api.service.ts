@@ -17,8 +17,11 @@ export class OrdersApi {
       this.api.post<ApiOrder>('/orders', request, { 'Idempotency-Key': idempotencyKey }),
     );
   }
-  list(page: number, limit: number): Promise<Paginated<ApiOrder>> {
-    return firstValueFrom(this.api.get<Paginated<ApiOrder>>('/orders', { page, limit }));
+  /** `statuses` limits the list on the server, before paging (e.g. ['Confirmed', 'Preparing']). */
+  list(page: number, limit: number, statuses?: string[]): Promise<Paginated<ApiOrder>> {
+    const params: Record<string, string | number> = { page, limit };
+    if (statuses?.length) params['status'] = statuses.join(',');
+    return firstValueFrom(this.api.get<Paginated<ApiOrder>>('/orders', params));
   }
   setStatus(id: string, status: string): Promise<ApiOrder> {
     return firstValueFrom(

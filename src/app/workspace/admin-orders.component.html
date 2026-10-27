@@ -3,7 +3,7 @@
     <div>
       <h2>Order management</h2>
       <p class="helper">
-        Newest first. {{ loaded().length }} of {{ total() }} orders loaded; refreshed every 30
+        Newest first. {{ loaded().length }} of {{ total() }} orders shown; refreshed every 30
         seconds.
       </p>
     </div>
@@ -17,7 +17,7 @@
       Sound for new orders</label
     >
     <label
-      >Show<select name="orderFilter" [ngModel]="filter()" (ngModelChange)="filter.set($event)">
+      >Show<select name="orderFilter" [ngModel]="filter()" (ngModelChange)="setFilter($event)">
         <option value="all">All orders</option>
         <option value="pending">Waiting to confirm</option>
         <option value="active">In progress</option>
@@ -77,12 +77,38 @@
     <p *ngIf="order.notes">
       <small>Notes: {{ order.notes }}</small>
     </p>
+    <p *ngIf="order.fulfillment === 'delivery' && mapsLink(order) as map">
+      <small><a [href]="map" target="_blank" rel="noopener">Open the address in Maps ↗</a></small>
+    </p>
     <p *ngIf="order.courierId">
       <small>Courier: {{ courierLabel(order) }}</small>
     </p>
     <p *ngIf="waitingForCourier(order)">
-      <small>Waiting for a courier to accept this delivery.</small>
+      <small>Waiting for a courier to accept this delivery, or assign one below.</small>
     </p>
+    <div class="actions assign-row" *ngIf="canAssign(order)">
+      <label
+        >{{ order.courierId ? 'Reassign to' : 'Assign to' }}
+        <select
+          [attr.name]="'courier-' + order.id"
+          [ngModel]="chosen(order)"
+          (ngModelChange)="pick(order, $event)"
+        >
+          <option value="">Choose a courier</option>
+          <option *ngFor="let c of couriers()" [value]="c.id">{{ c.name }}</option>
+        </select></label
+      >
+      <button
+        type="button"
+        class="secondary"
+        [disabled]="assigning() === order.id || !chosen(order) || chosen(order) === order.courierId"
+        (click)="assign(order)"
+      >
+        {{
+          assigning() === order.id ? 'Assigning…' : order.courierId ? 'Reassign' : 'Assign courier'
+        }}
+      </button>
+    </div>
 
     <div class="actions" *ngIf="order.allowedStatuses?.length">
       <ng-container *ngFor="let next of order.allowedStatuses">

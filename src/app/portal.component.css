@@ -1250,3 +1250,49 @@ select:focus-visible {
   color: var(--rt-pink-dark, #c2185b);
   font-weight: 800;
 }
+
+.password-field {
+  position: relative;
+  display: block;
+}
+.password-field input {
+  width: 100%;
+  padding-right: 76px;
+}
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  background: none;
+  border: 0;
+  padding: 6px 8px;
+  color: var(--rt-pink-dark, #c2185b);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+.password-toggle:focus-visible {
+  outline: 2px solid var(--rt-pink, #ef1684);
+  border-radius: 6px;
+}
+
+.assign-row {
+  justify-content: flex-start;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.assign-row label {
+  margin: 0;
+}
+.consent {
+  align-items: flex-start;
+  gap: 10px;
+}
+.consent span {
+  flex: 1;
+  line-height: 1.45;
+  font-weight: 400;
+}

@@ -1,0 +1,51 @@
+<div class="pane">
+  <form class="panel" (ngSubmit)="saveDetails()">
+    <h3>Your details</h3>
+    <div class="alert success-alert" *ngIf="detailsNotice()" role="status">
+      {{ detailsNotice() }}
+    </div>
+    <div class="alert error" *ngIf="detailsError()" role="alert">{{ detailsError() }}</div>
+    <label
+      >Full name<input name="name" required maxlength="100" [(ngModel)]="name" autocomplete="name"
+    /></label>
+    <label
+      >Phone number<input name="phone" required [(ngModel)]="phone" autocomplete="tel"
+    /></label>
+    <label>Email<input name="email" type="email" [value]="user()?.email ?? ''" readonly /></label>
+    <p class="helper">
+      Your email address and role cannot be changed here. Contact us if your email is wrong.
+    </p>
+    <button class="primary" [disabled]="savingDetails()">
+      {{ savingDetails() ? 'Saving…' : 'Save details' }}
+    </button>
+  </form>
+  <form class="panel" (ngSubmit)="savePassword()">
+    <h3>Change password</h3>
+    <div class="alert success-alert" *ngIf="passwordNotice()" role="status">
+      {{ passwordNotice() }}
+    </div>
+    <div class="alert error" *ngIf="passwordError()" role="alert">{{ passwordError() }}</div>
+    <rt-password-field
+      label="Current password"
+      name="currentPassword"
+      autocomplete="current-password"
+      [(value)]="current"
+    />
+    <rt-password-field
+      label="New password (12 to 128 characters)"
+      name="newPassword"
+      autocomplete="new-password"
+      [minlength]="12"
+      [(value)]="next"
+    />
+    <rt-password-field
+      label="Repeat the new password"
+      name="confirmPassword"
+      autocomplete="new-password"
+      [(value)]="confirm"
+    />
+    <button class="primary" [disabled]="savingPassword()">
+      {{ savingPassword() ? 'Saving…' : 'Change password' }}
+    </button>
+  </form>
+</div>

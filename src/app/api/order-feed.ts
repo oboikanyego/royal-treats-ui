@@ -33,7 +33,9 @@ export class OrderFeed {
     try {
       const page = await this.fetchPage(1, this.pageSize);
       const fresh = page.items.map(fromApiOrder);
-      this.orders.update((current) => (initial ? fresh : mergeOrders(current, fresh)));
+      this.orders.update((current) =>
+        initial ? fresh : mergeOrders(current, fresh, this.pageSize),
+      );
       this.total.set(page.total);
       this.status.set('ready');
       return null;
@@ -68,6 +70,13 @@ export class OrderFeed {
   add(order: DeliveryOrder) {
     this.orders.update((list) => [order, ...list.filter((o) => o.id !== order.id)]);
     this.total.update((n) => n + 1);
+  }
+
+  /** Takes an order out of the list, e.g. one that no longer matches the status filter. */
+  remove(id: string) {
+    const before = this.orders().length;
+    this.orders.update((list) => list.filter((o) => o.id !== id));
+    if (this.orders().length < before) this.total.update((n) => Math.max(0, n - 1));
   }
 
   /** Swaps in an order the server just returned (after a status change). */
