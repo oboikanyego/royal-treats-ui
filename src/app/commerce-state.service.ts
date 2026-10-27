@@ -448,6 +448,16 @@ export class CommerceState {
     );
     this.save('royal-products-v2', this.products, this.products());
   }
+  /** API mode: shows a product the admin just saved, so the menu and admin lists stay current. */
+  applyProduct(p: CatalogueProduct): void {
+    this.products.update((xs) =>
+      xs.some((x) => x.id === p.id) ? xs.map((x) => (x.id === p.id ? p : x)) : [p, ...xs],
+    );
+  }
+  /** API mode: shows the settings the admin just saved. */
+  applySettings(s: Settings): void {
+    this.settings.set(s);
+  }
   saveSettings(s: Settings): void {
     if (this.apiMode || this.session()?.role !== 'admin') return;
     this.settings.set({ ...s, radiusKm: DELIVERY_RADIUS_KM });

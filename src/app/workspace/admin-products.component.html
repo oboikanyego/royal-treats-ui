@@ -1,0 +1,190 @@
+<div class="pane">
+  <div class="section-row">
+    <div>
+      <span class="eyebrow">SWEET INVENTORY</span>
+      <h2>Product catalogue</h2>
+      <p class="helper">Keep your shelves fresh and your menu beautifully curated.</p>
+    </div>
+    <button type="button" class="primary" (click)="edit()">+ Add product</button>
+  </div>
+  <div class="alert success-alert" *ngIf="notice()" role="status">{{ notice() }}</div>
+  <div class="alert error" *ngIf="error()" role="alert">{{ error() }}</div>
+  <p *ngIf="!store.products().length">No products yet. Add the first one.</p>
+  <div class="product-line" *ngFor="let p of store.products()">
+    <img *ngIf="p.image" [src]="p.image" [alt]="p.name" />
+    <div>
+      <b>{{ p.name }}</b>
+      <p>From {{ p.price | rand }} · {{ p.available ? 'In stock' : 'Out of stock' }}</p>
+      <small>{{ p.deliverable ? 'Delivery enabled' : 'Collection only' }} · {{ p.category }}</small>
+    </div>
+    <button type="button" class="secondary" (click)="edit(p)">Edit</button
+    ><button type="button" class="secondary" (click)="pendingAvailability.set(p)">
+      {{ p.available ? 'Mark sold out' : 'Restock' }}
+    </button>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="edited() as p" (click)="closeEditor()" role="presentation">
+    <div
+      class="modal-shell"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Product editor"
+      (click)="$event.stopPropagation()"
+    >
+      <form class="product-editor" (ngSubmit)="save()">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow">PRODUCT STUDIO</span>
+            <h2>{{ isNew() ? 'Create a sweet treat' : 'Edit ' + p.name }}</h2>
+            <p>Manage your catalogue, pricing and availability.</p>
+          </div>
+          <button
+            type="button"
+            class="modal-close"
+            (click)="closeEditor()"
+            aria-label="Close product editor"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="modal-fields">
+          <label
+            >Product name<input required name="name" maxlength="100" [(ngModel)]="p.name" /></label
+          ><label
+            >Category<select name="category" [(ngModel)]="p.category">
+              <option *ngFor="let c of categories()" [value]="c">{{ c }}</option>
+            </select></label
+          ><label
+            >Description<textarea
+              name="description"
+              maxlength="1500"
+              [(ngModel)]="p.description"
+            ></textarea>
+          </label>
+          <div class="variant-editor">
+            <h4>Sizes and prices</h4>
+            <div class="variant-row" *ngFor="let option of p.variants; let i = index">
+              <label
+                >Option<input
+                  [name]="'variant-' + i"
+                  maxlength="80"
+                  [(ngModel)]="option.label"
+                  required /></label
+              ><label
+                >Price (R)<input
+                  [name]="'variant-price-' + i"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  [(ngModel)]="option.price"
+                  required /></label
+              ><button
+                class="secondary"
+                type="button"
+                (click)="removeVariant(i)"
+                [disabled]="p.variants.length === 1"
+              >
+                Remove
+              </button>
+            </div>
+            <button class="secondary" type="button" (click)="addVariant()">
+              + Add size / pack
+            </button>
+          </div>
+          <label
+            >{{ p.category === 'Mini Donuts' ? 'Sauces' : 'Flavours' }} customers can choose (one
+            per line)<textarea name="flavours" [(ngModel)]="optionText.flavours"></textarea></label
+          ><label
+            >Toppings customers can choose (one per line)<textarea
+              name="toppings"
+              [(ngModel)]="optionText.toppings"
+            ></textarea>
+          </label>
+          <div class="media-upload">
+            <div class="media-preview" *ngIf="p.image">
+              <img [src]="p.image" alt="Selected product picture" />
+            </div>
+            <div class="media-guide">
+              <strong>Product cover photo</strong>
+              <p>
+                Choose a beautiful, well-lit photo of your treat. It is uploaded when you choose it.
+              </p>
+              <label class="stylish-uploader"
+                ><input
+                  type="file"
+                  name="image"
+                  accept="image/png,image/jpeg,image/webp"
+                  [disabled]="uploading()"
+                  (change)="upload($event)"
+                /><span
+                  >✦
+                  {{
+                    uploading() ? 'Uploading…' : p.image ? 'Replace photo' : 'Choose product photo'
+                  }}</span
+                ></label
+              ><button type="button" class="secondary" *ngIf="p.image" (click)="removeImage()">
+                Remove photo</button
+              ><small>PNG, JPG, WebP · up to 5 MB</small>
+            </div>
+          </div>
+          <p *ngIf="imageError()" class="error">{{ imageError() }}</p>
+          <label class="check"
+            ><input type="checkbox" name="available" [(ngModel)]="p.available" /> Available for
+            ordering</label
+          ><label class="check"
+            ><input
+              type="checkbox"
+              name="deliverable"
+              [(ngModel)]="p.deliverable"
+              [disabled]="!canBeDelivered(p)"
+            />
+            Eligible for delivery (donuts only)</label
+          >
+        </div>
+        <p class="error" *ngIf="editorError()" role="alert">{{ editorError() }}</p>
+        <div class="actions modal-actions">
+          <button type="button" class="secondary" (click)="closeEditor()">Cancel</button
+          ><button type="submit" class="primary" [disabled]="saving() || uploading()">
+            {{ saving() ? 'Saving…' : '✓ Save product' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div
+  class="confirm-backdrop"
+  *ngIf="pendingAvailability() as p"
+  (click)="pendingAvailability.set(null)"
+>
+  <div
+    class="confirm-dialog"
+    role="alertdialog"
+    aria-modal="true"
+    aria-label="Confirm product availability"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="confirm-icon">{{ p.available ? '!' : '✓' }}</div>
+    <h2>{{ p.available ? 'Mark product out of stock?' : 'Make product available?' }}</h2>
+    <p>
+      {{ p.name }}
+      {{
+        p.available
+          ? 'will no longer be available for customer orders.'
+          : 'will appear as available to order again.'
+      }}
+    </p>
+    <div class="actions">
+      <button
+        type="button"
+        class="secondary"
+        [disabled]="saving()"
+        (click)="pendingAvailability.set(null)"
+      >
+        Cancel</button
+      ><button type="button" class="primary" [disabled]="saving()" (click)="confirmAvailability()">
+        {{ saving() ? 'Saving…' : 'Confirm change' }}
+      </button>
+    </div>
+  </div>
+</div>

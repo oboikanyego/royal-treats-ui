@@ -21,6 +21,13 @@ export class ContactComponent {
   emailReady() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.store.settings().supportEmail || '');
   }
+  /** The map link follows the address the admin sets, not a fixed one. */
+  mapsUrl() {
+    return (
+      'https://www.google.com/maps/search/?api=1&query=' +
+      encodeURIComponent(this.store.settings().address)
+    );
+  }
   supportHref() {
     const email = this.store.settings().supportEmail;
     return (

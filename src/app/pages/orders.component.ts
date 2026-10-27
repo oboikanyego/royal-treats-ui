@@ -4,9 +4,10 @@ import { RouterLink } from '@angular/router';
 import { toApiError } from '../api/api-errors';
 import { fromApiOrder } from '../api/api-mappers';
 import { orderErrorMessage } from '../api/order-messages';
+import { OrderFeed } from '../api/order-feed';
 import { OrdersApi } from '../api/orders-api.service';
 import { CommerceState, DeliveryOrder } from '../commerce-state.service';
-import { groupByRecipient, mergeOrders, stepDone, stepsFor } from '../order-view';
+import { groupByRecipient, stepDone, stepsFor } from '../order-view';
 import { RandPipe } from '../rand.pipe';
 
 const PAGE_SIZE = 20;
@@ -23,10 +24,14 @@ export class OrdersComponent {
   readonly store = inject(CommerceState);
   private readonly ordersApi = inject(OrdersApi);
 
-  readonly orders = signal<DeliveryOrder[]>([]);
-  readonly total = signal(0);
-  readonly status = signal<'idle' | 'loading' | 'ready' | 'error'>('idle');
-  readonly loadingMore = signal(false);
+  private readonly feed = new OrderFeed(
+    (page, limit) => this.ordersApi.list(page, limit),
+    PAGE_SIZE,
+  );
+  readonly orders = this.feed.orders;
+  readonly total = this.feed.total;
+  readonly status = this.feed.status;
+  readonly loadingMore = this.feed.loadingMore;
   readonly message = signal<{ kind: 'error' | 'notice'; text: string } | null>(null);
   /** The order whose "cancel" is awaiting confirmation, and the one being cancelled. */
   readonly confirming = signal<string | null>(null);
@@ -55,45 +60,24 @@ export class OrdersComponent {
   }
 
   private clear() {
-    this.orders.set([]);
-    this.total.set(0);
-    this.status.set('idle');
+    this.feed.clear();
     this.message.set(null);
   }
 
   /** `initial` shows the loading state; later refreshes are silent and keep what is on screen. */
   async refresh(initial: boolean) {
-    if (initial) this.status.set('loading');
-    try {
-      const page = await this.ordersApi.list(1, PAGE_SIZE);
-      const fresh = page.items.map(fromApiOrder);
-      this.orders.update((current) => (initial ? fresh : mergeOrders(current, fresh)));
-      this.total.set(page.total);
-      this.status.set('ready');
-      if (initial) this.message.set(null);
-    } catch (error) {
-      if (!initial) return; // a silent refresh just tries again next time
-      this.status.set('error');
-      this.message.set({ kind: 'error', text: orderErrorMessage(toApiError(error), 'list') });
+    const failure = await this.feed.refresh(initial);
+    if (initial) {
+      this.message.set(
+        failure ? { kind: 'error', text: orderErrorMessage(toApiError(failure), 'list') } : null,
+      );
     }
   }
 
   async loadMore() {
-    this.loadingMore.set(true);
-    try {
-      const next = Math.ceil(this.orders().length / PAGE_SIZE) + 1;
-      const page = await this.ordersApi.list(next, PAGE_SIZE);
-      const known = new Set(this.orders().map((o) => o.id));
-      this.orders.update((current) => [
-        ...current,
-        ...page.items.filter((o) => !known.has(o.id)).map(fromApiOrder),
-      ]);
-      this.total.set(page.total);
-    } catch (error) {
-      this.message.set({ kind: 'error', text: orderErrorMessage(toApiError(error), 'list') });
-    } finally {
-      this.loadingMore.set(false);
-    }
+    const failure = await this.feed.loadMore();
+    if (failure)
+      this.message.set({ kind: 'error', text: orderErrorMessage(toApiError(failure), 'list') });
   }
 
   canCancel(order: DeliveryOrder): boolean {
@@ -104,7 +88,7 @@ export class OrdersComponent {
     this.cancelling.set(order.id);
     try {
       const updated = fromApiOrder(await this.ordersApi.setStatus(order.id, 'Cancelled'));
-      this.orders.update((list) => list.map((o) => (o.id === updated.id ? updated : o)));
+      this.feed.replace(updated);
       this.message.set({ kind: 'notice', text: `Order ${updated.ref} was cancelled.` });
     } catch (error) {
       this.message.set({ kind: 'error', text: orderErrorMessage(toApiError(error), 'cancel') });

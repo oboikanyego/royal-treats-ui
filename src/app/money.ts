@@ -7,3 +7,6 @@ export function formatRand(rand: number | null | undefined): string {
   const whole = cents % 100 === 0;
   return 'R' + (whole ? String(cents / 100) : (cents / 100).toFixed(2));
 }
+
+/** The UI works in rand; the API takes integer cents. Rounds to the nearest cent. */
+export const randToCents = (rand: number): number => Math.round(rand * 100);

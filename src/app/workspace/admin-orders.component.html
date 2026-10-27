@@ -1,0 +1,115 @@
+<div class="pane">
+  <div class="section-row">
+    <div>
+      <h2>Order management</h2>
+      <p class="helper">
+        Newest first. {{ loaded().length }} of {{ total() }} orders loaded; refreshed every 30
+        seconds.
+      </p>
+    </div>
+    <label
+      >Show<select name="orderFilter" [ngModel]="filter()" (ngModelChange)="filter.set($event)">
+        <option value="all">All orders</option>
+        <option value="pending">Waiting to confirm</option>
+        <option value="active">In progress</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select></label
+    >
+  </div>
+  <div
+    class="alert"
+    [class.error]="message()?.kind === 'error'"
+    [class.success-alert]="message()?.kind === 'notice'"
+    *ngIf="message() as note"
+    [attr.role]="note.kind === 'error' ? 'alert' : 'status'"
+  >
+    {{ note.text }}
+  </div>
+  <p class="helper" *ngIf="status() === 'loading'">Loading orders…</p>
+  <button type="button" class="secondary" *ngIf="status() === 'error'" (click)="refresh()">
+    Try again
+  </button>
+  <p *ngIf="status() === 'ready' && !loaded().length">No orders yet.</p>
+  <p *ngIf="status() === 'ready' && loaded().length && !orders().length">
+    No loaded orders match this filter.
+  </p>
+
+  <div class="order-card" *ngFor="let order of orders()">
+    <div>
+      <b>{{ order.ref }}</b
+      ><span>{{ order.status }} · {{ order.total | rand }}</span>
+    </div>
+    <p>
+      {{ order.customer }} · <a [href]="'tel:' + order.phone">{{ order.phone }}</a> ·
+      {{ order.payment }}
+    </p>
+    <p>
+      {{
+        order.fulfillment === 'delivery' ? 'Delivery to ' + order.address : 'Collection at store'
+      }}
+    </p>
+    <div class="order-recipients">
+      <ng-container *ngFor="let group of groupByRecipient(order.items)">
+        <div *ngFor="let line of group.items">
+          <span>{{ group.recipient }}</span
+          ><b
+            >{{ line.qty }} × {{ line.name }}
+            <small>{{
+              [line.variant, line.sauce, line.topping].filter(isSet).join(' · ')
+            }}</small></b
+          >
+        </div>
+      </ng-container>
+    </div>
+    <small>{{ order.date }} {{ order.time }}</small>
+    <p *ngIf="order.notes">
+      <small>Notes: {{ order.notes }}</small>
+    </p>
+    <small *ngIf="order.courierId">Courier: {{ courierLabel(order) }}</small>
+    <small *ngIf="waitingForCourier(order)">Waiting for a courier to accept this delivery.</small>
+
+    <div class="actions" *ngIf="order.allowedStatuses?.length">
+      <ng-container *ngFor="let next of order.allowedStatuses">
+        <button
+          type="button"
+          [class.primary]="next !== 'Cancelled'"
+          [class.secondary]="next === 'Cancelled'"
+          [disabled]="busy() === order.id"
+          (click)="next === 'Cancelled' ? confirming.set(order.id) : change(order, next)"
+        >
+          {{ actionLabel(next) }}
+        </button>
+      </ng-container>
+    </div>
+    <div class="actions" *ngIf="confirming() === order.id">
+      <span>Cancel {{ order.ref }}? This cannot be undone.</span>
+      <button
+        type="button"
+        class="primary"
+        [disabled]="busy() === order.id"
+        (click)="change(order, 'Cancelled')"
+      >
+        {{ busy() === order.id ? 'Cancelling…' : 'Yes, cancel it' }}
+      </button>
+      <button
+        type="button"
+        class="secondary"
+        [disabled]="busy() === order.id"
+        (click)="confirming.set(null)"
+      >
+        Keep order
+      </button>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    class="secondary wide"
+    *ngIf="status() === 'ready' && loaded().length < total()"
+    [disabled]="loadingMore()"
+    (click)="loadMore()"
+  >
+    {{ loadingMore() ? 'Loading…' : 'Show older orders' }}
+  </button>
+</div>

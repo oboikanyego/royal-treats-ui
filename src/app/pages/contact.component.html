@@ -70,12 +70,7 @@
       <span>⌖</span>
       <h3>Visit us for collection</h3>
       <p>{{ store.settings().address }}</p>
-      <a
-        href="https://www.google.com/maps/search/?api=1&query=34+10th+Avenue+Thabazimbi"
-        target="_blank"
-        rel="noopener"
-        >View location ↗</a
-      >
+      <a [href]="mapsUrl()" target="_blank" rel="noopener">View location ↗</a>
     </div>
     <div class="support-info">
       <span>◷</span>

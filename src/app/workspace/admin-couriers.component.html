@@ -1,0 +1,72 @@
+<div class="pane">
+  <h2>Delivery personnel</h2>
+  <div class="alert success-alert" *ngIf="notice()" role="status">{{ notice() }}</div>
+  <div class="alert error" *ngIf="error()" role="alert">{{ error() }}</div>
+  <div class="panel">
+    <h3>Register delivery person</h3>
+    <form (ngSubmit)="create()">
+      <label>Full name<input required name="name" [(ngModel)]="courier.name" /></label
+      ><label>Email<input required type="email" name="email" [(ngModel)]="courier.email" /></label
+      ><label>Phone number<input required name="phone" [(ngModel)]="courier.phone" /></label
+      ><label
+        >Password (at least 12 characters)<input
+          required
+          minlength="12"
+          maxlength="128"
+          type="password"
+          name="password"
+          autocomplete="new-password"
+          [(ngModel)]="courier.password" /></label
+      ><button class="primary" [disabled]="saving()">
+        {{ saving() ? 'Adding…' : 'Add delivery person' }}
+      </button>
+    </form>
+  </div>
+  <h3>Delivery team</h3>
+  <p class="helper" *ngIf="status() === 'loading'">Loading the delivery team…</p>
+  <button type="button" class="secondary" *ngIf="status() === 'error'" (click)="load()">
+    Try again
+  </button>
+  <p *ngIf="status() === 'ready' && !couriers().length">No delivery staff registered yet.</p>
+  <div class="order-card" *ngFor="let c of couriers()">
+    <b>{{ c.name }}</b>
+    <p>{{ c.email }} · {{ c.phone }}</p>
+    <span>{{ c.active ? 'Active' : 'Deactivated' }}</span>
+    <button
+      type="button"
+      class="secondary"
+      *ngIf="!c.active"
+      [disabled]="busy() === c.id"
+      (click)="setActive(c, true)"
+    >
+      Reactivate
+    </button>
+    <button
+      type="button"
+      class="secondary"
+      *ngIf="c.active && confirming() !== c.id"
+      (click)="confirming.set(c.id)"
+    >
+      Deactivate
+    </button>
+    <div class="actions" *ngIf="c.active && confirming() === c.id">
+      <span>{{ c.name }} will be signed out and unable to sign in.</span>
+      <button
+        type="button"
+        class="primary"
+        [disabled]="busy() === c.id"
+        (click)="setActive(c, false)"
+      >
+        {{ busy() === c.id ? 'Deactivating…' : 'Yes, deactivate' }}
+      </button>
+      <button
+        type="button"
+        class="secondary"
+        [disabled]="busy() === c.id"
+        (click)="confirming.set(null)"
+      >
+        Keep active
+      </button>
+    </div>
+  </div>
+</div>
