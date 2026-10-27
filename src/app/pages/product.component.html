@@ -2,7 +2,7 @@
   <button class="back" routerLink="/menu">← Back to menu</button
   ><img class="feature-img" [src]="product.image" [alt]="product.name" />
   <h1>{{ product.name }}</h1>
-  <b class="pink">From R{{ product.price }}</b>
+  <b class="pink">From {{ product.price | rand }}</b>
   <p class="muted">Freshly made, customised with your favourite flavours and toppings.</p>
   <h3>Choose your size / box</h3>
   <div class="variants">
@@ -11,7 +11,7 @@
       [class.selected]="variant() === v.label"
       (click)="variant.set(v.label)"
     >
-      {{ v.label }}<small>R{{ v.price }}</small>
+      {{ v.label }}<small>{{ v.price | rand }}</small>
     </button>
   </div>
   <h3 *ngIf="flavours().length">Choose {{ options().flavourLabel }}</h3>
@@ -52,7 +52,7 @@
     </div>
   </div>
   <div class="action">
-    <h2>R{{ unitPrice() * qty() }}</h2>
+    <h2>{{ unitPrice() * qty() | rand }}</h2>
     <button class="primary" [disabled]="!selectedAvailable()" (click)="add()">
       {{ selectedAvailable() ? '🛒 Add to Cart' : 'Out of stock' }}
     </button>

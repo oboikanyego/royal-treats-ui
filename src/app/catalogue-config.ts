@@ -42,6 +42,10 @@ const FALLBACK_OPTIONS: ProductOptions = {
   toppings: [],
 };
 
+/** "sauce" for donuts, "flavour" for most others; unknown categories get the generic sauce label. */
+export const flavourLabelFor = (category: string): string =>
+  (CATEGORY_OPTIONS[category] ?? FALLBACK_OPTIONS).flavourLabel;
+
 export const optionsFor = (
   product: Pick<CatalogueProduct, 'category' | 'options'>,
 ): ProductOptions => product.options ?? CATEGORY_OPTIONS[product.category] ?? FALLBACK_OPTIONS;

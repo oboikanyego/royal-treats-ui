@@ -40,7 +40,7 @@
         <button type="button" (click)="change(i, -1)">−</button>{{ i.qty
         }}<button type="button" (click)="change(i, 1)">+</button>
       </div>
-      <b>R{{ i.price * i.qty }}</b>
+      <b>{{ i.price * i.qty | rand }}</b>
     </div>
   </div>
   <button type="button" class="remove" (click)="remove(i)" aria-label="Remove item">✕</button>
@@ -57,10 +57,10 @@
     ></textarea>
   </label>
   <div class="total">
-    <b>Subtotal</b><b>R{{ total() }}</b>
+    <b>Subtotal</b><b>{{ total() | rand }}</b>
   </div>
   <div class="total">
-    <strong>Total</strong><strong>R{{ total() }}</strong>
+    <strong>Total</strong><strong>{{ total() | rand }}</strong>
   </div>
   <button class="primary wide" routerLink="/checkout">Checkout all treats together →</button>
 </div>

@@ -1,3 +1,4 @@
+import { RandPipe } from '../rand.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +10,7 @@ import { OrderTrackingService } from '../order-tracking.service';
 @Component({
   selector: 'section[rt-checkout]',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, RandPipe],
   templateUrl: './checkout.component.html',
 })
 export class CheckoutComponent {

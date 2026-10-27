@@ -35,7 +35,7 @@
       <p>{{ p.description }}</p>
       <div class="product-bottom">
         <span
-          >From <strong>R{{ p.price }}</strong></span
+          >From <strong>{{ p.price | rand }}</strong></span
         ><span class="product-arrow" aria-hidden="true">↗</span>
       </div>
     </div>

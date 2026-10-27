@@ -1,4 +1,6 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { environment } from '../environments/environment';
+import { CatalogueApi } from './api/catalogue-api.service';
 import {
   CATEGORY_OPTIONS,
   DELIVERY_RADIUS_KM,
@@ -148,9 +150,29 @@ const demoAdmin: Account = {
   active: true,
 };
 
+/** Shown while the API catalogue loads: 'slow' means the first request is taking a while (cold start). */
+export type CatalogueStatus = 'ready' | 'loading' | 'slow' | 'error';
+const SLOW_AFTER_MS = 4000;
+const defaultSettings: Settings = {
+  open: '10:00',
+  close: '23:00',
+  latitude: null,
+  longitude: null,
+  radiusKm: DELIVERY_RADIUS_KM,
+  storeName: 'Royal Treats',
+  address: '34 10th Avenue, Thabazimbi',
+  supportEmail: '',
+};
+
 @Injectable({ providedIn: 'root' })
 export class CommerceState {
-  readonly products = signal<CatalogueProduct[]>(read('royal-products-v2', seedProducts));
+  private readonly catalogueApi = inject(CatalogueApi);
+  /** True when the catalogue and settings come from the API (see src/environments). */
+  readonly apiMode = environment.useApi;
+  readonly catalogueStatus = signal<CatalogueStatus>(environment.useApi ? 'loading' : 'ready');
+  readonly products = signal<CatalogueProduct[]>(
+    environment.useApi ? [] : read('royal-products-v2', seedProducts),
+  );
   readonly accounts = signal<Account[]>(
     read<Account[]>('royal-accounts-v2', [demoAdmin]).map((a) => ({
       id: a.id,
@@ -165,19 +187,14 @@ export class CommerceState {
   );
 
   readonly session = signal<Account | null>(null);
-  readonly settings = signal<Settings>({
-    ...read('royal-settings-v2', {
-      open: '10:00',
-      close: '23:00',
-      latitude: null,
-      longitude: null,
-      radiusKm: DELIVERY_RADIUS_KM,
-      storeName: 'Royal Treats',
-      address: '34 10th Avenue, Thabazimbi',
-      supportEmail: '',
-    }),
-    supportEmail: read<Partial<Settings>>('royal-settings-v2', {}).supportEmail ?? '',
-  });
+  readonly settings = signal<Settings>(
+    environment.useApi
+      ? defaultSettings
+      : {
+          ...read('royal-settings-v2', defaultSettings),
+          supportEmail: read<Partial<Settings>>('royal-settings-v2', {}).supportEmail ?? '',
+        },
+  );
   readonly deliveries = signal<DeliveryOrder[]>(
     read<DeliveryOrder[]>('royal-deliveries-v2', []).map((o) => ({
       ...o,
@@ -193,6 +210,28 @@ export class CommerceState {
   constructor() {
     const id = sessionStorage.getItem('royal-demo-session');
     if (id) this.session.set(this.accounts().find((a) => a.id === id && a.active) ?? null);
+    if (this.apiMode) void this.refreshCatalogue();
+  }
+  /** Loads products and settings from the API; retried from the banner after a failure. */
+  async refreshCatalogue(): Promise<void> {
+    this.catalogueStatus.set('loading');
+    const slow = setTimeout(
+      () => this.catalogueStatus.update((s) => (s === 'loading' ? 'slow' : s)),
+      SLOW_AFTER_MS,
+    );
+    try {
+      const [products, settings] = await Promise.all([
+        this.catalogueApi.products(),
+        this.catalogueApi.settings(this.settings()),
+      ]);
+      this.products.set(products);
+      this.settings.set(settings);
+      this.catalogueStatus.set('ready');
+    } catch {
+      this.catalogueStatus.set('error');
+    } finally {
+      clearTimeout(slow);
+    }
   }
   private save<T>(key: string, sig: { (): T }, value: T): void {
     localStorage.setItem(key, JSON.stringify(value));
@@ -275,7 +314,7 @@ export class CommerceState {
     this.save('royal-accounts-v2', this.accounts, this.accounts());
   }
   saveProduct(p: CatalogueProduct): void {
-    if (this.session()?.role !== 'admin') return;
+    if (this.apiMode || this.session()?.role !== 'admin') return;
     // The MVP only delivers products from deliverable categories, regardless of product configuration.
     const product = { ...p, deliverable: isDeliverableCategory(p.category) && p.deliverable };
     this.products.update((xs) =>
@@ -286,7 +325,7 @@ export class CommerceState {
     this.save('royal-products-v2', this.products, this.products());
   }
   saveSettings(s: Settings): void {
-    if (this.session()?.role !== 'admin') return;
+    if (this.apiMode || this.session()?.role !== 'admin') return;
     this.settings.set({ ...s, radiusKm: DELIVERY_RADIUS_KM });
     this.save('royal-settings-v2', this.settings, this.settings());
   }

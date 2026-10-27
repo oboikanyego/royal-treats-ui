@@ -83,7 +83,7 @@
           <p>{{ p.description }}</p>
           <div class="product-bottom">
             <span
-              >From <strong>R{{ p.price }}</strong></span
+              >From <strong>{{ p.price | rand }}</strong></span
             ><span class="product-arrow" aria-hidden="true">↗</span>
           </div>
         </div>
@@ -91,9 +91,18 @@
     </div>
     <div class="menu-empty" *ngIf="!filters.visibleProducts().length">
       <span>🍩</span>
-      <h3>No treats found this time</h3>
-      <p>Try a different search or category.</p>
-      <button class="secondary" (click)="filters.clear()">Show all treats</button>
+      <ng-container *ngIf="store.catalogueStatus() === 'ready'; else notReady">
+        <h3>No treats found this time</h3>
+        <p>Try a different search or category.</p>
+        <button class="secondary" (click)="filters.clear()">Show all treats</button>
+      </ng-container>
+      <ng-template #notReady>
+        <h3>
+          {{
+            store.catalogueStatus() === 'error' ? 'The menu is unavailable' : 'Loading the menu…'
+          }}
+        </h3>
+      </ng-template>
     </div>
     <div class="menu-pagination" *ngIf="filters.totalPages() > 1">
       <button

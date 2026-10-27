@@ -14,5 +14,9 @@ jobs:
           node-version: '22'
       - name: Install dependencies
         run: npm install --no-audit --no-fund
-      - name: Build Angular
+      - name: Unit tests
+        run: npm test
+      - name: Build Angular (demo)
         run: npm run build
+      - name: Build Angular (API mode)
+        run: npm run build:live

@@ -1,3 +1,4 @@
+import { RandPipe } from '../rand.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -11,7 +12,7 @@ import { CatalogueProduct, CommerceState } from '../commerce-state.service';
 @Component({
   selector: 'section[rt-product]',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, RandPipe],
   templateUrl: './product.component.html',
 })
 export class ProductComponent {
