@@ -1244,3 +1244,9 @@ select:focus-visible {
   font-weight: 650;
   color: #554359;
 }
+
+.sidebar-navigation button small.pending-count {
+  background: #fff;
+  color: var(--rt-pink-dark, #c2185b);
+  font-weight: 800;
+}

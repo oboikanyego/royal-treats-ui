@@ -42,7 +42,7 @@
     <div class="my-order-head">
       <h3>{{ order.ref || order.id }}</h3>
       <span class="status-pill" [class.cancelled]="order.status === 'Cancelled'">{{
-        order.status
+        statusText(order)
       }}</span>
     </div>
     <p class="muted" *ngIf="order.createdAt">
@@ -54,7 +54,7 @@
         *ngFor="let step of stepsFor(order.fulfillment)"
         [class.done]="stepDone(stepsFor(order.fulfillment), order.status, step)"
       >
-        ● {{ step }}
+        ● {{ stepText(order, step) }}
       </div>
     </div>
     <p>

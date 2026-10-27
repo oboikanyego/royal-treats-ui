@@ -26,7 +26,7 @@
         <small>Out of stock</small><b>{{ outOfStock() }}</b>
       </div>
       <div>
-        <small>Completed</small><b>{{ s.completed }}</b>
+        <small>Collected / delivered</small><b>{{ s.completed }}</b>
       </div>
       <div>
         <small>Cancelled</small><b>{{ s.cancelled }}</b>
@@ -36,7 +36,7 @@
       <h3>Orders by status</h3>
       <div class="order-card" *ngFor="let row of s.breakdown">
         <div>
-          <b>{{ row.status }}</b
+          <b>{{ row.label }}</b
           ><span>{{ row.count }} · {{ row.totalCents / 100 | rand }}</span>
         </div>
       </div>

@@ -7,7 +7,7 @@ import { orderErrorMessage } from '../api/order-messages';
 import { OrderFeed } from '../api/order-feed';
 import { OrdersApi } from '../api/orders-api.service';
 import { CommerceState, DeliveryOrder } from '../commerce-state.service';
-import { groupByRecipient, stepDone, stepsFor } from '../order-view';
+import { groupByRecipient, statusLabel, stepDone, stepsFor } from '../order-view';
 import { RandPipe } from '../rand.pipe';
 
 const PAGE_SIZE = 20;
@@ -41,6 +41,8 @@ export class OrdersComponent {
   readonly stepsFor = stepsFor;
   readonly stepDone = stepDone;
   readonly groupByRecipient = groupByRecipient;
+  readonly statusText = (order: DeliveryOrder) => statusLabel(order.status, order.fulfillment);
+  readonly stepText = (order: DeliveryOrder, step: string) => statusLabel(step, order.fulfillment);
   readonly isSet = (value: string | undefined) => !!value;
 
   constructor() {

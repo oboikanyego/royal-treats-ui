@@ -23,7 +23,7 @@ import {
 import { OrderFeed } from '../api/order-feed';
 import { OrdersApi } from '../api/orders-api.service';
 import type { DeliveryOrder } from '../commerce-state.service';
-import { groupByRecipient } from '../order-view';
+import { groupByRecipient, statusLabel } from '../order-view';
 import { RandPipe } from '../rand.pipe';
 
 const REFRESH_MS = 30_000;
@@ -56,6 +56,7 @@ export class CourierWorkspaceComponent implements OnInit {
 
   readonly groupByRecipient = groupByRecipient;
   readonly distanceLabel = distanceLabel;
+  readonly statusText = (order: DeliveryOrder) => statusLabel(order.status, order.fulfillment);
   readonly isSet = (value: string | undefined) => !!value;
 
   constructor() {

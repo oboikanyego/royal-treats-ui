@@ -1,6 +1,16 @@
-import { Component, ViewEncapsulation, effect, inject, signal, untracked } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  ViewEncapsulation,
+  effect,
+  inject,
+  signal,
+  untracked,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { AdminLive } from './api/admin-live.service';
 import { CommerceState } from './commerce-state.service';
 import { AdminCouriersComponent } from './workspace/admin-couriers.component';
 import { AdminOrdersComponent } from './workspace/admin-orders.component';
@@ -32,6 +42,7 @@ type Screen = 'signin' | 'register' | 'home' | 'products' | 'couriers' | 'settin
 })
 export class PortalComponent {
   readonly store = inject(CommerceState);
+  readonly live = inject(AdminLive);
   screen = signal<Screen>('signin');
   error = '';
   notice = '';
@@ -44,6 +55,13 @@ export class PortalComponent {
 
   constructor() {
     if (this.store.session()) this.screen.set('home');
+    // A new-order alert links here with ?screen=orders.
+    const route = inject(ActivatedRoute);
+    const sub = route.queryParamMap.subscribe((params) => {
+      if (params.get('screen') === 'orders' && this.store.session()?.role === 'admin')
+        this.screen.set('orders');
+    });
+    inject(DestroyRef).onDestroy(() => sub.unsubscribe());
     // Follow the session: leave the sign-in screens once signed in (e.g. a session restored after a
     // reload), and come back to them when it ends (sign-out, or the server rejecting the token).
     effect(() => {

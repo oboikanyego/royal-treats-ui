@@ -111,3 +111,15 @@ export type ApiDashboard = {
 export type ApiImage = { url: string; width: number; height: number };
 export type CourierRequest = { name: string; email: string; phone: string; password: string };
 export type ApiCourierJob = { id: string; date: string; time: string; distanceKm?: number };
+
+/** What the API pushes to a signed-in admin over Socket.IO (royal-treats-api, `order:new`). */
+export type ApiLiveOrder = {
+  id: string;
+  customer: string;
+  fulfillment: string;
+  totalCents: number;
+  itemCount: number;
+  date: string;
+  time: string;
+  createdAt: string;
+};
