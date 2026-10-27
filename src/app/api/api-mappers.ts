@@ -1,7 +1,7 @@
 import { flavourLabelFor } from '../catalogue-config';
-import type { CatalogueProduct, Settings } from '../commerce-state.service';
+import type { Account, CatalogueProduct, Settings } from '../commerce-state.service';
 import { centsToRand } from '../money';
-import type { ApiProduct, ApiSettings } from './api-types';
+import type { ApiProduct, ApiSettings, ApiUser } from './api-types';
 
 /** The API's product, in the shape the storefront already uses (prices in rand). */
 export function fromApiProduct(p: ApiProduct): CatalogueProduct {
@@ -36,5 +36,19 @@ export function fromApiSettings(s: ApiSettings, defaults: Settings): Settings {
     latitude: s.latitude ?? null,
     longitude: s.longitude ?? null,
     radiusKm: s.radiusKm ?? defaults.radiusKm,
+  };
+}
+
+/** The signed-in API user as the `Account` the UI already uses (there is no password on the client). */
+export function fromApiUser(user: ApiUser, photoUrl: string | null): Account {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    role: user.role,
+    active: user.active,
+    password: '',
+    photo: photoUrl ?? undefined,
   };
 }

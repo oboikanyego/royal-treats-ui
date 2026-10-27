@@ -18,6 +18,9 @@
         }}
       </p>
     </div>
+    <div class="alert" *ngIf="store.sessionExpired()">
+      Your session ended. Please sign in again.
+    </div>
     <form *ngIf="screen() === 'signin'" (ngSubmit)="login()">
       <label
         >Email address
@@ -30,7 +33,7 @@
           [(ngModel)]="password"
           autocomplete="current-password" /></label
       ><button class="primary wide">Sign in</button>
-      <p class="helper">
+      <p class="helper" *ngIf="!store.apiMode">
         Admin demo: <strong>admin@royaltreats.demo</strong> / <strong>Demo@12345</strong>
       </p>
       <button type="button" class="link" (click)="screen.set('register')">
@@ -54,10 +57,11 @@
           autocomplete="tel"
           placeholder="074 123 4567" /></label
       ><label
-        >Password (demo only)<input
+        >{{ store.apiMode ? 'Password (at least 12 characters)' : 'Password (demo only)'
+        }}<input
           name="password"
           type="password"
-          minlength="8"
+          [attr.minlength]="store.passwordMin"
           required
           [(ngModel)]="password"
           autocomplete="new-password" /></label
@@ -67,13 +71,28 @@
       </button>
     </form>
     <p class="error" *ngIf="error">{{ error }}</p>
-    <p class="warning">
+    <p class="warning" *ngIf="!store.apiMode">
       Frontend prototype only. Never use a real password; profiles are stored in this browser and
       are not secure or shared across devices.
     </p>
+    <p class="helper" *ngIf="store.apiMode">
+      Your password is sent to the Royal Treats server and stored hashed, never as plain text. Use a
+      password you do not use anywhere else.
+    </p>
   </section>
   <ng-container *ngIf="store.session() as user">
-    <div class="workspace-layout" [class.admin-mode]="user.role === 'admin'">
+    <section class="pane" *ngIf="store.apiMode && user.role !== 'customer'">
+      <h2>{{ user.role | titlecase }} workspace</h2>
+      <p>
+        Signed in as {{ user.name }}. Your tools are being connected to the live Royal Treats
+        service and will appear here soon.
+      </p>
+    </section>
+    <div
+      class="workspace-layout"
+      *ngIf="!store.apiMode || user.role === 'customer'"
+      [class.admin-mode]="user.role === 'admin'"
+    >
       <aside class="workspace-sidebar" *ngIf="user.role === 'admin'" aria-label="Admin navigation">
         <div class="workspace-brand">
           <span class="brand-crown">♛</span>
@@ -173,16 +192,18 @@
                 /><span
                   >✦ {{ uploadingPhoto ? 'Uploading...' : 'Change profile photo' }}</span
                 ></label
-              ><small class="helper"
-                >JPG, PNG or WebP up to 5 MB · stored only in this browser</small
-              >
+              ><small class="helper">{{
+                store.apiMode
+                  ? 'JPG, PNG or WebP up to 2 MB'
+                  : 'JPG, PNG or WebP up to 5 MB · stored only in this browser'
+              }}</small>
             </div>
           </div>
           <div class="profile-contact">
             <span><b>Email</b>{{ user.email }}</span
             ><span><b>Phone (calls)</b>{{ user.phone }}</span>
           </div>
-          <h3>Your orders</h3>
+          <h3 *ngIf="!store.apiMode">Your orders</h3>
           <div class="order-card" *ngFor="let order of store.deliveries()">
             <ng-container *ngIf="order.customerId === user.id"
               ><b>{{ order.id }}</b
@@ -190,7 +211,7 @@
               <p>{{ order.fulfillment | titlecase }} · {{ order.total | rand }}</p></ng-container
             >
           </div>
-          <p class="helper">
+          <p class="helper" *ngIf="!store.apiMode">
             Only orders created in this browser are visible until the backend is connected.
           </p>
         </div>

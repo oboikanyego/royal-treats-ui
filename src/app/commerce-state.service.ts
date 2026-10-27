@@ -1,6 +1,12 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, effect, inject, signal, untracked } from '@angular/core';
 import { environment } from '../environments/environment';
+import { fromApiUser } from './api/api-mappers';
+import { toApiError } from './api/api-errors';
+import { AuthApi } from './api/auth-api.service';
+import { authErrorMessage, registrationProblem, type AuthContext } from './api/auth-messages';
 import { CatalogueApi } from './api/catalogue-api.service';
+import { photoFileProblem } from './api/photo-file';
+import { SessionService } from './api/session.service';
 import {
   CATEGORY_OPTIONS,
   DELIVERY_RADIUS_KM,
@@ -167,8 +173,16 @@ const defaultSettings: Settings = {
 @Injectable({ providedIn: 'root' })
 export class CommerceState {
   private readonly catalogueApi = inject(CatalogueApi);
+  private readonly authApi = inject(AuthApi);
+  private readonly sessions = inject(SessionService);
   /** True when the catalogue and settings come from the API (see src/environments). */
   readonly apiMode = environment.useApi;
+  /** Minimum password length: the API requires 12, the browser demo only 8. */
+  readonly passwordMin = environment.useApi ? 12 : 8;
+  /** True while a saved API session is being checked after a page load. */
+  readonly sessionRestoring = this.sessions.restoring;
+  /** True after the API rejected our token, so the sign-in screen can explain. */
+  readonly sessionExpired = this.sessions.expired;
   readonly catalogueStatus = signal<CatalogueStatus>(environment.useApi ? 'loading' : 'ready');
   readonly products = signal<CatalogueProduct[]>(
     environment.useApi ? [] : read('royal-products-v2', seedProducts),
@@ -210,7 +224,49 @@ export class CommerceState {
   constructor() {
     const id = sessionStorage.getItem('royal-demo-session');
     if (id) this.session.set(this.accounts().find((a) => a.id === id && a.active) ?? null);
-    if (this.apiMode) void this.refreshCatalogue();
+    if (this.apiMode) {
+      // The signed-in API user, as the Account the templates already read.
+      effect(() => {
+        const user = this.sessions.user();
+        const photo = this.sessions.photoUrl();
+        untracked(() => this.session.set(user ? fromApiUser(user, photo) : null));
+      });
+      void this.refreshCatalogue();
+      void this.restoreSession();
+    }
+  }
+  /** After a reload, checks the token kept in sessionStorage; an invalid one ends the session. */
+  private async restoreSession(): Promise<void> {
+    if (!this.sessions.token()) return;
+    this.sessions.restoring.set(true);
+    try {
+      this.sessions.user.set(await this.authApi.me());
+      void this.loadPhoto();
+    } catch {
+      // A 401 already cleared the session in the interceptor; other failures leave us signed out for now.
+    } finally {
+      this.sessions.restoring.set(false);
+    }
+  }
+  private async loadPhoto(): Promise<void> {
+    try {
+      this.sessions.setPhoto(await this.authApi.photo());
+    } catch {
+      // The picture is optional; a failure to fetch it must not affect signing in.
+    }
+  }
+  private async startApiSession(
+    call: () => ReturnType<AuthApi['login']>,
+    context: AuthContext,
+  ): Promise<string | null> {
+    try {
+      const { user, token, expiresAt } = await call();
+      this.sessions.start(user, token, expiresAt);
+      void this.loadPhoto();
+      return null;
+    } catch (error) {
+      return authErrorMessage(toApiError(error), context);
+    }
   }
   /** Loads products and settings from the API; retried from the banner after a failure. */
   async refreshCatalogue(): Promise<void> {
@@ -236,7 +292,55 @@ export class CommerceState {
   private save<T>(key: string, sig: { (): T }, value: T): void {
     localStorage.setItem(key, JSON.stringify(value));
   }
-  register(name: string, email: string, phone: string, password: string): string | null {
+  /** Resolves to an error message for the form, or null on success. */
+  async register(
+    name: string,
+    email: string,
+    phone: string,
+    password: string,
+  ): Promise<string | null> {
+    if (!this.apiMode) return this.registerLocal(name, email, phone, password);
+    const problem = registrationProblem({ name, email, phone, password });
+    if (problem) return problem;
+    return this.startApiSession(
+      () =>
+        this.authApi.register({
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          phone: phone.trim(),
+          password,
+        }),
+      'register',
+    );
+  }
+  async signIn(email: string, password: string): Promise<string | null> {
+    if (this.apiMode)
+      return this.startApiSession(
+        () => this.authApi.login(email.trim().toLowerCase(), password),
+        'login',
+      );
+    return this.signInLocal(email, password)
+      ? null
+      : 'Incorrect email or password (demo account on this device).';
+  }
+  /** Uploads a profile picture to the API (API mode only). */
+  async uploadProfilePhoto(file: File): Promise<string | null> {
+    const problem = photoFileProblem(file);
+    if (problem) return problem;
+    try {
+      await this.authApi.uploadPhoto(file);
+      await this.loadPhoto();
+      return null;
+    } catch (error) {
+      return authErrorMessage(toApiError(error), 'photo');
+    }
+  }
+  private registerLocal(
+    name: string,
+    email: string,
+    phone: string,
+    password: string,
+  ): string | null {
     const normalized = email.trim().toLowerCase();
     if (!name.trim() || !normalized || !/^\+?[0-9 ]{9,16}$/.test(phone) || password.length < 8)
       return 'Please enter a name, email, valid phone and password of at least 8 characters.';
@@ -253,10 +357,10 @@ export class CommerceState {
     };
     this.accounts.update((xs) => [...xs, account]);
     this.save('royal-accounts-v2', this.accounts, this.accounts());
-    this.signIn(normalized, password);
+    this.signInLocal(normalized, password);
     return null;
   }
-  signIn(email: string, password: string): boolean {
+  private signInLocal(email: string, password: string): boolean {
     const a = this.accounts().find(
       (x) => x.email === email.trim().toLowerCase() && x.password === password && x.active,
     );
@@ -265,6 +369,12 @@ export class CommerceState {
     return !!a;
   }
   signOut(): void {
+    if (this.apiMode) {
+      // Revoke the token on the server (best effort), then forget it here.
+      void this.authApi.logout().catch(() => undefined);
+      this.sessions.clear();
+      return;
+    }
     this.session.set(null);
     sessionStorage.removeItem('royal-demo-session');
   }

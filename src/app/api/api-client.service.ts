@@ -25,4 +25,27 @@ export class ApiClient {
       }),
     );
   }
+
+  /** GET a binary response (an image). Not retried: used for optional extras. */
+  getBlob(path: string): Observable<Blob> {
+    return this.once(this.http.get(environment.apiUrl + path, { responseType: 'blob' }));
+  }
+
+  /** Writes are never retried automatically: repeating a sign-in or an order is not always safe. */
+  post<T>(path: string, body: unknown = {}, headers?: Record<string, string>): Observable<T> {
+    return this.once(this.http.post<T>(environment.apiUrl + path, body, { headers }));
+  }
+  patch<T>(path: string, body: unknown): Observable<T> {
+    return this.once(this.http.patch<T>(environment.apiUrl + path, body));
+  }
+  put<T>(path: string, body: unknown): Observable<T> {
+    return this.once(this.http.put<T>(environment.apiUrl + path, body));
+  }
+
+  private once<T>(request: Observable<T>): Observable<T> {
+    return request.pipe(
+      timeout(REQUEST_TIMEOUT_MS),
+      catchError((failure) => throwError(() => toApiError(failure))),
+    );
+  }
 }

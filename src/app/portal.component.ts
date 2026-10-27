@@ -1,4 +1,12 @@
-import { Component, HostListener, ViewEncapsulation, inject, signal } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  ViewEncapsulation,
+  effect,
+  inject,
+  signal,
+  untracked,
+} from '@angular/core';
 import { RandPipe } from './rand.pipe';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -35,18 +43,26 @@ export class PortalComponent {
   settings: Settings = { ...this.store.settings() };
   constructor() {
     if (this.store.session()) this.screen.set('home');
+    // Follow the session: leave the sign-in screens once signed in (e.g. a session restored after a
+    // reload), and come back to them when it ends (sign-out, or the server rejecting the token).
+    effect(() => {
+      const signedIn = !!this.store.session();
+      untracked(() => {
+        const onAuthScreen = this.screen() === 'signin' || this.screen() === 'register';
+        if (signedIn && onAuthScreen) this.screen.set('home');
+        if (!signedIn && !onAuthScreen) this.screen.set('signin');
+      });
+    });
   }
-  login() {
-    this.error = '';
-    if (!this.store.signIn(this.email, this.password)) {
-      this.error = 'Incorrect email or password (demo account on this device).';
-      return;
-    }
+  async login() {
+    this.error = (await this.store.signIn(this.email, this.password)) ?? '';
+    if (this.error) return;
     this.screen.set('home');
     this.password = '';
   }
-  register() {
-    this.error = this.store.register(this.name, this.email, this.phone, this.password) || '';
+  async register() {
+    this.error =
+      (await this.store.register(this.name, this.email, this.phone, this.password)) ?? '';
     if (!this.error) {
       this.screen.set('home');
       this.password = '';
@@ -190,6 +206,15 @@ export class PortalComponent {
     const file = input.files?.[0];
     if (!file) return;
     this.photoError = '';
+    if (this.store.apiMode) {
+      // The API validates and resizes the picture itself, so send the file as it is.
+      this.uploadingPhoto = true;
+      this.photoError = (await this.store.uploadProfilePhoto(file)) ?? '';
+      if (!this.photoError) this.notice = 'Profile picture updated.';
+      this.uploadingPhoto = false;
+      input.value = '';
+      return;
+    }
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5_000_000) {
       this.photoError = 'Select a JPG, PNG or WebP image under 5 MB.';
       input.value = '';
