@@ -154,3 +154,26 @@ test('the API refusing a password change reads clearly, and a 401 asks to sign i
   assert.match(authErrorMessage(err(429), 'password'), /Too many attempts/);
   assert.match(authErrorMessage(err(500), 'password'), /could not change your password/);
 });
+
+import { resetProblem } from '../src/app/api/auth-messages';
+
+test('the reset page checks the two passwords before asking the API', () => {
+  assert.equal(resetProblem({ next: 'new-long-password', confirm: 'new-long-password' }), null);
+  assert.match(resetProblem({ next: 'short', confirm: 'short' })!, /12 to 128/);
+  assert.match(
+    resetProblem({ next: 'new-long-password', confirm: 'other-long-password' })!,
+    /do not match/,
+  );
+});
+
+test('forgot and reset errors are plain, and a dead link says how to get a new one', () => {
+  assert.match(authErrorMessage(err(400), 'forgot'), /valid email/);
+  assert.match(authErrorMessage(err(429), 'forgot'), /Too many attempts/);
+  assert.match(authErrorMessage(err(500), 'forgot'), /could not send the email/);
+  assert.match(
+    authErrorMessage(err(400, 'This reset link is invalid or has expired'), 'reset'),
+    /invalid or has expired.*new one/,
+  );
+  assert.match(authErrorMessage(invalid('newPassword'), 'reset'), /12 to 128/);
+  assert.match(authErrorMessage(err(500), 'reset'), /could not change your password/);
+});

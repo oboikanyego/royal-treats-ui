@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { AdminLive } from './api/admin-live.service';
 import { CommerceState } from './commerce-state.service';
-import { type PortalScreen, portalHeading } from './portal-headings';
+import { type PortalScreen, authCopy, portalHeading } from './portal-headings';
 import { AdminCouriersComponent } from './workspace/admin-couriers.component';
 import { AdminOrdersComponent } from './workspace/admin-orders.component';
 import { AdminOverviewComponent } from './workspace/admin-overview.component';
@@ -52,6 +52,8 @@ export class PortalComponent {
   email = '';
   password = '';
   consent = false;
+  resetSent = false;
+  sendingReset = false;
   name = '';
   phone = '';
   photoError = '';
@@ -71,11 +73,31 @@ export class PortalComponent {
     effect(() => {
       const signedIn = !!this.store.session();
       untracked(() => {
-        const onAuthScreen = this.screen() === 'signin' || this.screen() === 'register';
+        const onAuthScreen = ['signin', 'register', 'forgot'].includes(this.screen());
         if (signedIn && onAuthScreen) this.screen.set('home');
         if (!signedIn && !onAuthScreen) this.screen.set('signin');
       });
     });
+  }
+
+  authTitle() {
+    return authCopy(this.screen()).title;
+  }
+  authSubtitle() {
+    return authCopy(this.screen()).subtitle;
+  }
+
+  openForgot() {
+    this.error = '';
+    this.resetSent = false;
+    this.screen.set('forgot');
+  }
+
+  async sendReset() {
+    this.sendingReset = true;
+    this.error = (await this.store.forgotPassword(this.email)) ?? '';
+    this.resetSent = !this.error;
+    this.sendingReset = false;
   }
 
   async login() {

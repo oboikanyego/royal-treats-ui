@@ -1,5 +1,13 @@
 export type PortalScreen =
-  'signin' | 'register' | 'home' | 'products' | 'couriers' | 'settings' | 'orders' | 'account';
+  | 'forgot'
+  | 'signin'
+  | 'register'
+  | 'home'
+  | 'products'
+  | 'couriers'
+  | 'settings'
+  | 'orders'
+  | 'account';
 
 /** The title and line under it for the signed-in header, which follow the screen the user is on. */
 export function portalHeading(
@@ -37,4 +45,19 @@ export function portalHeading(
     title: 'Your Royal account',
     subtitle: 'Everything you need to order, share and enjoy your treats.',
   };
+}
+
+/** The title and line above the sign-in, register and forgot-password forms. */
+export function authCopy(screen: PortalScreen): { title: string; subtitle: string } {
+  switch (screen) {
+    case 'register':
+      return { title: 'Join Royal Treats', subtitle: 'Create a customer profile' };
+    case 'forgot':
+      return {
+        title: 'Forgot your password?',
+        subtitle: 'We will email you a link to choose a new one',
+      };
+    default:
+      return { title: 'Welcome back', subtitle: 'Sign in to your Royal Treats account' };
+  }
 }

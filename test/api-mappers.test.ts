@@ -84,7 +84,7 @@ test('optional text fields default to empty strings', () => {
 test('settings overlay the defaults, and unconfigured coordinates are null', () => {
   assert.deepEqual(
     fromApiSettings({ storeName: 'Royal Treats', supportEmail: '', radiusKm: 5 }, defaults),
-    defaults,
+    { ...defaults, passwordResetEnabled: false },
   );
   const s = fromApiSettings(
     { open: '09:00', close: '20:00', latitude: -24.59, longitude: 27.41, supportEmail: 'a@b.test' },
@@ -94,4 +94,24 @@ test('settings overlay the defaults, and unconfigured coordinates are null', () 
   assert.equal(s.latitude, -24.59);
   assert.equal(s.supportEmail, 'a@b.test');
   assert.equal(s.address, defaults.address);
+});
+
+test('the API says whether password reset is available, and the admin saving settings keeps it', () => {
+  const defaults = {
+    storeName: 'S',
+    address: 'A',
+    supportEmail: '',
+    open: '10:00',
+    close: '23:00',
+    latitude: null,
+    longitude: null,
+    radiusKm: 5,
+  };
+  assert.equal(
+    fromApiSettings({ passwordResetEnabled: true }, defaults).passwordResetEnabled,
+    true,
+  );
+  assert.equal(fromApiSettings({}, defaults).passwordResetEnabled, false);
+  const current = { ...defaults, passwordResetEnabled: true };
+  assert.equal(fromApiSettings({ storeName: 'S2' }, current).passwordResetEnabled, true); // the PUT reply lacks it
 });

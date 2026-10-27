@@ -3011,3 +3011,34 @@ app-root a {
   text-decoration: underline;
   font-size: 13px;
 }
+
+/* Show / Hide password boxes on storefront pages (the staff portal has its own copy) */
+.reset-panel {
+  max-width: 440px;
+  margin: 0 auto 40px;
+}
+.password-field {
+  position: relative;
+  display: block;
+}
+.password-field input {
+  width: 100%;
+  padding-right: 76px;
+}
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  background: none;
+  border: 0;
+  padding: 6px 8px;
+  color: var(--rt-pink-dark, #c2185b);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+.success-text {
+  color: #1b7f3b;
+  font-weight: 700;
+}

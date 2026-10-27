@@ -76,6 +76,13 @@ export const routes: Routes = [
   // The old guest "Track order" address now leads to the signed-in orders page.
   { path: 'track', pathMatch: 'full', redirectTo: 'orders' },
   {
+    path: 'reset-password',
+    title: 'Reset password',
+    data: { page: 'portal' },
+    loadComponent: () =>
+      import('./pages/reset-password.component').then((m) => m.ResetPasswordComponent),
+  },
+  {
     path: 'privacy',
     title: 'Privacy Notice',
     data: { page: 'privacy', legal: 'privacy' },

@@ -8,6 +8,7 @@ import {
   passwordChangeProblem,
   profileProblem,
   registrationProblem,
+  resetProblem,
   type AuthContext,
 } from './api/auth-messages';
 import { CatalogueApi } from './api/catalogue-api.service';
@@ -47,6 +48,8 @@ export type Settings = {
   storeName: string;
   address: string;
   supportEmail: string;
+  /** Set by the API: whether it can email a password reset link. */
+  passwordResetEnabled?: boolean;
 };
 export type DeliveryOrder = {
   id: string;
@@ -219,6 +222,27 @@ export class CommerceState {
       return null;
     } catch (error) {
       return authErrorMessage(toApiError(error), 'password');
+    }
+  }
+  /** Asks for a reset email. Resolves to an error message, or null; the answer never says if the address exists. */
+  async forgotPassword(email: string): Promise<string | null> {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return 'Enter a valid email address.';
+    try {
+      await this.authApi.forgotPassword(email.trim().toLowerCase());
+      return null;
+    } catch (error) {
+      return authErrorMessage(toApiError(error), 'forgot');
+    }
+  }
+  /** Sets a new password from the emailed link. Resolves to an error message, or null on success. */
+  async resetPassword(token: string, next: string, confirm: string): Promise<string | null> {
+    const problem = resetProblem({ next, confirm });
+    if (problem) return problem;
+    try {
+      await this.authApi.resetPassword(token, next);
+      return null;
+    } catch (error) {
+      return authErrorMessage(toApiError(error), 'reset');
     }
   }
   async signIn(email: string, password: string): Promise<string | null> {

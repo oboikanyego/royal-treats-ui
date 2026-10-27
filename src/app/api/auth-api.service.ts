@@ -36,6 +36,14 @@ export class AuthApi {
   changePassword(currentPassword: string, newPassword: string) {
     return firstValueFrom(this.api.post<void>('/me/password', { currentPassword, newPassword }));
   }
+  /** Asks the API to email a reset link. It answers the same for any address. */
+  forgotPassword(email: string) {
+    return firstValueFrom(this.api.post<{ ok: true }>('/auth/forgot-password', { email }));
+  }
+  /** Sets a new password with the one-time token from the email; ends every session of the account. */
+  resetPassword(token: string, newPassword: string) {
+    return firstValueFrom(this.api.post<void>('/auth/reset-password', { token, newPassword }));
+  }
   uploadPhoto(file: File) {
     const form = new FormData();
     form.set('photo', file); // the API reads the multipart field named `photo`

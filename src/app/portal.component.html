@@ -9,14 +9,8 @@
   <section class="auth" *ngIf="!store.session()">
     <div class="auth-head">
       <span>♛</span>
-      <h1>{{ screen() === 'register' ? 'Join Royal Treats' : 'Welcome back' }}</h1>
-      <p>
-        {{
-          screen() === 'register'
-            ? 'Create a customer profile'
-            : 'Sign in to your Royal Treats account'
-        }}
-      </p>
+      <h1>{{ authTitle() }}</h1>
+      <p>{{ authSubtitle() }}</p>
     </div>
     <div class="alert" *ngIf="store.sessionExpired()">
       Your session ended. Please sign in again.
@@ -31,9 +25,37 @@
         autocomplete="current-password"
         [(value)]="password"
       /><button class="primary wide">Sign in</button>
+      <button
+        type="button"
+        class="link"
+        *ngIf="store.settings().passwordResetEnabled"
+        (click)="openForgot()"
+      >
+        Forgot your password?
+      </button>
       <button type="button" class="link" (click)="screen.set('register')">
         New customer? Register here
       </button>
+    </form>
+    <form *ngIf="screen() === 'forgot'" (ngSubmit)="sendReset()">
+      <ng-container *ngIf="!resetSent">
+        <label
+          >Email address
+          <input
+            name="email"
+            type="email"
+            required
+            [(ngModel)]="email"
+            autocomplete="email" /></label
+        ><button class="primary wide" [disabled]="sendingReset">
+          {{ sendingReset ? 'Sending…' : 'Send me a reset link' }}
+        </button>
+      </ng-container>
+      <p class="alert success-alert" *ngIf="resetSent" role="status">
+        If there is an account for {{ email }}, we have emailed it a link to choose a new password.
+        It works once and expires in 1 hour. Check your spam folder if it does not arrive.
+      </p>
+      <button type="button" class="link" (click)="screen.set('signin')">← Back to sign in</button>
     </form>
     <form *ngIf="screen() === 'register'" (ngSubmit)="register()">
       <label>Full name<input name="name" required [(ngModel)]="name" autocomplete="name" /></label

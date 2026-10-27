@@ -22,3 +22,12 @@ test('couriers and customers keep their own headings, and everyone gets My accou
   assert.equal(portalHeading('courier', 'account').title, 'My account');
   assert.equal(portalHeading('customer', 'account').title, 'My account');
 });
+
+import { authCopy } from '../src/app/portal-headings';
+
+test('the sign-in, register and forgot-password screens each have their own title', () => {
+  assert.equal(authCopy('signin').title, 'Welcome back');
+  assert.equal(authCopy('register').title, 'Join Royal Treats');
+  assert.equal(authCopy('forgot').title, 'Forgot your password?');
+  assert.match(authCopy('forgot').subtitle, /email you a link/);
+});
