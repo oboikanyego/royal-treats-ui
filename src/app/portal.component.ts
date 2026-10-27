@@ -16,6 +16,7 @@ import { AdminCouriersComponent } from './workspace/admin-couriers.component';
 import { AdminOrdersComponent } from './workspace/admin-orders.component';
 import { AdminOverviewComponent } from './workspace/admin-overview.component';
 import { AdminProductsComponent } from './workspace/admin-products.component';
+import { CourierWorkspaceComponent } from './workspace/courier-workspace.component';
 import { AdminSettingsComponent } from './workspace/admin-settings.component';
 
 @Component({
@@ -30,6 +31,7 @@ import { AdminSettingsComponent } from './workspace/admin-settings.component';
     AdminProductsComponent,
     AdminCouriersComponent,
     AdminSettingsComponent,
+    CourierWorkspaceComponent,
   ],
   templateUrl: './portal.component.html',
   styleUrls: ['./portal.component.css'],

@@ -81,18 +81,7 @@
     </p>
   </section>
   <ng-container *ngIf="store.session() as user">
-    <section class="pane" *ngIf="store.apiMode && user.role === 'courier'">
-      <h2>{{ user.role | titlecase }} workspace</h2>
-      <p>
-        Signed in as {{ user.name }}. Your tools are being connected to the live Royal Treats
-        service and will appear here soon.
-      </p>
-    </section>
-    <div
-      class="workspace-layout"
-      *ngIf="!store.apiMode || user.role !== 'courier'"
-      [class.admin-mode]="user.role === 'admin'"
-    >
+    <div class="workspace-layout" [class.admin-mode]="user.role === 'admin'">
       <aside class="workspace-sidebar" *ngIf="user.role === 'admin'" aria-label="Admin navigation">
         <div class="workspace-brand">
           <span class="brand-crown">♛</span>
@@ -216,6 +205,7 @@
             Only orders created in this browser are visible until the backend is connected.
           </p>
         </div>
+        <rt-courier-workspace *ngIf="user.role === 'courier' && store.apiMode" />
         <div *ngIf="user.role === 'courier' && !store.apiMode" class="pane">
           <h2>Available delivery jobs</h2>
           <p class="helper">

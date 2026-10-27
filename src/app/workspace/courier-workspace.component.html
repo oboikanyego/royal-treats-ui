@@ -1,0 +1,102 @@
+<div class="pane">
+  <div
+    class="alert"
+    [class.error]="message()?.kind === 'error'"
+    [class.success-alert]="message()?.kind === 'notice'"
+    *ngIf="message() as note"
+    [attr.role]="note.kind === 'error' ? 'alert' : 'status'"
+  >
+    {{ note.text }}
+  </div>
+
+  <h2>Available delivery jobs</h2>
+  <p class="helper">
+    The first courier to accept a job gets it. The customer's name, phone number and address appear
+    once you accept.
+  </p>
+  <p class="helper" *ngIf="jobsStatus() === 'loading'">Loading jobs…</p>
+  <button type="button" class="secondary" *ngIf="jobsStatus() === 'error'" (click)="refresh()">
+    Try again
+  </button>
+  <p *ngIf="jobsStatus() === 'ready' && !jobs().length">No available jobs at the moment.</p>
+  <div class="order-card" *ngFor="let job of jobs()">
+    <div>
+      <b>{{ job.ref }}</b
+      ><span>{{ distanceLabel(job.distanceKm) }}</span>
+    </div>
+    <p>Due {{ job.date }} at {{ job.time }}</p>
+    <button type="button" class="primary" [disabled]="accepting() === job.id" (click)="accept(job)">
+      {{ accepting() === job.id ? 'Accepting…' : 'Accept delivery' }}
+    </button>
+  </div>
+
+  <h2>My deliveries</h2>
+  <p class="helper" *ngIf="deliveriesStatus() === 'loading'">Loading your deliveries…</p>
+  <p *ngIf="deliveriesStatus() === 'ready' && !deliveries().active.length">
+    No deliveries to make right now.
+  </p>
+  <div class="order-card" *ngFor="let order of deliveries().active">
+    <div>
+      <b>{{ order.ref }}</b
+      ><span>Due {{ order.date }} at {{ order.time }}</span>
+    </div>
+    <p>
+      {{ order.customer }} · <a [href]="'tel:' + order.phone">{{ order.phone }}</a>
+    </p>
+    <p>{{ order.address }}</p>
+    <div class="order-recipients">
+      <ng-container *ngFor="let group of groupByRecipient(order.items)">
+        <div *ngFor="let line of group.items">
+          <span>{{ group.recipient }}</span
+          ><b
+            >{{ line.qty }} × {{ line.name }}
+            <small>{{
+              [line.variant, line.sauce, line.topping].filter(isSet).join(' · ')
+            }}</small></b
+          >
+        </div>
+      </ng-container>
+    </div>
+    <p *ngIf="order.notes">
+      <small>Notes: {{ order.notes }}</small>
+    </p>
+    <p>
+      <b>{{ order.payment }}: {{ order.total | rand }}</b>
+    </p>
+    <div class="actions" *ngIf="canComplete(order) && confirming() !== order.id">
+      <button type="button" class="primary" (click)="confirming.set(order.id)">
+        Mark delivered
+      </button>
+    </div>
+    <div class="actions" *ngIf="confirming() === order.id">
+      <span>Has {{ order.customer }} received this order?</span>
+      <button
+        type="button"
+        class="primary"
+        [disabled]="completing() === order.id"
+        (click)="complete(order)"
+      >
+        {{ completing() === order.id ? 'Saving…' : 'Yes, delivered' }}
+      </button>
+      <button
+        type="button"
+        class="secondary"
+        [disabled]="completing() === order.id"
+        (click)="confirming.set(null)"
+      >
+        Not yet
+      </button>
+    </div>
+  </div>
+
+  <ng-container *ngIf="deliveries().done.length">
+    <h3>Delivered</h3>
+    <div class="order-card" *ngFor="let order of deliveries().done">
+      <div>
+        <b>{{ order.ref }}</b
+        ><span>{{ order.status }} · {{ order.total | rand }}</span>
+      </div>
+      <p>{{ order.customer }} · {{ order.address }}</p>
+    </div>
+  </ng-container>
+</div>
