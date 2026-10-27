@@ -32,7 +32,7 @@ export function privacySections(shop: ShopInfo): LegalSection[] {
       heading: 'Why we use it',
       bullets: [
         'To create and run your account.',
-        'To take, prepare, deliver and collect your orders, and to contact you about them by phone or email.',
+        'To take, prepare, deliver and collect your orders, and to contact you about them by phone or email. We email you when we receive your order and at each step, and when you ask to reset your password. These emails are about your orders and account, not marketing.',
         'To keep the service secure and to prevent fraud and abuse.',
         'To keep the records we must keep by law, such as for accounting.',
       ],
@@ -49,7 +49,7 @@ export function privacySections(shop: ShopInfo): LegalSection[] {
       bullets: [
         'Our staff, who can see your orders and contact details so they can serve you.',
         'A delivery person, who sees your name, phone number and address only after they accept your delivery.',
-        'The companies that run the service for us: the website host, the server host, the database provider and the image host (which only stores product pictures, never customer information). Some of them may process information outside South Africa. We choose providers that protect it, and they may only use it to provide their service to us.',
+        'The companies that run the service for us: the website host, the server host, the database provider, the email service that delivers our messages to you (it sees your email address and the message), and the image host (which only stores product pictures, never customer information). Some of them may process information outside South Africa. We choose providers that protect it, and they may only use it to provide their service to us.',
         'Anyone else only if the law requires it.',
       ],
     },

@@ -21,6 +21,8 @@ export type ApiSettings = {
   latitude?: number | null;
   longitude?: number | null;
   radiusKm?: number;
+  /** True when the API can send email, so "Forgot password?" can work. */
+  passwordResetEnabled?: boolean;
 };
 export type Paginated<T> = { items: T[]; total: number; page: number; limit: number };
 export type ApiUser = {

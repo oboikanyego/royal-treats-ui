@@ -1,6 +1,7 @@
 import type { ApiRequestError } from './api-errors';
 
-export type AuthContext = 'login' | 'register' | 'photo' | 'profile' | 'password';
+export type AuthContext =
+  'login' | 'register' | 'photo' | 'profile' | 'password' | 'forgot' | 'reset';
 const TOO_MANY = 'Too many attempts. Please wait a few minutes and try again.';
 
 /** The API's `details` are `{ path, message }` per invalid field. */
@@ -34,6 +35,18 @@ export function authErrorMessage(error: ApiRequestError, context: AuthContext): 
       return (field && FIELD_HELP[field]) || 'Please check your details and try again.';
     }
     return 'We could not create your account. Please try again.';
+  }
+  if (context === 'forgot') {
+    if (error.status === 400) return 'Enter a valid email address.';
+    return 'We could not send the email just now. Please try again in a few minutes.';
+  }
+  if (context === 'reset') {
+    if (error.status === 400) {
+      const field = firstInvalidField(error.details);
+      if (field === 'newPassword') return FIELD_HELP['newPassword']!;
+      return 'This reset link is invalid or has expired. Ask for a new one from the sign-in page.';
+    }
+    return 'We could not change your password. Please try again.';
   }
   if (context === 'profile') {
     if (error.status === 401) return 'Please sign in again to change your details.';
@@ -98,5 +111,12 @@ export function passwordChangeProblem(input: {
   if (input.next.length < 12 || input.next.length > 128) return FIELD_HELP['newPassword']!;
   if (input.next !== input.confirm) return 'The new passwords do not match.';
   if (input.next === input.current) return 'Choose a password you have not used just now.';
+  return null;
+}
+
+/** The two boxes on the reset page. */
+export function resetProblem(input: { next: string; confirm: string }): string | null {
+  if (input.next.length < 12 || input.next.length > 128) return FIELD_HELP['newPassword']!;
+  if (input.next !== input.confirm) return 'The new passwords do not match.';
   return null;
 }

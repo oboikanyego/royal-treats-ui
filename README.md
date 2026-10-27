@@ -25,6 +25,7 @@ Loading feedback: a thin bar at the top of the page shows whenever a page change
 - **Checkout** sends the cart without prices (the API prices it from its own catalogue, so the total on the confirmation and in the list is the server's) with an `Idempotency-Key` that is reused if the same order is submitted again after a lost response, so a retry can never create a duplicate. Name and phone come from the account. Collection works for every available product; delivery is for in-stock mini donuts within 5 km (straight line) of the store. Payment is cash on collection or delivery. Known refusals (item out of stock, outside the delivery area or store hours) are shown as plain messages.
 - **Privacy Notice and Terms of Use** (`/privacy`, `/terms`, linked in the footer and from registration) are written for POPIA and South African consumer law and quote the shop's name, address and support email from the live settings. **Registering needs an explicit tick** on "I have read the Privacy Notice and the Terms of Use and I agree"; the API requires it and records the time and the version of the texts the customer agreed to (`TERMS_VERSION` in royal-treats-api; keep it in step with `LEGAL_UPDATED` in `src/app/legal.ts` when the wording changes). The texts are a draft written from how the site works; have them reviewed before relying on them.
 - **My account** (every role, including admin and courier): change your name and phone number (the email and role cannot be changed), and change your password. Changing the password signs every other device out. An admin who changes their password here keeps it across restarts until a different `ADMIN_PASSWORD` is set on the API.
+- **Forgot password**: when the API has email set up (`passwordResetEnabled` in `GET /settings`) the sign-in screen shows "Forgot your password?". The emailed link opens `/reset-password?token=...`; the page removes the token from the address bar, and the link works once and expires in 1 hour. Using it signs every device out. The answer never says whether an address has an account.
 - **Show / Hide** on every password box (sign-in, registration, add-courier, change-password).
 - **My Orders** lists the signed-in customer's orders with a status timeline, refreshes every 30 seconds, groups items by recipient, and tells the customer to contact the shop to change or cancel an order: **only an admin can cancel an order** (the API refuses it for anyone else). `/track` redirects there.
 
@@ -49,14 +50,14 @@ For courier accounts (created by the admin).
 
 ## Support
 
-No messaging integrations and no owner phone numbers are shown publicly. The support page composes a `mailto:` message to the **support email an admin configured**; this site does not send email.
+No messaging integrations and no owner phone numbers are shown publicly. The support page composes a `mailto:` message to the **support email an admin configured**; this site does not send email itself; order and password-reset emails are sent by the API (Resend), see royal-treats-api.
 
 ## Security notes
 
 - Roles are enforced by the API; the UI only hides what a role cannot use. The API refuses admin and courier calls from other roles.
 - Passwords are sent to the API over HTTPS and stored hashed there. The token lives only in `sessionStorage`.
 - Prices, stock, delivery distance and store hours are checked by the API on every order; the checks in the browser only save a round trip.
-- Not yet built: online/EFT payment, automatic confirmation emails or messages, and driving-distance (rather than straight-line) delivery checks.
+- Not yet built: online/EFT payment, SMS/WhatsApp messages, and driving-distance (rather than straight-line) delivery checks.
 
 ## Formatting and CI
 

@@ -36,6 +36,7 @@ export function fromApiSettings(s: ApiSettings, defaults: Settings): Settings {
     latitude: s.latitude ?? null,
     longitude: s.longitude ?? null,
     radiusKm: s.radiusKm ?? defaults.radiusKm,
+    passwordResetEnabled: s.passwordResetEnabled ?? defaults.passwordResetEnabled ?? false,
   };
 }
 
