@@ -29,6 +29,15 @@ export function stepDone(steps: readonly string[], status: string, step: string)
   return steps.indexOf(step) <= current;
 }
 
+/**
+ * The API stores the last status as "Completed". Customers and staff read it as "Collected" for a
+ * collection order and "Delivered" for a delivery; every other status is shown as it is.
+ */
+export function statusLabel(status: string, fulfillment: string): string {
+  if (status !== 'Completed') return status;
+  return fulfillment === 'delivery' ? 'Delivered' : 'Collected';
+}
+
 export const SHARED_LABEL = 'Shared treats';
 
 /** An order's lines grouped by the person each treat is for, in first-seen order. */

@@ -86,6 +86,18 @@
   We couldn't load the menu.
   <button class="secondary" (click)="store.refreshCatalogue()">Try again</button>
 </div>
+<div class="live-toasts" *ngIf="live.alerts().length" role="status" aria-live="polite">
+  <div class="live-toast" *ngFor="let alert of live.alerts()">
+    <div>
+      <b>New order</b>
+      <span>{{ alert.text }}</span>
+    </div>
+    <button class="primary" (click)="openOrders(alert.id)">View orders</button>
+    <button class="live-toast-close" (click)="live.dismiss(alert.id)" aria-label="Dismiss alert">
+      ✕
+    </button>
+  </div>
+</div>
 <main id="main-content"><router-outlet /></main>
 <nav class="mobile-bottom-nav" *ngIf="!page().startsWith('admin')" aria-label="Mobile navigation">
   <button [class.current]="page() === 'home'" (click)="go('home')">

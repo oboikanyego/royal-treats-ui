@@ -19,6 +19,7 @@
     "@angular/platform-browser": "^20.3.0",
     "@angular/router": "^20.3.0",
     "rxjs": "~7.8.0",
+    "socket.io-client": "^4.8.4",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
   },
@@ -26,8 +27,8 @@
     "@angular/build": "^20.3.0",
     "@angular/cli": "^20.3.0",
     "@angular/compiler-cli": "^20.3.0",
-    "typescript": "~5.9.0",
     "prettier": "^3.6.2",
-    "tsx": "^4.23.15"
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.0"
   }
 }

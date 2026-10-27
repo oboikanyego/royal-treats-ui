@@ -7,12 +7,21 @@
         seconds.
       </p>
     </div>
+    <label class="check"
+      ><input
+        type="checkbox"
+        name="alertSound"
+        [ngModel]="live.soundOn()"
+        (ngModelChange)="live.setSound($event)"
+      />
+      Sound for new orders</label
+    >
     <label
       >Show<select name="orderFilter" [ngModel]="filter()" (ngModelChange)="filter.set($event)">
         <option value="all">All orders</option>
         <option value="pending">Waiting to confirm</option>
         <option value="active">In progress</option>
-        <option value="completed">Completed</option>
+        <option value="completed">Collected / delivered</option>
         <option value="cancelled">Cancelled</option>
       </select></label
     >
@@ -38,7 +47,7 @@
   <div class="order-card" *ngFor="let order of orders()">
     <div>
       <b>{{ order.ref }}</b
-      ><span>{{ order.status }} · {{ order.total | rand }}</span>
+      ><span>{{ statusText(order) }} · {{ order.total | rand }}</span>
     </div>
     <p>
       {{ order.customer }} · <a [href]="'tel:' + order.phone">{{ order.phone }}</a> ·
@@ -84,7 +93,7 @@
           [disabled]="busy() === order.id"
           (click)="next === 'Cancelled' ? confirming.set(order.id) : change(order, next)"
         >
-          {{ actionLabel(next) }}
+          {{ actionLabel(next, order.fulfillment) }}
         </button>
       </ng-container>
     </div>

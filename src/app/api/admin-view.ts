@@ -1,3 +1,4 @@
+import { statusLabel } from '../order-view';
 import type { ApiDashboard } from './api-types';
 
 const ACTIVE = [
@@ -17,7 +18,7 @@ export type DashboardSummary = {
   completed: number;
   cancelled: number;
   revenueCents: number;
-  breakdown: { status: string; count: number; totalCents: number }[];
+  breakdown: { status: string; label: string; count: number; totalCents: number }[];
 };
 
 /** The API's per-status totals, as the handful of numbers the overview shows. */
@@ -36,7 +37,13 @@ export function dashboardSummary(d: ApiDashboard): DashboardSummary {
     cancelled: count(['Cancelled']),
     revenueCents: d.completedRevenueCents,
     breakdown: d.ordersByStatus
-      .map((s) => ({ status: s._id, count: s.count, totalCents: s.totalCents }))
+      .map((s) => ({
+        status: s._id,
+        // The dashboard groups collections and deliveries together, so it cannot say which.
+        label: s._id === 'Completed' ? 'Collected / delivered' : s._id,
+        count: s.count,
+        totalCents: s.totalCents,
+      }))
       .sort((a, b) => rank(a.status) - rank(b.status) || a.status.localeCompare(b.status)),
   };
 }
@@ -59,6 +66,6 @@ export function matchesFilter(status: string, filter: OrderFilter): boolean {
 }
 
 /** The button text for moving an order to `status`. */
-export function statusActionLabel(status: string): string {
-  return status === 'Cancelled' ? 'Cancel order' : `Mark ${status}`;
+export function statusActionLabel(status: string, fulfillment: string): string {
+  return status === 'Cancelled' ? 'Cancel order' : `Mark ${statusLabel(status, fulfillment)}`;
 }

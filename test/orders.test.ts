@@ -317,3 +317,19 @@ test('blocked storage does not stop the app from starting', () => {
   };
   assert.doesNotThrow(() => clearLegacyDemoData(blocked, blocked));
 });
+
+import { statusLabel } from '../src/app/order-view';
+
+test('the last status reads Collected for a collection and Delivered for a delivery', () => {
+  assert.equal(statusLabel('Completed', 'collection'), 'Collected');
+  assert.equal(statusLabel('Completed', 'delivery'), 'Delivered');
+  for (const status of [
+    'Pending',
+    'Confirmed',
+    'Preparing',
+    'Ready for Collection',
+    'Out for Delivery',
+    'Cancelled',
+  ])
+    assert.equal(statusLabel(status, 'delivery'), status);
+});

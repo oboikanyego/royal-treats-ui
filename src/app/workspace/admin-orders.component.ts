@@ -5,11 +5,14 @@ import {
   OnInit,
   ViewEncapsulation,
   computed,
+  effect,
   inject,
   signal,
+  untracked,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi } from '../api/admin-api.service';
+import { AdminLive } from '../api/admin-live.service';
 import { adminErrorMessage } from '../api/admin-messages';
 import { type OrderFilter, matchesFilter, statusActionLabel } from '../api/admin-view';
 import { toApiError } from '../api/api-errors';
@@ -17,7 +20,7 @@ import { fromApiOrder } from '../api/api-mappers';
 import { OrderFeed } from '../api/order-feed';
 import { OrdersApi } from '../api/orders-api.service';
 import type { DeliveryOrder } from '../commerce-state.service';
-import { groupByRecipient } from '../order-view';
+import { groupByRecipient, statusLabel } from '../order-view';
 import { RandPipe } from '../rand.pipe';
 
 const REFRESH_MS = 30_000;
@@ -33,6 +36,7 @@ const REFRESH_MS = 30_000;
 export class AdminOrdersComponent implements OnInit {
   private readonly ordersApi = inject(OrdersApi);
   private readonly admin = inject(AdminApi);
+  readonly live = inject(AdminLive);
   private readonly feed = new OrderFeed((page, limit) => this.ordersApi.list(page, limit), 20);
   readonly status = this.feed.status;
   readonly total = this.feed.total;
@@ -50,9 +54,19 @@ export class AdminOrdersComponent implements OnInit {
 
   readonly groupByRecipient = groupByRecipient;
   readonly actionLabel = statusActionLabel;
+  readonly statusText = (order: DeliveryOrder) => statusLabel(order.status, order.fulfillment);
   readonly isSet = (value: string | undefined) => !!value;
 
   constructor() {
+    // A new order, or a change reported by the API, shows up without waiting for the 30 s refresh.
+    let first = true;
+    effect(() => {
+      this.live.changes();
+      untracked(() => {
+        if (first) first = false;
+        else void this.feed.refresh(false);
+      });
+    });
     const timer = setInterval(() => {
       if (document.visibilityState === 'visible') void this.feed.refresh(false);
     }, REFRESH_MS);
@@ -100,7 +114,10 @@ export class AdminOrdersComponent implements OnInit {
     try {
       const updated = fromApiOrder(await this.ordersApi.setStatus(order.id, status));
       this.feed.replace(updated);
-      this.message.set({ kind: 'notice', text: `${updated.ref} is now ${updated.status}.` });
+      this.message.set({
+        kind: 'notice',
+        text: `${updated.ref} is now ${this.statusText(updated)}.`,
+      });
     } catch (failure) {
       this.message.set({ kind: 'error', text: adminErrorMessage(toApiError(failure), 'status') });
       void this.feed.refresh(false); // the order has probably moved on; show how

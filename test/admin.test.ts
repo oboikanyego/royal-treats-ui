@@ -263,6 +263,26 @@ test('order filters and action labels', () => {
   assert.ok(!matchesFilter('Pending', 'active') && !matchesFilter('Completed', 'active'));
   assert.ok(matchesFilter('Pending', 'pending') && matchesFilter('Cancelled', 'cancelled'));
   assert.ok(matchesFilter('Anything', 'all'));
-  assert.equal(statusActionLabel('Confirmed'), 'Mark Confirmed');
-  assert.equal(statusActionLabel('Cancelled'), 'Cancel order');
+  assert.equal(statusActionLabel('Confirmed', 'collection'), 'Mark Confirmed');
+  assert.equal(statusActionLabel('Cancelled', 'delivery'), 'Cancel order');
+  assert.equal(statusActionLabel('Completed', 'collection'), 'Mark Collected');
+  assert.equal(statusActionLabel('Completed', 'delivery'), 'Mark Delivered');
+});
+
+test('the dashboard names the finished group for both ways of fulfilling an order', () => {
+  const rows = dashboardSummary({
+    ordersByStatus: [
+      { _id: 'Completed', count: 1, totalCents: 100 },
+      { _id: 'Pending', count: 1, totalCents: 100 },
+    ],
+    completedRevenueCents: 100,
+    products: 1,
+  }).breakdown;
+  assert.deepEqual(
+    rows.map((r) => [r.status, r.label]),
+    [
+      ['Pending', 'Pending'],
+      ['Completed', 'Collected / delivered'],
+    ],
+  );
 });

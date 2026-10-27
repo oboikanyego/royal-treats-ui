@@ -94,7 +94,7 @@
     <div class="order-card" *ngFor="let order of deliveries().done">
       <div>
         <b>{{ order.ref }}</b
-        ><span>{{ order.status }} · {{ order.total | rand }}</span>
+        ><span>{{ statusText(order) }} · {{ order.total | rand }}</span>
       </div>
       <p>{{ order.customer }} · {{ order.address }}</p>
     </div>

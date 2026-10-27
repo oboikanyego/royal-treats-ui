@@ -2829,3 +2829,54 @@ main > section.support-page:not(.admin) {
   gap: 10px;
   margin-top: 12px;
 }
+
+/* New-order alerts for the admin (any page) */
+.live-toasts {
+  position: fixed;
+  top: 98px;
+  right: 16px;
+  z-index: 70;
+  display: grid;
+  gap: 10px;
+  width: min(380px, calc(100vw - 32px));
+}
+.live-toast {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid var(--rt-pink-border);
+  border-left: 5px solid var(--rt-pink);
+  border-radius: var(--rt-radius-lg);
+  padding: 12px 12px 12px 14px;
+  box-shadow: 0 12px 30px rgba(60, 20, 50, 0.22);
+}
+.live-toast b {
+  display: block;
+  font-size: 13px;
+  color: var(--rt-pink-dark);
+}
+.live-toast span {
+  font-size: 13px;
+  line-height: 1.35;
+}
+.live-toast-close {
+  background: none;
+  border: 0;
+  color: #6f6b74;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px 6px;
+}
+@media (max-width: 640px) {
+  .live-toasts {
+    top: 80px;
+  }
+  .live-toast {
+    grid-template-columns: 1fr auto;
+  }
+  .live-toast .primary {
+    grid-column: 1 / 2;
+  }
+}
