@@ -23,3 +23,12 @@ export type ApiSettings = {
   radiusKm?: number;
 };
 export type Paginated<T> = { items: T[]; total: number; page: number; limit: number };
+export type ApiUser = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: 'customer' | 'admin' | 'courier';
+  active: boolean;
+};
+export type AuthResponse = { user: ApiUser; token: string; expiresAt: string };

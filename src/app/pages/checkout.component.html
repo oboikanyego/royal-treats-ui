@@ -2,7 +2,7 @@
   <span>♛</span>
   <h1>Checkout</h1>
 </div>
-<p class="notice" *ngIf="store.session()?.role !== 'customer'">
+<p class="notice" *ngIf="store.session()?.role !== 'customer' && !store.sessionRestoring()">
   Customer sign-in is required to place an order.
   <button type="button" class="secondary" routerLink="/account">Sign in or register</button>
 </p>
