@@ -74,6 +74,7 @@
         *ngFor="let p of filters.visibleProducts()"
         (click)="open(p)"
         [disabled]="!p.available"
+        [class.opening]="busy.navigationInProgress() && tapped() === p.id"
       >
         <span class="stock-tag" *ngIf="!p.available">Sold out</span
         ><span class="product-category-label">{{ p.category }}</span

@@ -9,7 +9,11 @@
 </div>
 <h2 class="center">Sweet Treats, Bigger Smiles ♡</h2>
 <div class="categories">
-  <button *ngFor="let p of store.products()" (click)="open(p)">
+  <button
+    *ngFor="let p of store.products()"
+    (click)="open(p)"
+    [class.opening]="busy.navigationInProgress() && tapped() === p.id"
+  >
     <img [src]="p.image" [alt]="p.name" /><b>{{ p.name }}</b>
   </button>
 </div>
@@ -26,6 +30,7 @@
     *ngFor="let p of store.products().slice(0, 8)"
     (click)="open(p)"
     [disabled]="!p.available"
+    [class.opening]="busy.navigationInProgress() && tapped() === p.id"
   >
     <span class="stock-tag" *ngIf="!p.available">Sold out</span
     ><span class="product-category-label">{{ p.category }}</span

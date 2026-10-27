@@ -38,26 +38,26 @@ export const routes: Routes = [
     path: 'menu',
     pathMatch: 'full',
     title: 'Our Menu',
-    data: { page: 'menu' },
+    data: { page: 'menu', preload: true },
     loadComponent: () => import('./pages/menu.component').then((m) => m.MenuComponent),
   },
   {
     path: 'menu/:id',
     title: 'Menu',
-    data: { page: 'product' },
+    data: { page: 'product', preload: true },
     canActivate: [knownProduct],
     loadComponent: () => import('./pages/product.component').then((m) => m.ProductComponent),
   },
   {
     path: 'cart',
     title: 'Your Basket',
-    data: { page: 'cart' },
+    data: { page: 'cart', preload: true },
     loadComponent: () => import('./pages/cart.component').then((m) => m.CartComponent),
   },
   {
     path: 'checkout',
     title: 'Checkout',
-    data: { page: 'checkout' },
+    data: { page: 'checkout', preload: true },
     loadComponent: () => import('./pages/checkout.component').then((m) => m.CheckoutComponent),
   },
   {
@@ -70,7 +70,7 @@ export const routes: Routes = [
   {
     path: 'orders',
     title: 'My Orders',
-    data: { page: 'orders' },
+    data: { page: 'orders', preload: true },
     loadComponent: () => import('./pages/orders.component').then((m) => m.OrdersComponent),
   },
   // The old guest "Track order" address now leads to the signed-in orders page.
