@@ -1,7 +1,7 @@
 import { flavourLabelFor } from '../catalogue-config';
-import type { Account, CatalogueProduct, Settings } from '../commerce-state.service';
+import type { Account, CatalogueProduct, DeliveryOrder, Settings } from '../commerce-state.service';
 import { centsToRand } from '../money';
-import type { ApiProduct, ApiSettings, ApiUser } from './api-types';
+import type { ApiOrder, ApiProduct, ApiSettings, ApiUser } from './api-types';
 
 /** The API's product, in the shape the storefront already uses (prices in rand). */
 export function fromApiProduct(p: ApiProduct): CatalogueProduct {
@@ -50,5 +50,45 @@ export function fromApiUser(user: ApiUser, photoUrl: string | null): Account {
     active: user.active,
     password: '',
     photo: photoUrl ?? undefined,
+  };
+}
+
+/** API order ids are `RT-` plus a 36-character UUID; customers see `RT-` and its first 8 characters. */
+export function shortRef(id: string): string {
+  const match = /^RT-([0-9a-f]{8})-[0-9a-f-]{27}$/i.exec(id);
+  return match ? `RT-${match[1]!.toUpperCase()}` : id;
+}
+
+/** An API order (cents) as the DeliveryOrder the UI already renders (rand). */
+export function fromApiOrder(o: ApiOrder): DeliveryOrder {
+  return {
+    id: o.id,
+    ref: shortRef(o.id),
+    customerId: o.customerId,
+    customer: o.customer,
+    phone: o.phone,
+    address: o.address ?? '',
+    latitude: o.latitude,
+    longitude: o.longitude,
+    distanceKm: o.distanceKm,
+    fulfillment: o.fulfillment,
+    courierId: o.courierId,
+    status: o.status,
+    payment: o.payment,
+    total: centsToRand(o.totalCents),
+    items: o.items.map((i) => ({
+      name: i.name,
+      qty: i.qty,
+      price: centsToRand(i.priceCents),
+      recipient: i.recipient,
+      variant: i.variant,
+      sauce: i.sauce,
+      topping: i.topping,
+    })),
+    date: o.date,
+    time: o.time,
+    notes: o.notes,
+    createdAt: o.createdAt,
+    allowedStatuses: o.allowedStatuses ?? [],
   };
 }

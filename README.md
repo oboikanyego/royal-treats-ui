@@ -21,15 +21,16 @@ The default build is the browser-only demo described below. A second mode loads 
 npm run start:live    # use the deployed API (src/environments/environment.live.ts)
 npm run start:local   # use an API on http://localhost:3000 (npm run dev in royal-treats-api)
 npm run build:live    # production build in API mode
-npm test              # unit tests (money, API errors, mappers, token storage, auth messages)
+npm test              # unit tests (money, API errors, mappers, token storage, auth messages, orders)
 ```
 
-API mode is **in progress and off by default**. Today it covers the public catalogue and **customer accounts**:
+API mode is **in progress and off by default**. Today it covers the public catalogue, **customer accounts** and **customer orders**:
 
 - **Catalogue and settings:** products (prices converted from cents, sauces/toppings as options) and store settings, with a "waking up the server" banner for a slow first request, retries for network and gateway failures, and a "try again" button.
 - **Sign-in:** register, sign in and sign out against the API. The bearer token is kept in **`sessionStorage`** (it survives a refresh of the tab, is gone when the tab closes, and is never put in `localStorage`); on reload the app checks it with `GET /me`. A token the server rejects ends the session with a "Your session ended" message. Passwords must be 12 to 128 characters, as the API requires, and the profile picture is uploaded to the API (JPG, PNG or WebP, up to 2 MB).
+- **Checkout and My Orders:** the order is sent without prices (the API prices it from its own catalogue, so the total on the confirmation and in the list is the server's), with an `Idempotency-Key` that is reused if the same order is submitted again after a lost response, so a retry can never create a duplicate. Name and phone come from the account. Known API refusals (item out of stock, outside the delivery area or store hours) are shown as plain messages. **My Orders** replaces guest tracking: it lists the signed-in customer's orders with a status timeline, refreshes every 30 seconds, groups items by recipient, and offers "Cancel order" only while the API's `allowedStatuses` says it is allowed (a Pending order). `/track` redirects there.
 
-Still on the browser demo: orders and tracking. Admin and courier accounts can sign in, but their workspace shows a "being connected" notice instead of the demo data. Because the admin product and settings screens can only write to the API once admin tools are connected, **saving products or settings is disabled in API mode** (with a message) rather than silently going to `localStorage`. The API address is in `src/environments/`, and the API must list this site's origin in its `CORS_ORIGINS` (set in Render's Environment tab).
+Still on the browser demo: the admin and courier tools. Admin and courier accounts can sign in, but their workspace shows a "being connected" notice instead of the demo data. Because the admin product and settings screens can only write to the API once admin tools are connected, **saving products or settings is disabled in API mode** (with a message) rather than silently going to `localStorage`. The API address is in `src/environments/`, and the API must list this site's origin in its `CORS_ORIGINS` (set in Render's Environment tab).
 
 ## Customer storefront
 

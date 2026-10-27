@@ -62,10 +62,24 @@ export type DeliveryOrder = {
   status: string;
   payment: string;
   total: number;
-  items: { name: string; qty: number; price: number; recipient?: string }[];
+  items: {
+    name: string;
+    qty: number;
+    price: number;
+    recipient?: string;
+    variant?: string;
+    sauce?: string;
+    topping?: string;
+  }[];
   date: string;
   time: string;
   notes?: string;
+  /** Short reference to show customers (API orders have long ids). */
+  ref?: string;
+  /** ISO time the order was placed (API orders). */
+  createdAt?: string;
+  /** Statuses the signed-in user may move this order to (API orders). */
+  allowedStatuses?: string[];
 };
 
 const seedProducts: CatalogueProduct[] = [

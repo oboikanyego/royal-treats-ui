@@ -13,6 +13,7 @@
       >Full Name<input
         name="name"
         required
+        [readonly]="store.apiMode"
         [(ngModel)]="name"
         placeholder="Enter full name" /></label
     ><label
@@ -20,9 +21,13 @@
         name="phone"
         required
         pattern="[0-9+ ]{9,16}"
+        [readonly]="store.apiMode"
         [(ngModel)]="phone"
         placeholder="07x xxx xxxx"
     /></label>
+    <p class="helper" *ngIf="store.apiMode">
+      Your order is placed for the name and phone number on your account.
+    </p>
   </div>
   <div class="panel">
     <h3>② Preferred order time</h3>
@@ -108,7 +113,10 @@
   <div class="total">
     <b>Total</b><b>{{ total() | rand }}</b>
   </div>
-  <button class="primary wide" [disabled]="!cart().length || store.session()?.role !== 'customer'">
-    Place Demo Order
+  <button
+    class="primary wide"
+    [disabled]="!cart().length || store.session()?.role !== 'customer' || submitting()"
+  >
+    {{ submitting() ? 'Placing your order…' : store.apiMode ? 'Place Order' : 'Place Demo Order' }}
   </button>
 </form>

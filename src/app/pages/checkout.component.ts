@@ -4,6 +4,11 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CartService } from '../cart.service';
+import { toApiError } from '../api/api-errors';
+import { fromApiOrder } from '../api/api-mappers';
+import { orderErrorMessage } from '../api/order-messages';
+import { AttemptKeys, buildOrderRequest } from '../api/order-request';
+import { OrdersApi } from '../api/orders-api.service';
 import { CommerceState, DeliveryOrder } from '../commerce-state.service';
 import { OrderTrackingService } from '../order-tracking.service';
 
@@ -18,6 +23,10 @@ export class CheckoutComponent {
   private readonly cartSvc = inject(CartService);
   private readonly tracking = inject(OrderTrackingService);
   private readonly router = inject(Router);
+  private readonly ordersApi = inject(OrdersApi);
+  /** One idempotency key per distinct order, so a retried submit cannot place it twice. */
+  private readonly keys = new AttemptKeys();
+  readonly submitting = signal(false);
 
   readonly cart = this.cartSvc.items;
   readonly count = this.cartSvc.count;
@@ -82,7 +91,7 @@ export class CheckoutComponent {
     );
   }
 
-  place() {
+  async place() {
     this.checkoutError = '';
     if (this.store.session()?.role !== 'customer') {
       this.checkoutError = 'Please sign in or register as a customer before placing an order.';
@@ -117,6 +126,7 @@ export class CheckoutComponent {
       this.checkoutError = 'Delivery requires a valid location within 5 km and a delivery address.';
       return;
     }
+    if (this.store.apiMode) return this.placeViaApi();
     const user = this.store.session();
     const order: DeliveryOrder = {
       id: 'RT-' + Date.now().toString().slice(-8),
@@ -145,5 +155,32 @@ export class CheckoutComponent {
     this.tracking.placed(order);
     this.cartSvc.clear();
     this.router.navigateByUrl('/order-placed');
+  }
+
+  /** API mode: the server prices the order and returns it; nothing about money is decided here. */
+  private async placeViaApi() {
+    if (this.submitting()) return;
+    this.submitting.set(true);
+    try {
+      const request = buildOrderRequest(this.cart(), {
+        fulfillment: this.fulfillment,
+        date: this.date,
+        time: this.time,
+        notes: this.cartSvc.notes(),
+        address: this.deliveryAddress,
+        latitude: this.deliveryLat(),
+        longitude: this.deliveryLng(),
+      });
+      const order = fromApiOrder(await this.ordersApi.place(request, this.keys.keyFor(request)));
+      this.keys.reset();
+      this.tracking.placed(order);
+      this.cartSvc.clear();
+      await this.router.navigateByUrl('/order-placed');
+    } catch (error) {
+      // The key is kept: submitting the same order again returns the one already created.
+      this.checkoutError = orderErrorMessage(toApiError(error), 'place');
+    } finally {
+      this.submitting.set(false);
+    }
   }
 }

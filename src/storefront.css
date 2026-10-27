@@ -2770,3 +2770,62 @@ main > section.support-page:not(.admin) {
     animation: none;
   }
 }
+
+/* My Orders (API mode) */
+.my-order {
+  background: #fff;
+  border: 1px solid var(--rt-pink-border);
+  border-radius: var(--rt-radius-lg);
+  padding: 16px 18px;
+  margin: 14px 0;
+}
+.my-order-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.my-order-head h3 {
+  margin: 0;
+  font-family: var(--rt-font-display);
+}
+.status-pill {
+  background: var(--rt-blush);
+  color: var(--rt-pink-dark);
+  border-radius: var(--rt-radius-pill);
+  padding: 3px 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.status-pill.cancelled {
+  background: #eee;
+  color: #555;
+}
+.my-order .timeline {
+  margin: 12px 4px;
+}
+.my-order-group b {
+  display: block;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--rt-plum);
+}
+.my-order-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+  font-size: 14px;
+}
+.my-order-line small {
+  display: block;
+  color: #6f6b74;
+}
+.my-order-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}

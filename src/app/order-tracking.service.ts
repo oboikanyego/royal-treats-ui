@@ -1,15 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { CommerceState, DeliveryOrder } from './commerce-state.service';
-
-const COLLECTION_STEPS = ['Pending', 'Confirmed', 'Preparing', 'Ready for Collection', 'Completed'];
-const DELIVERY_STEPS = [
-  'Pending',
-  'Confirmed',
-  'Preparing',
-  'Ready for Delivery',
-  'Out for Delivery',
-  'Completed',
-];
+import { stepDone, stepsFor } from './order-view';
 
 /** What checkout hands over to the confirmation and tracking pages. */
 @Injectable({ providedIn: 'root' })
@@ -27,9 +18,7 @@ export class OrderTrackingService {
   readonly tracked = computed(
     () => this.store.deliveries().find((o) => o.id === this.trackedId()) ?? null,
   );
-  readonly steps = computed(() =>
-    this.tracked()?.fulfillment === 'delivery' ? DELIVERY_STEPS : COLLECTION_STEPS,
-  );
+  readonly steps = computed(() => stepsFor(this.tracked()?.fulfillment ?? 'collection'));
 
   /** Remember a freshly placed order and prefill the tracking form with it. */
   placed(order: DeliveryOrder): void {
@@ -52,11 +41,6 @@ export class OrderTrackingService {
   }
 
   stepDone(step: string): boolean {
-    const steps = this.steps();
-    const status = this.tracked()?.status ?? '';
-    let current = steps.indexOf(status);
-    if (current < 0 && status.startsWith('Ready'))
-      current = steps.findIndex((x) => x.startsWith('Ready'));
-    return steps.indexOf(step) <= current;
+    return stepDone(this.steps(), this.tracked()?.status ?? '', step);
   }
 }
