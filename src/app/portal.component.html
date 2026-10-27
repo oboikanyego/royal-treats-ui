@@ -33,9 +33,6 @@
           [(ngModel)]="password"
           autocomplete="current-password" /></label
       ><button class="primary wide">Sign in</button>
-      <p class="helper" *ngIf="!store.apiMode">
-        Admin demo: <strong>admin@royaltreats.demo</strong> / <strong>Demo@12345</strong>
-      </p>
       <button type="button" class="link" (click)="screen.set('register')">
         New customer? Register here
       </button>
@@ -57,11 +54,10 @@
           autocomplete="tel"
           placeholder="074 123 4567" /></label
       ><label
-        >{{ store.apiMode ? 'Password (at least 12 characters)' : 'Password (demo only)'
-        }}<input
+        >Password (at least 12 characters)<input
           name="password"
           type="password"
-          [attr.minlength]="store.passwordMin"
+          minlength="12"
           required
           [(ngModel)]="password"
           autocomplete="new-password" /></label
@@ -71,11 +67,7 @@
       </button>
     </form>
     <p class="error" *ngIf="error">{{ error }}</p>
-    <p class="warning" *ngIf="!store.apiMode">
-      Frontend prototype only. Never use a real password; profiles are stored in this browser and
-      are not secure or shared across devices.
-    </p>
-    <p class="helper" *ngIf="store.apiMode">
+    <p class="helper">
       Your password is sent to the Royal Treats server and stored hashed, never as plain text. Use a
       password you do not use anywhere else.
     </p>
@@ -94,7 +86,6 @@
           </button>
           <button [class.active]="screen() === 'orders'" (click)="nav('orders')">
             <span>▤</span> Orders
-            <small *ngIf="!store.apiMode">{{ store.deliveries().length }}</small>
           </button>
           <button [class.active]="screen() === 'products'" (click)="nav('products')">
             <span>◈</span> Products <small>{{ store.products().length }}</small>
@@ -114,7 +105,7 @@
           </div>
           <div class="sidebar-identity">
             <b>{{ user.name }}</b
-            ><small>{{ store.apiMode ? 'Administrator' : 'Administrator · Demo' }}</small>
+            ><small>Administrator</small>
           </div>
         </div>
       </aside>
@@ -182,391 +173,23 @@
                 /><span
                   >✦ {{ uploadingPhoto ? 'Uploading...' : 'Change profile photo' }}</span
                 ></label
-              ><small class="helper">{{
-                store.apiMode
-                  ? 'JPG, PNG or WebP up to 2 MB'
-                  : 'JPG, PNG or WebP up to 5 MB · stored only in this browser'
-              }}</small>
+              ><small class="helper">JPG, PNG or WebP up to 2 MB</small>
             </div>
           </div>
           <div class="profile-contact">
             <span><b>Email</b>{{ user.email }}</span
             ><span><b>Phone (calls)</b>{{ user.phone }}</span>
           </div>
-          <h3 *ngIf="!store.apiMode">Your orders</h3>
-          <div class="order-card" *ngFor="let order of store.deliveries()">
-            <ng-container *ngIf="order.customerId === user.id"
-              ><b>{{ order.id }}</b
-              ><span>{{ order.status }}</span>
-              <p>{{ order.fulfillment | titlecase }} · {{ order.total | rand }}</p></ng-container
-            >
-          </div>
-          <p class="helper" *ngIf="!store.apiMode">
-            Only orders created in this browser are visible until the backend is connected.
-          </p>
         </div>
-        <rt-courier-workspace *ngIf="user.role === 'courier' && store.apiMode" />
-        <div *ngIf="user.role === 'courier' && !store.apiMode" class="pane">
-          <h2>Available delivery jobs</h2>
-          <p class="helper">
-            Jobs within the configured store delivery area, assigned by first acceptance.
-          </p>
-          <p *ngIf="!availableOrders().length">No available jobs at the moment.</p>
-          <div class="order-card" *ngFor="let order of availableOrders()">
-            <div>
-              <b>{{ order.id }}</b
-              ><span>{{ order.distanceKm?.toFixed(2) }} km from store</span>
-            </div>
-            <p>{{ order.address }}</p>
-            <p>{{ order.items.length }} items · {{ order.total | rand }} · {{ order.payment }}</p>
-            <div class="order-recipients">
-              <div *ngFor="let item of order.items">
-                <span>{{ item.recipient || 'Shared treats' }}</span
-                ><b>{{ item.qty }} × {{ item.name }}</b>
-              </div>
-            </div>
-            <button class="primary" (click)="accept(order.id)">Accept delivery</button>
-          </div>
-          <h2>My deliveries</h2>
-          <p *ngIf="!ownOrders().length">No accepted deliveries yet.</p>
-          <div class="order-card" *ngFor="let order of ownOrders()">
-            <b>{{ order.id }}</b>
-            <p>
-              {{ order.customer }} · <a [href]="'tel:' + order.phone">{{ order.phone }}</a>
-            </p>
-            <p>{{ order.address }}</p>
-            <p>Status: {{ order.status }}</p>
-            <button
-              class="primary"
-              *ngIf="order.status === 'Out for Delivery'"
-              (click)="saveOrder(order.id, 'Completed')"
-            >
-              Mark delivered
-            </button>
-          </div>
-        </div>
-        <ng-container *ngIf="user.role === 'admin' && store.apiMode">
+        <rt-courier-workspace *ngIf="user.role === 'courier'" />
+        <ng-container *ngIf="user.role === 'admin'">
           <rt-admin-overview *ngIf="screen() === 'home'" (configure)="nav('settings')" />
           <rt-admin-orders *ngIf="screen() === 'orders'" />
           <rt-admin-products *ngIf="screen() === 'products'" />
           <rt-admin-couriers *ngIf="screen() === 'couriers'" />
           <rt-admin-settings *ngIf="screen() === 'settings'" />
         </ng-container>
-        <ng-container *ngIf="user.role === 'admin' && !store.apiMode">
-          <div class="pane" *ngIf="screen() === 'home'">
-            <div class="portal-stats">
-              <div>
-                <small>Catalogue</small><b>{{ store.products().length }}</b>
-              </div>
-              <div>
-                <small>Out of stock</small><b>{{ outOfStockCount() }}</b>
-              </div>
-              <div>
-                <small>Orders</small><b>{{ store.deliveries().length }}</b>
-              </div>
-              <div>
-                <small>Delivery staff</small><b>{{ couriers().length }}</b>
-              </div>
-            </div>
-            <div class="panel">
-              <h2>Store operations</h2>
-              <p>
-                Open from <strong>{{ store.settings().open }}</strong> to
-                <strong>{{ store.settings().close }}</strong
-                >.
-              </p>
-              <p>Delivery: <strong>Mini donuts only, maximum 5 km</strong>.</p>
-              <p *ngIf="store.settings().latitude === null" class="warning">
-                Store coordinates are not configured. Delivery checkout is disabled until set in
-                Settings.
-              </p>
-              <button class="primary" (click)="nav('settings')">Configure store</button>
-            </div>
-          </div>
-          <div class="pane" *ngIf="screen() === 'orders'">
-            <h2>Order management</h2>
-            <p *ngIf="!store.deliveries().length">No orders yet.</p>
-            <div class="order-card" *ngFor="let order of store.deliveries()">
-              <div>
-                <b>{{ order.id }}</b
-                ><span>{{ order.fulfillment | titlecase }} · {{ order.total | rand }}</span>
-              </div>
-              <p>{{ order.customer }} · {{ order.phone }} · {{ order.payment }}</p>
-              <p>{{ order.address || 'Collection at store' }}</p>
-              <div class="order-recipients">
-                <div *ngFor="let item of order.items">
-                  <span>{{ item.recipient || 'Shared treats' }}</span
-                  ><b>{{ item.qty }} × {{ item.name }}</b>
-                </div>
-              </div>
-              <small>{{ order.date }} {{ order.time }}</small
-              ><label
-                >Status<select
-                  [ngModel]="order.status"
-                  (ngModelChange)="saveOrder(order.id, $event)"
-                >
-                  <option *ngFor="let s of statusOptions(order)" [value]="s">{{ s }}</option>
-                </select></label
-              ><small *ngIf="order.courierId">Courier: {{ order.courierId }}</small>
-            </div>
-          </div>
-          <div class="pane" *ngIf="screen() === 'products'">
-            <div class="section-row">
-              <div>
-                <span class="eyebrow">SWEET INVENTORY</span>
-                <h2>Product catalogue</h2>
-                <p class="helper">Keep your shelves fresh and your menu beautifully curated.</p>
-              </div>
-              <button class="primary" (click)="edit()">+ Add product</button>
-            </div>
-            <div class="product-line" *ngFor="let p of store.products()">
-              <img [src]="p.image" [alt]="p.name" />
-              <div>
-                <b>{{ p.name }}</b>
-                <p>From {{ p.price | rand }} · {{ p.available ? 'In stock' : 'Out of stock' }}</p>
-                <small>{{ p.deliverable ? 'Delivery enabled' : 'Collection only' }}</small>
-              </div>
-              <button class="secondary" (click)="edit(p)">Edit</button
-              ><button class="secondary" (click)="toggleAvailability(p)">
-                {{ p.available ? 'Mark sold out' : 'Restock' }}
-              </button>
-            </div>
-            <div
-              class="modal-backdrop"
-              *ngIf="edited as p"
-              (click)="closeEditor()"
-              role="presentation"
-            >
-              <div
-                class="modal-shell"
-                role="dialog"
-                aria-modal="true"
-                aria-label="Product editor"
-                (click)="$event.stopPropagation()"
-              >
-                <form class="product-editor" (ngSubmit)="saveProduct()">
-                  <div class="modal-head">
-                    <div>
-                      <span class="eyebrow">PRODUCT STUDIO</span>
-                      <h2>
-                        {{ p.id.startsWith('p-') ? 'Create a sweet treat' : 'Edit ' + p.name }}
-                      </h2>
-                      <p>Manage your catalogue, pricing and availability.</p>
-                    </div>
-                    <button
-                      type="button"
-                      class="modal-close"
-                      (click)="closeEditor()"
-                      aria-label="Close product editor"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  <div class="modal-fields">
-                    <label>Product name<input required name="name" [(ngModel)]="p.name" /></label
-                    ><label
-                      >Category<select name="category" [(ngModel)]="p.category">
-                        <option>Mini Donuts</option>
-                        <option>Slushies</option>
-                        <option>Milkshakes</option>
-                        <option>Ice Cream Sundaes</option>
-                      </select></label
-                    ><label
-                      >Base price (R)<input
-                        name="price"
-                        type="number"
-                        min="0"
-                        required
-                        [(ngModel)]="p.price" /></label
-                    ><label
-                      >Description<textarea
-                        name="description"
-                        [(ngModel)]="p.description"
-                      ></textarea>
-                    </label>
-                    <div class="variant-editor">
-                      <h4>Sizes and prices</h4>
-                      <div class="variant-row" *ngFor="let option of p.variants; let i = index">
-                        <label
-                          >Option<input
-                            [name]="'variant-' + i"
-                            [(ngModel)]="option.label"
-                            required /></label
-                        ><label
-                          >Price (R)<input
-                            [name]="'variant-price-' + i"
-                            type="number"
-                            min="0"
-                            [(ngModel)]="option.price"
-                            required /></label
-                        ><button
-                          class="secondary"
-                          type="button"
-                          (click)="removeVariant(i)"
-                          [disabled]="p.variants.length === 1"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                      <button class="secondary" type="button" (click)="addVariant()">
-                        + Add size / pack
-                      </button>
-                    </div>
-                    <div class="media-upload">
-                      <div class="media-preview" *ngIf="p.image">
-                        <img [src]="p.image" alt="Selected product picture" />
-                      </div>
-                      <div class="media-guide">
-                        <strong>Product cover photo</strong>
-                        <p>Choose a beautiful, well-lit photo of your treat.</p>
-                        <label class="stylish-uploader"
-                          ><input
-                            type="file"
-                            accept="image/png,image/jpeg,image/webp"
-                            (change)="upload($event)"
-                          /><span>✦ Choose product photo</span></label
-                        ><small>PNG, JPG, WebP · max 400 KB for demo storage</small>
-                      </div>
-                    </div>
-                    <p *ngIf="imageError" class="error">{{ imageError }}</p>
-                    <label>Image URL<input name="image" [(ngModel)]="p.image" /></label
-                    ><label class="check"
-                      ><input type="checkbox" name="available" [(ngModel)]="p.available" />
-                      Available for ordering</label
-                    ><label class="check"
-                      ><input
-                        type="checkbox"
-                        name="deliverable"
-                        [(ngModel)]="p.deliverable"
-                        [disabled]="!canBeDelivered(p)"
-                      />
-                      Eligible for delivery (donuts only)</label
-                    >
-                  </div>
-                  <div class="actions modal-actions">
-                    <button type="button" class="secondary" (click)="closeEditor()">Cancel</button
-                    ><button type="submit" class="primary">✓ Save product</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-          <div class="pane" *ngIf="screen() === 'couriers'">
-            <h2>Delivery personnel</h2>
-            <div class="panel">
-              <h3>Register delivery person</h3>
-              <form (ngSubmit)="createCourier()">
-                <label>Full name<input required name="name" [(ngModel)]="courier.name" /></label
-                ><label
-                  >Email<input
-                    required
-                    type="email"
-                    name="email"
-                    [(ngModel)]="courier.email" /></label
-                ><label
-                  >Phone number<input required name="phone" [(ngModel)]="courier.phone" /></label
-                ><label
-                  >Demo password (8+ characters)<input
-                    required
-                    minlength="8"
-                    type="password"
-                    name="password"
-                    [(ngModel)]="courier.password" /></label
-                ><button class="primary">Add delivery person</button>
-              </form>
-            </div>
-            <h3>Delivery team</h3>
-            <p *ngIf="!couriers().length">No delivery staff registered yet.</p>
-            <div class="order-card" *ngFor="let c of couriers()">
-              <b>{{ c.name }}</b>
-              <p>{{ c.email }} · {{ c.phone }}</p>
-              <span>{{ c.active ? 'Active' : 'Disabled' }}</span
-              ><button class="secondary" (click)="store.toggleAccount(c.id)">
-                {{ c.active ? 'Deactivate' : 'Reactivate' }}
-              </button>
-            </div>
-          </div>
-          <div class="pane" *ngIf="screen() === 'settings'">
-            <h2>Business settings</h2>
-            <form class="panel" (ngSubmit)="saveHours()">
-              <label
-                >Opening time<input
-                  type="time"
-                  required
-                  name="open"
-                  [(ngModel)]="settings.open" /></label
-              ><label
-                >Closing time<input
-                  type="time"
-                  required
-                  name="close"
-                  [(ngModel)]="settings.close" /></label
-              ><label
-                >Store address<input
-                  required
-                  name="address"
-                  [(ngModel)]="settings.address" /></label
-              ><label
-                >Business support email<input
-                  required
-                  type="email"
-                  name="supportEmail"
-                  [(ngModel)]="settings.supportEmail"
-                  placeholder="support@yourbusiness.co.za"
-              /></label>
-              <p class="helper">
-                Visitors can contact support using their own email app. This frontend does not send
-                messages.
-              </p>
-              <p>Delivery radius: <strong>5 km maximum</strong> (fixed business rule).</p>
-              <label
-                >Store latitude<input
-                  name="latitude"
-                  type="number"
-                  step="any"
-                  [(ngModel)]="settings.latitude" /></label
-              ><label
-                >Store longitude<input
-                  name="longitude"
-                  type="number"
-                  step="any"
-                  [(ngModel)]="settings.longitude" /></label
-              ><button type="button" class="secondary" (click)="useStoreLocation()">
-                Use this device's location as store
-              </button>
-              <p class="helper">
-                Set coordinates while physically at the store, not from another location. Distance
-                is straight-line, not road-driving distance.
-              </p>
-              <button class="primary wide">Save settings</button>
-            </form>
-          </div>
-        </ng-container>
       </div>
     </div>
   </ng-container>
-</div>
-<div class="confirm-backdrop" *ngIf="pendingAvailability as p" (click)="pendingAvailability = null">
-  <div
-    class="confirm-dialog"
-    role="alertdialog"
-    aria-modal="true"
-    aria-label="Confirm product availability"
-    (click)="$event.stopPropagation()"
-  >
-    <div class="confirm-icon">{{ p.available ? '!' : '✓' }}</div>
-    <h2>{{ p.available ? 'Mark product out of stock?' : 'Make product available?' }}</h2>
-    <p>
-      {{ p.name }}
-      {{
-        p.available
-          ? 'will no longer be available for customer orders.'
-          : 'will appear as available to order again.'
-      }}
-    </p>
-    <div class="actions">
-      <button type="button" class="secondary" (click)="pendingAvailability = null">Cancel</button
-      ><button type="button" class="primary" (click)="confirmAvailability()">Confirm change</button>
-    </div>
-  </div>
 </div>

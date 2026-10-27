@@ -66,7 +66,7 @@ test('blocked or full storage never throws', () => {
   assert.equal(store.read(), null);
   assert.doesNotThrow(() => store.clear());
 });
-test('the token lives under its own key, so it cannot clash with the demo session', () => {
+test('the token lives under its own key, so it cannot clash with other keys', () => {
   const storage = memory();
   new TokenStore(storage, () => NOW).write('abc', later);
   assert.deepEqual([...storage.data.keys()], ['royal-api-session']);

@@ -62,12 +62,18 @@
         </div>
       </ng-container>
     </div>
-    <small>{{ order.date }} {{ order.time }}</small>
+    <p>
+      <small>{{ order.date }} {{ order.time }}</small>
+    </p>
     <p *ngIf="order.notes">
       <small>Notes: {{ order.notes }}</small>
     </p>
-    <small *ngIf="order.courierId">Courier: {{ courierLabel(order) }}</small>
-    <small *ngIf="waitingForCourier(order)">Waiting for a courier to accept this delivery.</small>
+    <p *ngIf="order.courierId">
+      <small>Courier: {{ courierLabel(order) }}</small>
+    </p>
+    <p *ngIf="waitingForCourier(order)">
+      <small>Waiting for a courier to accept this delivery.</small>
+    </p>
 
     <div class="actions" *ngIf="order.allowedStatuses?.length">
       <ng-container *ngFor="let next of order.allowedStatuses">

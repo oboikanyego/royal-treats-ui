@@ -16,7 +16,7 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Unit tests
         run: npm test
-      - name: Build Angular (demo)
+      - name: Build Angular (deployed API)
         run: npm run build
-      - name: Build Angular (API mode)
-        run: npm run build:live
+      - name: Build Angular (local API)
+        run: npm run build:local

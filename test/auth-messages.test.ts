@@ -91,7 +91,6 @@ test('the API user becomes the Account the templates use, with no password', () 
     phone: '0741234567',
     role: 'courier',
     active: true,
-    password: '',
     photo: 'blob:photo',
   });
   assert.equal(

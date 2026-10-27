@@ -4,7 +4,14 @@ import { provideRouter, TitleStrategy, withInMemoryScrolling } from '@angular/ro
 import { authInterceptor } from './app/api/auth.interceptor';
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
+import { clearLegacyDemoData } from './app/legacy-storage';
 import { RoyalTitleStrategy } from './app/title.strategy';
+
+try {
+  clearLegacyDemoData(localStorage, sessionStorage);
+} catch {
+  // Browser storage is blocked; there is nothing to clean up.
+}
 
 bootstrapApplication(AppComponent, {
   providers: [

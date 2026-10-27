@@ -1,9 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CommerceState } from '../commerce-state.service';
-import { ORDERS_PATH } from '../navigation';
-import { OrderTrackingService } from '../order-tracking.service';
+import { PlacedOrder } from '../placed-order.service';
 
 @Component({
   selector: 'section[rt-success]',
@@ -13,7 +11,5 @@ import { OrderTrackingService } from '../order-tracking.service';
   host: { class: 'success' },
 })
 export class SuccessComponent {
-  readonly tracking = inject(OrderTrackingService);
-  readonly store = inject(CommerceState);
-  readonly ordersPath = ORDERS_PATH;
+  readonly placed = inject(PlacedOrder);
 }

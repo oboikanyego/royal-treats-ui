@@ -34,7 +34,7 @@
     <button [class.current]="page() === 'menu' || page() === 'product'" (click)="go('menu')">
       Our Menu
     </button>
-    <button [class.current]="page() === 'track'" (click)="go('track')">{{ ordersLabel }}</button>
+    <button [class.current]="page() === 'orders'" (click)="go('orders')">My Orders</button>
     <button [class.current]="page() === 'about'" (click)="go('about')">About Us</button>
     <button [class.current]="page() === 'contact'" (click)="go('contact')">Contact</button>
     <button *ngIf="!store.session()" class="nav-signin" (click)="go('portal')">Sign in</button>
@@ -61,10 +61,13 @@
   </button>
 </header>
 <nav class="nav" *ngIf="menu">
-  <button *ngFor="let n of ['home', 'menu', 'track', 'about', 'contact', 'portal']" (click)="go(n)">
+  <button
+    *ngFor="let n of ['home', 'menu', 'orders', 'about', 'contact', 'portal']"
+    (click)="go(n)"
+  >
     {{
-      n === 'track'
-        ? ordersLabel
+      n === 'orders'
+        ? 'My Orders'
         : n === 'portal'
           ? store.session()
             ? 'My account'
@@ -91,8 +94,8 @@
   <button [class.current]="page() === 'menu' || page() === 'product'" (click)="go('menu')">
     <span aria-hidden="true">▦</span>Menu
   </button>
-  <button [class.current]="page() === 'track'" (click)="go('track')">
-    <span aria-hidden="true">◷</span>{{ ordersShortLabel }}
+  <button [class.current]="page() === 'orders'" (click)="go('orders')">
+    <span aria-hidden="true">◷</span>Orders
   </button>
   <button
     *ngIf="!store.session() || store.session()?.role === 'customer'"
