@@ -48,7 +48,6 @@ export function fromApiUser(user: ApiUser, photoUrl: string | null): Account {
     phone: user.phone,
     role: user.role,
     active: user.active,
-    password: '',
     photo: photoUrl ?? undefined,
   };
 }

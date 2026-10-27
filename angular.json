@@ -25,14 +25,6 @@
             ]
           },
           "configurations": {
-            "live": {
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.live.ts"
-                }
-              ]
-            },
             "local": {
               "fileReplacements": [
                 {
@@ -49,9 +41,6 @@
             "buildTarget": "royal-treats-ui:build"
           },
           "configurations": {
-            "live": {
-              "buildTarget": "royal-treats-ui:build:live"
-            },
             "local": {
               "buildTarget": "royal-treats-ui:build:local"
             }

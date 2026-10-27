@@ -2,14 +2,10 @@
 <h1>Order Placed!</h1>
 <p>Thank you for your order.</p>
 <p>Your order reference is:</p>
-<div class="ref">{{ tracking.lastOrder()?.ref || tracking.lastOrder()?.id }}</div>
-<p *ngIf="!store.apiMode">
-  You can follow your order status in the app. Confirmation messages are not sent automatically.
-</p>
-<p *ngIf="store.apiMode">
+<div class="ref">{{ placed.last()?.ref || placed.last()?.id }}</div>
+<p>
   Follow your order under <b>My Orders</b>. Confirmation messages are not sent automatically, and
   Royal Treats will confirm your date and time.
 </p>
-<button class="primary wide" [routerLink]="ordersPath">
-  {{ store.apiMode ? 'View My Orders' : 'View Order Details' }}</button
+<button class="primary wide" routerLink="/orders">View My Orders</button
 ><button class="secondary wide" routerLink="/">Back to Home</button>

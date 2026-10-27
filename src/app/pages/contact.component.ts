@@ -3,7 +3,6 @@ import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CommerceState } from '../commerce-state.service';
-import { ORDERS_PATH } from '../navigation';
 
 @Component({
   selector: 'section[rt-contact]',
@@ -14,7 +13,6 @@ import { ORDERS_PATH } from '../navigation';
 })
 export class ContactComponent {
   readonly store = inject(CommerceState);
-  readonly ordersPath = ORDERS_PATH;
   supportSubject = 'Order support';
   supportMessage = '';
 

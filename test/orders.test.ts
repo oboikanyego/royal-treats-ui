@@ -156,7 +156,7 @@ test('cancel and list errors', () => {
 
 test('long API order ids are shown as a short reference', () => {
   assert.equal(shortRef('RT-1a2b3c4d-1111-4222-8333-444455556666'), 'RT-1A2B3C4D');
-  assert.equal(shortRef('RT-12345678'), 'RT-12345678'); // already short (demo orders)
+  assert.equal(shortRef('RT-12345678'), 'RT-12345678'); // already short
   assert.equal(shortRef('weird'), 'weird');
 });
 
@@ -291,4 +291,29 @@ test('refreshing merges the newest page into what is on screen', () => {
     mergeOrders(onScreen, []).map((x) => x.id),
     ['c', 'b', 'a'],
   );
+});
+
+import {
+  LEGACY_LOCAL_KEYS,
+  LEGACY_SESSION_KEYS,
+  clearLegacyDemoData,
+} from '../src/app/legacy-storage';
+
+test('old demo data is removed, and everything the site still uses is kept', () => {
+  const make = (keys: string[]) => new Map(keys.map((k) => [k, 'x']));
+  const local = make([...LEGACY_LOCAL_KEYS, 'rt-cart', 'royal-welcome-v1']);
+  const session = make([...LEGACY_SESSION_KEYS, 'royal-api-session']);
+  const wrap = (m: Map<string, string>) => ({ removeItem: (k: string) => void m.delete(k) });
+  clearLegacyDemoData(wrap(local), wrap(session));
+  assert.deepEqual([...local.keys()], ['rt-cart', 'royal-welcome-v1']);
+  assert.deepEqual([...session.keys()], ['royal-api-session']);
+});
+
+test('blocked storage does not stop the app from starting', () => {
+  const blocked = {
+    removeItem: () => {
+      throw new Error('blocked');
+    },
+  };
+  assert.doesNotThrow(() => clearLegacyDemoData(blocked, blocked));
 });

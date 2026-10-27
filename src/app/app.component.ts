@@ -3,7 +3,6 @@ import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { CartService } from './cart.service';
 import { CommerceState } from './commerce-state.service';
-import { ORDERS_LABEL, ORDERS_PATH, ORDERS_SHORT_LABEL } from './navigation';
 
 const pagePaths: Record<string, string> = {
   home: '/',
@@ -11,7 +10,7 @@ const pagePaths: Record<string, string> = {
   cart: '/cart',
   checkout: '/checkout',
   success: '/order-placed',
-  track: ORDERS_PATH,
+  orders: '/orders',
   about: '/about',
   contact: '/contact',
   portal: '/account',
@@ -27,8 +26,6 @@ const pagePaths: Record<string, string> = {
 export class AppComponent {
   readonly store = inject(CommerceState);
   readonly count = inject(CartService).count;
-  readonly ordersLabel = ORDERS_LABEL;
-  readonly ordersShortLabel = ORDERS_SHORT_LABEL;
   private readonly router = inject(Router);
 
   /** The active page, from the route's `data.page`, for highlighting navigation. */

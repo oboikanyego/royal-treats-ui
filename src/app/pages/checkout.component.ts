@@ -9,8 +9,8 @@ import { fromApiOrder } from '../api/api-mappers';
 import { orderErrorMessage } from '../api/order-messages';
 import { AttemptKeys, buildOrderRequest } from '../api/order-request';
 import { OrdersApi } from '../api/orders-api.service';
-import { CommerceState, DeliveryOrder } from '../commerce-state.service';
-import { OrderTrackingService } from '../order-tracking.service';
+import { CommerceState } from '../commerce-state.service';
+import { PlacedOrder } from '../placed-order.service';
 
 @Component({
   selector: 'section[rt-checkout]',
@@ -21,7 +21,7 @@ import { OrderTrackingService } from '../order-tracking.service';
 export class CheckoutComponent {
   readonly store = inject(CommerceState);
   private readonly cartSvc = inject(CartService);
-  private readonly tracking = inject(OrderTrackingService);
+  private readonly placedOrder = inject(PlacedOrder);
   private readonly router = inject(Router);
   private readonly ordersApi = inject(OrdersApi);
   /** One idempotency key per distinct order, so a retried submit cannot place it twice. */
@@ -126,39 +126,11 @@ export class CheckoutComponent {
       this.checkoutError = 'Delivery requires a valid location within 5 km and a delivery address.';
       return;
     }
-    if (this.store.apiMode) return this.placeViaApi();
-    const user = this.store.session();
-    const order: DeliveryOrder = {
-      id: 'RT-' + Date.now().toString().slice(-8),
-      customerId: user?.id || 'guest',
-      customer: this.name,
-      phone: this.phone.replace(/\s/g, ''),
-      address: this.fulfillment === 'delivery' ? this.deliveryAddress : '',
-      latitude: this.deliveryLat() ?? undefined,
-      longitude: this.deliveryLng() ?? undefined,
-      distanceKm: this.deliveryCheck().distance ?? undefined,
-      fulfillment: this.fulfillment,
-      status: 'Pending',
-      payment: this.fulfillment === 'delivery' ? 'Cash on Delivery' : 'Cash on Collection',
-      total: this.total(),
-      items: this.cart().map((i) => ({
-        name: i.name,
-        qty: i.qty,
-        price: i.price,
-        recipient: i.recipient,
-      })),
-      date: this.date,
-      time: this.time,
-      notes: this.cartSvc.notes(),
-    };
-    this.store.record(order);
-    this.tracking.placed(order);
-    this.cartSvc.clear();
-    this.router.navigateByUrl('/order-placed');
+    await this.submit();
   }
 
-  /** API mode: the server prices the order and returns it; nothing about money is decided here. */
-  private async placeViaApi() {
+  /** The server prices the order and returns it; nothing about money is decided here. */
+  private async submit() {
     if (this.submitting()) return;
     this.submitting.set(true);
     try {
@@ -173,7 +145,7 @@ export class CheckoutComponent {
       });
       const order = fromApiOrder(await this.ordersApi.place(request, this.keys.keyFor(request)));
       this.keys.reset();
-      this.tracking.placed(order);
+      this.placedOrder.placed(order);
       this.cartSvc.clear();
       await this.router.navigateByUrl('/order-placed');
     } catch (error) {
