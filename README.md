@@ -16,6 +16,8 @@ npm run format        # Prettier
 
 The Netlify build uses `netlify.toml` (Node 22, `npm run build`, publish `dist/royal-treats-ui/browser`). The API address is in `src/environments/`, and the API must list this site's origin in its `CORS_ORIGINS` (set in Render's Environment tab; the API refuses to start in production without it). Render's free plan sleeps when idle, so the first request after a pause can take about a minute; the menu shows a "waking up the server" notice, reads are retried, and there is a "try again" button.
 
+Loading feedback: a thin bar at the top of the page shows whenever a page change or a request to the API lasts more than 200 ms (quick ones never flash it). A tapped product card shows a spinner and further taps are ignored until the page opens. The code for the menu, product, basket, checkout and orders pages is downloaded in the background once the first page is up (`data: { preload: true }` on the route), so most taps do not wait for a download. Hover effects only apply on devices that really hover (`@media (hover: hover)`): on a phone the first tap on a card whose hover state changes can be swallowed as a hover.
+
 ## Customers
 
 - Browse the menu (search, categories, availability filter, sorting), choose sizes, sauces/flavours and toppings, and label each line with a person's name for group orders.

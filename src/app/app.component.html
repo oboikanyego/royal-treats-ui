@@ -98,7 +98,8 @@
     </button>
   </div>
 </div>
-<main id="main-content"><router-outlet /></main>
+<div class="busy-bar" *ngIf="busy.visible()" role="progressbar" aria-label="Loading"></div>
+<main id="main-content" [attr.aria-busy]="busy.visible()"><router-outlet /></main>
 <nav class="mobile-bottom-nav" *ngIf="!page().startsWith('admin')" aria-label="Mobile navigation">
   <button [class.current]="page() === 'home'" (click)="go('home')">
     <span aria-hidden="true">⌂</span>Home
