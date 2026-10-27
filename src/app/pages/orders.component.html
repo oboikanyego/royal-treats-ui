@@ -80,28 +80,10 @@
     </div>
     <p class="muted">{{ order.payment }}</p>
 
-    <div class="my-order-actions" *ngIf="canCancel(order)">
-      <button
-        class="secondary"
-        *ngIf="confirming() !== order.id"
-        (click)="confirming.set(order.id)"
-      >
-        Cancel order
-      </button>
-      <ng-container *ngIf="confirming() === order.id">
-        <span>Cancel this order?</span>
-        <button class="primary" [disabled]="cancelling() === order.id" (click)="cancel(order)">
-          {{ cancelling() === order.id ? 'Cancelling…' : 'Yes, cancel it' }}
-        </button>
-        <button
-          class="secondary"
-          [disabled]="cancelling() === order.id"
-          (click)="confirming.set(null)"
-        >
-          Keep my order
-        </button>
-      </ng-container>
-    </div>
+    <p class="muted" *ngIf="order.status !== 'Cancelled' && order.status !== 'Completed'">
+      Need to change or cancel this order? <a routerLink="/contact">Contact us</a>; only the shop
+      can cancel an order.
+    </p>
   </article>
 
   <button
