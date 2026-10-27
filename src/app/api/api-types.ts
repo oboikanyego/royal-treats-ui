@@ -32,3 +32,52 @@ export type ApiUser = {
   active: boolean;
 };
 export type AuthResponse = { user: ApiUser; token: string; expiresAt: string };
+export type ApiOrderItem = {
+  productId: string;
+  name: string;
+  variant: string;
+  qty: number;
+  priceCents: number;
+  sauce: string;
+  topping: string;
+  recipient: string;
+};
+export type ApiOrder = {
+  id: string;
+  customerId: string;
+  customer: string;
+  phone: string;
+  fulfillment: 'collection' | 'delivery';
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  distanceKm?: number;
+  date: string;
+  time: string;
+  notes?: string;
+  payment: string;
+  totalCents: number;
+  status: string;
+  courierId?: string;
+  items: ApiOrderItem[];
+  createdAt?: string;
+  /** The statuses the calling user may move this order to (see the API's allowedStatuses). */
+  allowedStatuses?: string[];
+};
+export type OrderRequest = {
+  fulfillment: 'collection' | 'delivery';
+  date: string;
+  time: string;
+  notes: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  items: {
+    productId: string;
+    variant: string;
+    qty: number;
+    sauce: string;
+    topping: string;
+    recipient: string;
+  }[];
+};

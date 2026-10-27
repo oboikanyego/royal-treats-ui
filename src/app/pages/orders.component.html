@@ -1,0 +1,115 @@
+<div class="heading">
+  <span>♛</span>
+  <h1>My Orders</h1>
+  <p>Follow your treats from order to collection.</p>
+</div>
+
+<p class="muted" *ngIf="store.sessionRestoring()">Checking your sign-in…</p>
+
+<div class="panel" *ngIf="!store.sessionRestoring() && !store.session()">
+  <h3>Sign in to see your orders</h3>
+  <p>Your orders are kept with your account, so you can follow them from any device.</p>
+  <button class="primary" routerLink="/account">Sign in or register</button>
+</div>
+
+<div class="panel" *ngIf="store.session() && !isCustomer()">
+  <h3>My Orders is for customer accounts</h3>
+  <p>
+    You are signed in as {{ store.session()?.role }}. Order tools for your role are coming soon.
+  </p>
+</div>
+
+<ng-container *ngIf="isCustomer()">
+  <p
+    *ngIf="message() as note"
+    [class.pink]="note.kind === 'error'"
+    [attr.role]="note.kind === 'error' ? 'alert' : 'status'"
+  >
+    {{ note.text }}
+  </p>
+
+  <p class="muted" *ngIf="status() === 'loading'">Loading your orders…</p>
+  <button class="secondary" *ngIf="status() === 'error'" (click)="refresh(true)">Try again</button>
+
+  <div class="menu-empty" *ngIf="status() === 'ready' && !orders().length">
+    <span>🧁</span>
+    <h3>No orders yet</h3>
+    <p>When you place an order it will appear here.</p>
+    <button class="primary" routerLink="/menu">Explore treats →</button>
+  </div>
+
+  <article class="my-order" *ngFor="let order of orders()">
+    <div class="my-order-head">
+      <h3>{{ order.ref || order.id }}</h3>
+      <span class="status-pill" [class.cancelled]="order.status === 'Cancelled'">{{
+        order.status
+      }}</span>
+    </div>
+    <p class="muted" *ngIf="order.createdAt">
+      Placed {{ order.createdAt | date: 'd MMM y, HH:mm' }}
+    </p>
+    <p class="pink" *ngIf="order.status === 'Cancelled'">This order was cancelled.</p>
+    <div class="timeline" *ngIf="order.status !== 'Cancelled'">
+      <div
+        *ngFor="let step of stepsFor(order.fulfillment)"
+        [class.done]="stepDone(stepsFor(order.fulfillment), order.status, step)"
+      >
+        ● {{ step }}
+      </div>
+    </div>
+    <p>
+      {{ order.fulfillment === 'delivery' ? 'Delivery' : 'Collection' }}: {{ order.date }} at
+      {{ order.time }}
+    </p>
+    <p *ngIf="order.fulfillment === 'delivery' && order.address">{{ order.address }}</p>
+    <div class="my-order-group" *ngFor="let group of groupByRecipient(order.items)">
+      <b>{{ group.recipient }}</b>
+      <div class="my-order-line" *ngFor="let line of group.items">
+        <span
+          >{{ line.qty }} × {{ line.name }}
+          <small>{{
+            [line.variant, line.sauce, line.topping].filter(isSet).join(' · ')
+          }}</small></span
+        >
+        <span>{{ line.price * line.qty | rand }}</span>
+      </div>
+    </div>
+    <p class="muted" *ngIf="order.notes">Notes: {{ order.notes }}</p>
+    <div class="total">
+      <b>Total</b><b>{{ order.total | rand }}</b>
+    </div>
+    <p class="muted">{{ order.payment }}</p>
+
+    <div class="my-order-actions" *ngIf="canCancel(order)">
+      <button
+        class="secondary"
+        *ngIf="confirming() !== order.id"
+        (click)="confirming.set(order.id)"
+      >
+        Cancel order
+      </button>
+      <ng-container *ngIf="confirming() === order.id">
+        <span>Cancel this order?</span>
+        <button class="primary" [disabled]="cancelling() === order.id" (click)="cancel(order)">
+          {{ cancelling() === order.id ? 'Cancelling…' : 'Yes, cancel it' }}
+        </button>
+        <button
+          class="secondary"
+          [disabled]="cancelling() === order.id"
+          (click)="confirming.set(null)"
+        >
+          Keep my order
+        </button>
+      </ng-container>
+    </div>
+  </article>
+
+  <button
+    class="secondary wide"
+    *ngIf="status() === 'ready' && orders().length < total()"
+    [disabled]="loadingMore()"
+    (click)="loadMore()"
+  >
+    {{ loadingMore() ? 'Loading…' : 'Show older orders' }}
+  </button>
+</ng-container>

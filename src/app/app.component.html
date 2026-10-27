@@ -34,7 +34,7 @@
     <button [class.current]="page() === 'menu' || page() === 'product'" (click)="go('menu')">
       Our Menu
     </button>
-    <button [class.current]="page() === 'track'" (click)="go('track')">Track Order</button>
+    <button [class.current]="page() === 'track'" (click)="go('track')">{{ ordersLabel }}</button>
     <button [class.current]="page() === 'about'" (click)="go('about')">About Us</button>
     <button [class.current]="page() === 'contact'" (click)="go('contact')">Contact</button>
     <button *ngIf="!store.session()" class="nav-signin" (click)="go('portal')">Sign in</button>
@@ -64,7 +64,7 @@
   <button *ngFor="let n of ['home', 'menu', 'track', 'about', 'contact', 'portal']" (click)="go(n)">
     {{
       n === 'track'
-        ? 'Track Order'
+        ? ordersLabel
         : n === 'portal'
           ? store.session()
             ? 'My account'
@@ -92,7 +92,7 @@
     <span aria-hidden="true">▦</span>Menu
   </button>
   <button [class.current]="page() === 'track'" (click)="go('track')">
-    <span aria-hidden="true">◷</span>Track
+    <span aria-hidden="true">◷</span>{{ ordersShortLabel }}
   </button>
   <button
     *ngIf="!store.session() || store.session()?.role === 'customer'"

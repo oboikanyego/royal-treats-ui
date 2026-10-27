@@ -2,12 +2,14 @@ import { inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CanActivateFn, Router, Routes } from '@angular/router';
 import { filter, firstValueFrom } from 'rxjs';
+import { environment } from '../environments/environment';
 import { CommerceState } from './commerce-state.service';
+import { ORDERS_PATH } from './navigation';
 import { OrderTrackingService } from './order-tracking.service';
 
 /** The confirmation page only makes sense straight after placing an order. */
 const hasJustOrdered: CanActivateFn = () =>
-  inject(OrderTrackingService).lastOrder() ? true : inject(Router).createUrlTree(['/track']);
+  inject(OrderTrackingService).lastOrder() ? true : inject(Router).createUrlTree([ORDERS_PATH]);
 
 /**
  * Unknown product ids go back to the menu. When the catalogue comes from the API the guard first
@@ -24,6 +26,27 @@ const knownProduct: CanActivateFn = (route) => {
   if (settled(store.catalogueStatus())) return check();
   return firstValueFrom(toObservable(store.catalogueStatus).pipe(filter(settled))).then(check);
 };
+
+// Customers follow orders under "My Orders" (signed in) with the API; the browser demo keeps the
+// lookup-by-reference "Track order" page. Both highlight the same navigation item.
+const orderRoutes: Routes = environment.useApi
+  ? [
+      {
+        path: 'orders',
+        title: 'My Orders',
+        data: { page: 'track' },
+        loadComponent: () => import('./pages/orders.component').then((m) => m.OrdersComponent),
+      },
+      { path: 'track', pathMatch: 'full', redirectTo: 'orders' },
+    ]
+  : [
+      {
+        path: 'track',
+        title: 'Track Order',
+        data: { page: 'track' },
+        loadComponent: () => import('./pages/track.component').then((m) => m.TrackComponent),
+      },
+    ];
 
 // `data.page` tells the shell which navigation item to highlight.
 export const routes: Routes = [
@@ -67,12 +90,7 @@ export const routes: Routes = [
     canActivate: [hasJustOrdered],
     loadComponent: () => import('./pages/success.component').then((m) => m.SuccessComponent),
   },
-  {
-    path: 'track',
-    title: 'Track Order',
-    data: { page: 'track' },
-    loadComponent: () => import('./pages/track.component').then((m) => m.TrackComponent),
-  },
+  ...orderRoutes,
   {
     path: 'about',
     title: 'About Us',
