@@ -64,6 +64,12 @@ export class OrderFeed {
     }
   }
 
+  /** Puts an order the server just returned (e.g. a delivery just accepted) at the top of the list. */
+  add(order: DeliveryOrder) {
+    this.orders.update((list) => [order, ...list.filter((o) => o.id !== order.id)]);
+    this.total.update((n) => n + 1);
+  }
+
   /** Swaps in an order the server just returned (after a status change). */
   replace(order: DeliveryOrder) {
     this.orders.update((list) => list.map((o) => (o.id === order.id ? order : o)));

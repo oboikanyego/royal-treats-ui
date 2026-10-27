@@ -21,10 +21,10 @@ The default build is the browser-only demo described below. A second mode loads 
 npm run start:live    # use the deployed API (src/environments/environment.live.ts)
 npm run start:local   # use an API on http://localhost:3000 (npm run dev in royal-treats-api)
 npm run build:live    # production build in API mode
-npm test              # unit tests (money, API errors, mappers, token storage, auth messages, orders, admin)
+npm test              # unit tests (money, API errors, mappers, token storage, auth messages, orders, admin, courier)
 ```
 
-API mode is **in progress and off by default**. Today it covers the public catalogue, **customer accounts**, **customer orders** and the **admin workspace**:
+API mode is **in progress and off by default**. Today it covers the public catalogue, **customer accounts**, **customer orders**, the **admin workspace** and the **courier workspace**:
 
 - **Catalogue and settings:** products (prices converted from cents, sauces/toppings as options) and store settings, with a "waking up the server" banner for a slow first request, retries for network and gateway failures, and a "try again" button.
 - **Sign-in:** register, sign in and sign out against the API. The bearer token is kept in **`sessionStorage`** (it survives a refresh of the tab, is gone when the tab closes, and is never put in `localStorage`); on reload the app checks it with `GET /me`. A token the server rejects ends the session with a "Your session ended" message. Passwords must be 12 to 128 characters, as the API requires, and the profile picture is uploaded to the API (JPG, PNG or WebP, up to 2 MB).
@@ -32,7 +32,9 @@ API mode is **in progress and off by default**. Today it covers the public catal
 - **Admin workspace** (admin accounts): an overview from the API's dashboard; **orders** (all customers, newest first, 30 s refresh) moved only along the transitions the API offers in `allowedStatuses`, with a confirmation before cancelling; **products** (add, edit, sold out / restock) with sizes and prices in rand (sent as cents) and the sauce/flavour and topping choices; **delivery team** (add a courier, deactivate or reactivate, which also signs them out); and **settings** (hours, address, support email, store coordinates; the 5 km radius is fixed by the API).
 - **Product photos are uploaded as files only.** There is no image-URL field: the chosen JPG, PNG or WebP (up to 5 MB) is sent to the API, which re-encodes it and stores it in Cloudinary, and the product keeps the URL it returns. A product that still has an older photo keeps it unless a new file is uploaded. If Cloudinary is not configured on the API the editor says uploads are not set up.
 
-Still on the browser demo: the courier tools. Courier accounts can sign in, but their workspace shows a "being connected" notice instead of the demo data. The API address is in `src/environments/`, and the API must list this site's origin in its `CORS_ORIGINS` (set in Render's Environment tab).
+- **Courier workspace** (courier accounts): **available jobs** (soonest first, 30 s refresh; the API shows only the due time and distance until a job is accepted, so no customer details appear before that; the first courier to accept gets it, and losing a race gives a plain message), and **my deliveries** with the customer's name, a tap-to-call phone link, address, items by recipient, notes and the cash to collect. **Mark delivered** asks for confirmation and is offered only when the API's `allowedStatuses` allows it. Delivered jobs stay listed (they come from `GET /orders`).
+
+Everything the browser demo did is now also available through the API; the demo remains the default until API mode is switched on. The API address is in `src/environments/`, and the API must list this site's origin in its `CORS_ORIGINS` (set in Render's Environment tab).
 
 ## Customer storefront
 
