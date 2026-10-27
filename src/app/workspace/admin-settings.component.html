@@ -1,0 +1,56 @@
+<div class="pane">
+  <h2>Business settings</h2>
+  <div class="alert success-alert" *ngIf="notice()" role="status">{{ notice() }}</div>
+  <div class="alert error" *ngIf="error()" role="alert">{{ error() }}</div>
+  <form class="panel" (ngSubmit)="save()">
+    <label
+      >Store name<input
+        required
+        name="storeName"
+        maxlength="100"
+        [(ngModel)]="settings.storeName" /></label
+    ><label
+      >Opening time<input type="time" required name="open" [(ngModel)]="settings.open" /></label
+    ><label
+      >Closing time<input type="time" required name="close" [(ngModel)]="settings.close" /></label
+    ><label
+      >Store address<input
+        required
+        name="address"
+        maxlength="300"
+        [(ngModel)]="settings.address" /></label
+    ><label
+      >Business support email<input
+        type="email"
+        name="supportEmail"
+        [(ngModel)]="settings.supportEmail"
+        placeholder="support@yourbusiness.co.za"
+    /></label>
+    <p class="helper">
+      Visitors can contact support using their own email app. This site does not send messages.
+    </p>
+    <p>Delivery radius: <strong>5 km maximum</strong> (fixed business rule).</p>
+    <label
+      >Store latitude<input
+        name="latitude"
+        type="number"
+        step="any"
+        [(ngModel)]="settings.latitude" /></label
+    ><label
+      >Store longitude<input
+        name="longitude"
+        type="number"
+        step="any"
+        [(ngModel)]="settings.longitude" /></label
+    ><button type="button" class="secondary" (click)="useStoreLocation()">
+      Use this device's location as store
+    </button>
+    <p class="helper">
+      Set coordinates while physically at the store, not from another location. Distance is
+      straight-line, not road-driving distance.
+    </p>
+    <button class="primary wide" [disabled]="saving()">
+      {{ saving() ? 'Saving…' : 'Save settings' }}
+    </button>
+  </form>
+</div>

@@ -81,7 +81,7 @@
     </p>
   </section>
   <ng-container *ngIf="store.session() as user">
-    <section class="pane" *ngIf="store.apiMode && user.role !== 'customer'">
+    <section class="pane" *ngIf="store.apiMode && user.role === 'courier'">
       <h2>{{ user.role | titlecase }} workspace</h2>
       <p>
         Signed in as {{ user.name }}. Your tools are being connected to the live Royal Treats
@@ -90,7 +90,7 @@
     </section>
     <div
       class="workspace-layout"
-      *ngIf="!store.apiMode || user.role === 'customer'"
+      *ngIf="!store.apiMode || user.role !== 'courier'"
       [class.admin-mode]="user.role === 'admin'"
     >
       <aside class="workspace-sidebar" *ngIf="user.role === 'admin'" aria-label="Admin navigation">
@@ -104,7 +104,8 @@
             <span>▦</span> Overview
           </button>
           <button [class.active]="screen() === 'orders'" (click)="nav('orders')">
-            <span>▤</span> Orders <small>{{ store.deliveries().length }}</small>
+            <span>▤</span> Orders
+            <small *ngIf="!store.apiMode">{{ store.deliveries().length }}</small>
           </button>
           <button [class.active]="screen() === 'products'" (click)="nav('products')">
             <span>◈</span> Products <small>{{ store.products().length }}</small>
@@ -124,7 +125,7 @@
           </div>
           <div class="sidebar-identity">
             <b>{{ user.name }}</b
-            ><small>Administrator · Demo</small>
+            ><small>{{ store.apiMode ? 'Administrator' : 'Administrator · Demo' }}</small>
           </div>
         </div>
       </aside>
@@ -215,7 +216,7 @@
             Only orders created in this browser are visible until the backend is connected.
           </p>
         </div>
-        <div *ngIf="user.role === 'courier'" class="pane">
+        <div *ngIf="user.role === 'courier' && !store.apiMode" class="pane">
           <h2>Available delivery jobs</h2>
           <p class="helper">
             Jobs within the configured store delivery area, assigned by first acceptance.
@@ -254,7 +255,14 @@
             </button>
           </div>
         </div>
-        <ng-container *ngIf="user.role === 'admin'">
+        <ng-container *ngIf="user.role === 'admin' && store.apiMode">
+          <rt-admin-overview *ngIf="screen() === 'home'" (configure)="nav('settings')" />
+          <rt-admin-orders *ngIf="screen() === 'orders'" />
+          <rt-admin-products *ngIf="screen() === 'products'" />
+          <rt-admin-couriers *ngIf="screen() === 'couriers'" />
+          <rt-admin-settings *ngIf="screen() === 'settings'" />
+        </ng-container>
+        <ng-container *ngIf="user.role === 'admin' && !store.apiMode">
           <div class="pane" *ngIf="screen() === 'home'">
             <div class="portal-stats">
               <div>

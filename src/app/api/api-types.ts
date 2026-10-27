@@ -81,3 +81,33 @@ export type OrderRequest = {
     recipient: string;
   }[];
 };
+
+/** What the admin tools send and receive (royal-treats-api /admin/*). */
+export type ProductPayload = {
+  name: string;
+  category: string;
+  description: string;
+  image: string;
+  available: boolean;
+  deliverable: boolean;
+  variants: { label: string; priceCents: number }[];
+  sauces: string[];
+  toppings: string[];
+};
+export type SettingsPayload = {
+  storeName: string;
+  address: string;
+  supportEmail: string;
+  open: string;
+  close: string;
+  latitude: number | null;
+  longitude: number | null;
+};
+export type ApiDashboard = {
+  ordersByStatus: { _id: string; count: number; totalCents: number }[];
+  completedRevenueCents: number;
+  products: number;
+};
+export type ApiImage = { url: string; width: number; height: number };
+export type CourierRequest = { name: string; email: string; phone: string; password: string };
+export type ApiCourierJob = { id: string; date: string; time: string; distanceKm?: number };

@@ -1,0 +1,58 @@
+<div class="pane">
+  <div class="alert error" *ngIf="error()">
+    {{ error() }} <button type="button" class="secondary" (click)="load()">Try again</button>
+  </div>
+  <p class="helper" *ngIf="!summary() && !error()">Loading the overview…</p>
+  <ng-container *ngIf="summary() as s">
+    <div class="portal-stats">
+      <div>
+        <small>Orders</small><b>{{ s.orders }}</b>
+      </div>
+      <div>
+        <small>Waiting to confirm</small><b>{{ s.pending }}</b>
+      </div>
+      <div>
+        <small>In progress</small><b>{{ s.active }}</b>
+      </div>
+      <div>
+        <small>Completed sales</small><b>{{ s.revenueCents / 100 | rand }}</b>
+      </div>
+    </div>
+    <div class="portal-stats">
+      <div>
+        <small>Catalogue</small><b>{{ store.products().length }}</b>
+      </div>
+      <div>
+        <small>Out of stock</small><b>{{ outOfStock() }}</b>
+      </div>
+      <div>
+        <small>Completed</small><b>{{ s.completed }}</b>
+      </div>
+      <div>
+        <small>Cancelled</small><b>{{ s.cancelled }}</b>
+      </div>
+    </div>
+    <div class="panel" *ngIf="s.breakdown.length">
+      <h3>Orders by status</h3>
+      <div class="order-card" *ngFor="let row of s.breakdown">
+        <div>
+          <b>{{ row.status }}</b
+          ><span>{{ row.count }} · {{ row.totalCents / 100 | rand }}</span>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+  <div class="panel">
+    <h2>Store operations</h2>
+    <p>
+      Open from <strong>{{ store.settings().open }}</strong> to
+      <strong>{{ store.settings().close }}</strong
+      >.
+    </p>
+    <p>Delivery: <strong>Mini donuts only, maximum 5 km</strong>.</p>
+    <p *ngIf="store.settings().latitude === null" class="warning">
+      Store coordinates are not configured. Delivery checkout is disabled until set in Settings.
+    </p>
+    <button type="button" class="primary" (click)="configure.emit()">Configure store</button>
+  </div>
+</div>
