@@ -1,3 +1,4 @@
+import { RandPipe } from '../rand.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +8,7 @@ import { CartItem, CartService } from '../cart.service';
 @Component({
   selector: 'section[rt-cart]',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, RandPipe],
   templateUrl: './cart.component.html',
   host: { class: 'cart-section' },
 })

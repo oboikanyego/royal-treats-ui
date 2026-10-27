@@ -1,3 +1,4 @@
+import { RandPipe } from '../rand.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
@@ -6,7 +7,7 @@ import { CatalogueProduct, CommerceState } from '../commerce-state.service';
 @Component({
   selector: 'section[rt-home]',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, RandPipe],
   templateUrl: './home.component.html',
 })
 export class HomeComponent {

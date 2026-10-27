@@ -2730,3 +2730,43 @@ main > section.support-page:not(.admin) {
     animation: none !important;
   }
 }
+
+/* Catalogue loading / failure banner (API mode) */
+.api-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 10px 16px;
+  background: var(--rt-blush);
+  border-bottom: 1px solid var(--rt-pink-border);
+  color: var(--rt-plum);
+  font-size: 14px;
+  text-align: center;
+}
+.api-banner-error {
+  background: var(--rt-pink-100);
+}
+.api-banner button {
+  padding: 6px 14px;
+}
+.api-banner-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--rt-pink-border);
+  border-top-color: var(--rt-pink);
+  border-radius: 50%;
+  animation: api-spin 0.8s linear infinite;
+}
+@keyframes api-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .api-banner-spinner {
+    animation: none;
+  }
+}

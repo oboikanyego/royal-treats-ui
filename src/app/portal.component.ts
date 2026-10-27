@@ -1,4 +1,5 @@
 import { Component, HostListener, ViewEncapsulation, inject, signal } from '@angular/core';
+import { RandPipe } from './rand.pipe';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CommerceState, CatalogueProduct, DeliveryOrder, Settings } from './commerce-state.service';
@@ -7,7 +8,7 @@ import { isDeliverableCategory } from './catalogue-config';
 @Component({
   selector: 'app-portal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RandPipe],
   templateUrl: './portal.component.html',
   styleUrls: ['./portal.component.css'],
   // Shadow DOM keeps the global storefront stylesheet from reaching the staff workspace.
@@ -97,7 +98,15 @@ export class PortalComponent {
   removeVariant(i: number) {
     if (this.edited && this.edited.variants.length > 1) this.edited.variants.splice(i, 1);
   }
+  /** In API mode the catalogue and settings are read-only here until admin sign-in is connected. */
+  private apiLocked(): boolean {
+    if (!this.store.apiMode) return false;
+    this.error =
+      'Products and settings come from the API in this mode and cannot be edited here yet.';
+    return true;
+  }
   saveProduct() {
+    if (this.apiLocked()) return;
     const p = this.edited;
     if (!p || !p.name.trim() || p.price < 0) {
       this.error = 'Enter a valid product name and price.';
@@ -128,6 +137,7 @@ export class PortalComponent {
     reader.readAsDataURL(file);
   }
   saveHours() {
+    if (this.apiLocked()) return;
     if (
       this.settings.supportEmail.trim() &&
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.settings.supportEmail.trim())
@@ -213,6 +223,10 @@ export class PortalComponent {
   }
   confirmAvailability(): void {
     if (!this.pendingAvailability) return;
+    if (this.apiLocked()) {
+      this.pendingAvailability = null;
+      return;
+    }
     const product = this.pendingAvailability;
     this.store.saveProduct({ ...product, available: !product.available });
     this.notice = product.available

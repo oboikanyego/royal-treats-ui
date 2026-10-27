@@ -187,7 +187,7 @@
             <ng-container *ngIf="order.customerId === user.id"
               ><b>{{ order.id }}</b
               ><span>{{ order.status }}</span>
-              <p>{{ order.fulfillment | titlecase }} · R{{ order.total }}</p></ng-container
+              <p>{{ order.fulfillment | titlecase }} · {{ order.total | rand }}</p></ng-container
             >
           </div>
           <p class="helper">
@@ -206,7 +206,7 @@
               ><span>{{ order.distanceKm?.toFixed(2) }} km from store</span>
             </div>
             <p>{{ order.address }}</p>
-            <p>{{ order.items.length }} items · R{{ order.total }} · {{ order.payment }}</p>
+            <p>{{ order.items.length }} items · {{ order.total | rand }} · {{ order.payment }}</p>
             <div class="order-recipients">
               <div *ngFor="let item of order.items">
                 <span>{{ item.recipient || 'Shared treats' }}</span
@@ -270,7 +270,7 @@
             <div class="order-card" *ngFor="let order of store.deliveries()">
               <div>
                 <b>{{ order.id }}</b
-                ><span>{{ order.fulfillment | titlecase }} · R{{ order.total }}</span>
+                ><span>{{ order.fulfillment | titlecase }} · {{ order.total | rand }}</span>
               </div>
               <p>{{ order.customer }} · {{ order.phone }} · {{ order.payment }}</p>
               <p>{{ order.address || 'Collection at store' }}</p>
@@ -304,7 +304,7 @@
               <img [src]="p.image" [alt]="p.name" />
               <div>
                 <b>{{ p.name }}</b>
-                <p>From R{{ p.price }} · {{ p.available ? 'In stock' : 'Out of stock' }}</p>
+                <p>From {{ p.price | rand }} · {{ p.available ? 'In stock' : 'Out of stock' }}</p>
                 <small>{{ p.deliverable ? 'Delivery enabled' : 'Collection only' }}</small>
               </div>
               <button class="secondary" (click)="edit(p)">Edit</button

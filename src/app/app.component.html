@@ -75,6 +75,14 @@
     Sign out of {{ store.session()?.name }}
   </button>
 </nav>
+<div class="api-banner" role="status" *ngIf="store.catalogueStatus() === 'slow'">
+  <span class="api-banner-spinner" aria-hidden="true"></span>
+  Waking up the server. The first load can take up to a minute…
+</div>
+<div class="api-banner api-banner-error" role="alert" *ngIf="store.catalogueStatus() === 'error'">
+  We couldn't load the menu.
+  <button class="secondary" (click)="store.refreshCatalogue()">Try again</button>
+</div>
 <main id="main-content"><router-outlet /></main>
 <nav class="mobile-bottom-nav" *ngIf="!page().startsWith('admin')" aria-label="Mobile navigation">
   <button [class.current]="page() === 'home'" (click)="go('home')">

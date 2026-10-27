@@ -1,5 +1,7 @@
 import { inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CanActivateFn, Router, Routes } from '@angular/router';
+import { filter, firstValueFrom } from 'rxjs';
 import { CommerceState } from './commerce-state.service';
 import { OrderTrackingService } from './order-tracking.service';
 
@@ -7,13 +9,21 @@ import { OrderTrackingService } from './order-tracking.service';
 const hasJustOrdered: CanActivateFn = () =>
   inject(OrderTrackingService).lastOrder() ? true : inject(Router).createUrlTree(['/track']);
 
-/** Unknown product ids go back to the menu. */
-const knownProduct: CanActivateFn = (route) =>
-  inject(CommerceState)
-    .products()
-    .some((p) => p.id === route.paramMap.get('id'))
-    ? true
-    : inject(Router).createUrlTree(['/menu']);
+/**
+ * Unknown product ids go back to the menu. When the catalogue comes from the API the guard first
+ * waits for the load to finish, otherwise a deep link or refresh would always look "unknown".
+ */
+const knownProduct: CanActivateFn = (route) => {
+  const store = inject(CommerceState);
+  const router = inject(Router);
+  const check = () =>
+    store.products().some((p) => p.id === route.paramMap.get('id'))
+      ? true
+      : router.createUrlTree(['/menu']);
+  const settled = (status: string) => status === 'ready' || status === 'error';
+  if (settled(store.catalogueStatus())) return check();
+  return firstValueFrom(toObservable(store.catalogueStatus).pipe(filter(settled))).then(check);
+};
 
 // `data.page` tells the shell which navigation item to highlight.
 export const routes: Routes = [

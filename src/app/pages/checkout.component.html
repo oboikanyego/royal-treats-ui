@@ -106,7 +106,7 @@
   </div>
   <p class="error" *ngIf="checkoutError">{{ checkoutError }}</p>
   <div class="total">
-    <b>Total</b><b>R{{ total() }}</b>
+    <b>Total</b><b>{{ total() | rand }}</b>
   </div>
   <button class="primary wide" [disabled]="!cart().length || store.session()?.role !== 'customer'">
     Place Demo Order

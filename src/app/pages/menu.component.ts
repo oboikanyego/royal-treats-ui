@@ -1,3 +1,4 @@
+import { RandPipe } from '../rand.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +9,7 @@ import { CatalogueProduct, CommerceState } from '../commerce-state.service';
 @Component({
   selector: 'section[rt-menu]',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RandPipe],
   templateUrl: './menu.component.html',
   host: { class: 'menu-section' },
 })
