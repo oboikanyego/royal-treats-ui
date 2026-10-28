@@ -51,7 +51,8 @@
     </p>
     <p>Delivery: <strong>Mini donuts only, maximum 5 km</strong>.</p>
     <p *ngIf="store.settings().latitude === null" class="warning">
-      Store coordinates are not configured. Delivery checkout is disabled until set in Settings.
+      Delivery is off because the shop address could not be found on the map. Check the address in
+      Settings.
     </p>
     <button type="button" class="primary" (click)="configure.emit()">Configure store</button>
   </div>
