@@ -24,7 +24,7 @@ test('the privacy notice covers what POPIA asks a notice to say', () => {
     'Cookies and browser storage',
     'Your location',
     'outside South Africa',
-    'reset your password',
+    'ask us for a new one',
     'email service',
   ])
     assert.ok(t.includes(needle), needle);

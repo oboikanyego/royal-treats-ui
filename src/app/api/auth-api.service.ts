@@ -39,9 +39,11 @@ export class AuthApi {
   changePassword(currentPassword: string, newPassword: string) {
     return firstValueFrom(this.api.post<void>('/me/password', { currentPassword, newPassword }));
   }
-  /** Asks the API to email a reset link. It answers the same for any address. */
-  forgotPassword(email: string) {
-    return firstValueFrom(this.api.post<{ ok: true }>('/auth/forgot-password', { email }));
+  /** Asks the shop to set a new password. The API scrambles it at once and answers the same for any address. */
+  requestPasswordChange(email: string, newPassword: string) {
+    return firstValueFrom(
+      this.api.post<{ ok: true }>('/auth/password-requests', { email, newPassword }),
+    );
   }
   /** Sets a new password with the one-time token from the email; ends every session of the account. */
   resetPassword(token: string, newPassword: string) {

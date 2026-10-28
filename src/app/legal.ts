@@ -24,6 +24,7 @@ export function privacySections(shop: ShopInfo): LegalSection[] {
       bullets: [
         'Your account: your name, email address and phone number, a password (we only keep it in scrambled form, so we cannot read it) and, if you add one, a profile picture.',
         'Your orders: what you ordered, the date and time you asked for, when each step happened (placed, accepted, ready, collected or delivered, cancelled), any notes you wrote, the names you gave to share treats with, and whether you collect or want delivery.',
+        'If you forget your password and ask us for a new one: the new password you choose, kept only in scrambled form so nobody at the shop can read it, until we have checked that it is you and approved or declined the request (or for 7 days at most).',
         'For delivery: your delivery address and the location your device shares when you tap “Check my delivery location”.',
         'Technical information: our hosting providers may keep standard logs (such as your IP address) to keep the service secure and working.',
       ],
@@ -32,7 +33,7 @@ export function privacySections(shop: ShopInfo): LegalSection[] {
       heading: 'Why we use it',
       bullets: [
         'To create and run your account.',
-        'To take, prepare, deliver and collect your orders, and to contact you about them by phone or email. We email you when we receive your order and at each step (including when an order is cancelled automatically), when you ask to reset your password, and to confirm that your account was deleted. These emails are about your orders and account, not marketing.',
+        'To take, prepare, deliver and collect your orders, and to contact you about them by phone or email. We email you when we receive your order and at each step (including when an order is cancelled automatically), and to confirm that your account was deleted. These emails are about your orders and account, not marketing.',
         'To keep the service secure and to prevent fraud and abuse.',
         'To keep the records we must keep by law, such as for accounting.',
       ],

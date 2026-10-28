@@ -169,7 +169,7 @@ test('the reset page checks the two passwords before asking the API', () => {
 test('forgot and reset errors are plain, and a dead link says how to get a new one', () => {
   assert.match(authErrorMessage(err(400), 'forgot'), /valid email/);
   assert.match(authErrorMessage(err(429), 'forgot'), /Too many attempts/);
-  assert.match(authErrorMessage(err(500), 'forgot'), /could not send the email/);
+  assert.match(authErrorMessage(err(500), 'forgot'), /could not send your request/);
   assert.match(
     authErrorMessage(err(400, 'This reset link is invalid or has expired'), 'reset'),
     /invalid or has expired.*new one/,

@@ -67,6 +67,8 @@ export class PortalComponent {
   consent = false;
   /** "Keep me signed in on this device": on by default, as phones often drop a tab's session. */
   remember = true;
+  newPassword = '';
+  confirmPassword = '';
   resetSent = false;
   sendingReset = false;
   name = '';
@@ -121,13 +123,20 @@ export class PortalComponent {
   openForgot() {
     this.error = '';
     this.resetSent = false;
+    this.newPassword = this.confirmPassword = '';
     this.screen.set('forgot');
   }
 
   async sendReset() {
     this.sendingReset = true;
-    this.error = (await this.store.forgotPassword(this.email)) ?? '';
+    this.error =
+      (await this.store.requestPasswordChange(
+        this.email,
+        this.newPassword,
+        this.confirmPassword,
+      )) ?? '';
     this.resetSent = !this.error;
+    if (this.resetSent) this.newPassword = this.confirmPassword = '';
     this.sendingReset = false;
   }
 

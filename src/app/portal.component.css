@@ -2354,3 +2354,22 @@ select:focus-visible {
   background: #fdecee;
   color: #a51a41;
 }
+
+/* ---- Password requests (admin overview) ---- */
+.pw-request .helper {
+  margin: 4px 0 0;
+}
+.pw-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+.pw-actions .helper {
+  flex: 1 1 100%;
+  margin: 0;
+}
+.pw-actions button {
+  min-height: 44px;
+}

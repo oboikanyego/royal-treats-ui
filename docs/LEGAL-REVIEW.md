@@ -25,8 +25,12 @@ database host, the email service (Resend: the customer's email address and the m
 host (Cloudinary: product pictures only, never customer information). The shop's own address is sent to
 OpenStreetMap's search when an admin saves a new address in Settings; no customer data is sent there.
 
-Emails sent: order received, each status change (including automatic cancellation), password reset,
+Emails sent: order received, each status change (including automatic cancellation),
 account deleted, and a new-order message to the shop.
+
+Password requests: a person who forgot their password enters a new one; only a scrambled copy is
+stored (nobody, an admin included, can read it) until an admin approves or declines it, or for 7 days.
+Admins see the person's name, email, phone and order count to check who is asking.
 
 ## Decisions for a qualified person
 

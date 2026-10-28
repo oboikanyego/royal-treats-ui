@@ -238,11 +238,17 @@ export class CommerceState {
       return authErrorMessage(toApiError(error), 'password');
     }
   }
-  /** Asks for a reset email. Resolves to an error message, or null; the answer never says if the address exists. */
-  async forgotPassword(email: string): Promise<string | null> {
+  /** Asks the shop to set a new password. Resolves to an error message, or null; the answer never says if the address exists. */
+  async requestPasswordChange(
+    email: string,
+    next: string,
+    confirm: string,
+  ): Promise<string | null> {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return 'Enter a valid email address.';
+    const problem = resetProblem({ next, confirm });
+    if (problem) return problem;
     try {
-      await this.authApi.forgotPassword(email.trim().toLowerCase());
+      await this.authApi.requestPasswordChange(email.trim().toLowerCase(), next);
       return null;
     } catch (error) {
       return authErrorMessage(toApiError(error), 'forgot');

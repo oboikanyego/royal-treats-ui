@@ -125,6 +125,18 @@ export type ApiDashboard = {
   ordersByStatus: { _id: string; count: number; totalCents: number }[];
   completedRevenueCents: number;
   products: number;
+  /** Pending password requests (0 from an older API). */
+  passwordRequests?: number;
+};
+export type ApiPasswordRequest = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  requestedAt: string;
+  orderCount: number;
+  lastOrderAt: string | null;
 };
 export type ApiImage = { url: string; width: number; height: number };
 export type CourierRequest = { name: string; email: string; phone: string; password: string };

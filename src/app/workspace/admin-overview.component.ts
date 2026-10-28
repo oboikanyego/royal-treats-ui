@@ -20,12 +20,13 @@ import type { ApiDashboard } from '../api/api-types';
 import { weekSummary } from '../opening-hours';
 import { CommerceState } from '../commerce-state.service';
 import { RandPipe } from '../rand.pipe';
+import { AdminPasswordRequestsComponent } from './admin-password-requests.component';
 
 /** The admin's overview: order totals from the API's dashboard plus the store's opening hours. */
 @Component({
   selector: 'rt-admin-overview',
   standalone: true,
-  imports: [CommonModule, RandPipe],
+  imports: [CommonModule, RandPipe, AdminPasswordRequestsComponent],
   templateUrl: './admin-overview.component.html',
   // Rendered inside the portal's shadow root, so the portal's stylesheet already styles it.
   encapsulation: ViewEncapsulation.None,
