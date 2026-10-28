@@ -48,4 +48,38 @@
       {{ savingPassword() ? 'Saving…' : 'Change password' }}
     </button>
   </form>
+  <section class="panel delete-panel" *ngIf="user()?.role === 'customer'">
+    <h3>Delete my account</h3>
+    <p>
+      You can delete your account at any time. We then delete your name, email, phone number,
+      password, profile picture and sign-ins, and take your name, phone, address, notes and the
+      names of people you shared treats with out of your past orders. We keep those orders, without
+      your details, for our accounts. This cannot be undone.
+    </p>
+    <button
+      type="button"
+      class="danger-outline"
+      *ngIf="deleteStep() === 'closed'"
+      (click)="openDelete()"
+    >
+      Delete my account…
+    </button>
+    <form *ngIf="deleteStep() === 'confirm'" (ngSubmit)="confirmDelete()">
+      <div class="alert error" *ngIf="deleteError()" role="alert">{{ deleteError() }}</div>
+      <rt-password-field
+        label="Enter your password to confirm"
+        name="deletePassword"
+        autocomplete="current-password"
+        [(value)]="deletePassword"
+      />
+      <div class="actions">
+        <button class="danger" [disabled]="deleting()">
+          {{ deleting() ? 'Deleting…' : 'Yes, delete my account' }}
+        </button>
+        <button type="button" class="secondary" [disabled]="deleting()" (click)="cancelDelete()">
+          Keep my account
+        </button>
+      </div>
+    </form>
+  </section>
 </div>

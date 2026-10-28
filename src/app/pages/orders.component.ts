@@ -39,6 +39,8 @@ export class OrdersComponent {
   readonly stepDone = stepDone;
   readonly groupByRecipient = groupByRecipient;
   readonly statusText = (order: DeliveryOrder) => statusLabel(order.status, order.fulfillment);
+  /** When the order reached this step (ISO), or '' when it has not (or the API gave no time). */
+  readonly stepTime = (order: DeliveryOrder, step: string) => order.stepTimes?.[step] ?? '';
   readonly stepText = (order: DeliveryOrder, step: string) => statusLabel(step, order.fulfillment);
   readonly isSet = (value: string | undefined) => !!value;
 

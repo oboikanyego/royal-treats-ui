@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ViewEncapsulation, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommerceState } from '../commerce-state.service';
 import { PasswordFieldComponent } from './password-field.component';
@@ -14,6 +15,7 @@ import { PasswordFieldComponent } from './password-field.component';
 })
 export class AccountSettingsComponent {
   private readonly store = inject(CommerceState);
+  private readonly router = inject(Router);
   readonly user = this.store.session;
 
   name = this.store.session()?.name ?? '';
@@ -28,6 +30,33 @@ export class AccountSettingsComponent {
   readonly passwordNotice = signal('');
   readonly passwordError = signal('');
   readonly savingPassword = signal(false);
+
+  /** Delete my account: ask, then ask again with the password. */
+  readonly deleteStep = signal<'closed' | 'confirm'>('closed');
+  deletePassword = '';
+  readonly deleteError = signal('');
+  readonly deleting = signal(false);
+
+  openDelete() {
+    this.deleteError.set('');
+    this.deletePassword = '';
+    this.deleteStep.set('confirm');
+  }
+  cancelDelete() {
+    this.deletePassword = '';
+    this.deleteError.set('');
+    this.deleteStep.set('closed');
+  }
+  async confirmDelete() {
+    this.deleting.set(true);
+    const problem = await this.store.deleteAccount(this.deletePassword);
+    this.deleting.set(false);
+    if (problem) {
+      this.deleteError.set(problem);
+      return;
+    }
+    void this.router.navigateByUrl('/');
+  }
 
   async saveDetails() {
     this.detailsNotice.set('');

@@ -177,3 +177,19 @@ test('forgot and reset errors are plain, and a dead link says how to get a new o
   assert.match(authErrorMessage(invalid('newPassword'), 'reset'), /12 to 128/);
   assert.match(authErrorMessage(err(500), 'reset'), /could not change your password/);
 });
+
+test('deleting an account: a wrong password, staff and open orders each get their own words', () => {
+  const err = (status: number, message = 'x') => ({ status, message, details: undefined }) as never;
+  assert.equal(authErrorMessage(err(400), 'delete'), 'That password is not right.');
+  assert.match(authErrorMessage(err(401), 'delete'), /sign in again/);
+  assert.equal(
+    authErrorMessage(err(409, 'You still have orders in progress. Please wait'), 'delete'),
+    'You still have orders in progress. Please wait',
+  );
+  assert.equal(
+    authErrorMessage(err(403, 'Only customer accounts'), 'delete'),
+    'Only customer accounts',
+  );
+  assert.match(authErrorMessage(err(500), 'delete'), /could not delete/);
+  assert.match(authErrorMessage(err(429), 'delete'), /Too many/);
+});

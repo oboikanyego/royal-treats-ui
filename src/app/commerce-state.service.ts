@@ -91,6 +91,8 @@ export type DeliveryOrder = {
   allowedStatuses?: string[];
   /** Why the order was cancelled, when the system did it (e.g. overdue). */
   cancelNote?: string;
+  /** When the order reached each status (ISO time of the latest time it did), from the API's history. */
+  stepTimes?: Record<string, string>;
 };
 
 /** Shown while the API catalogue loads: 'slow' means the first request is taking a while (cold start). */
@@ -245,6 +247,20 @@ export class CommerceState {
     } catch (error) {
       return authErrorMessage(toApiError(error), 'forgot');
     }
+  }
+  /** A short message to show on the next page, like "Your account was deleted". */
+  readonly flash = signal<string | null>(null);
+  /** Deletes the signed-in customer's account, then signs out. Resolves to an error message, or null. */
+  async deleteAccount(password: string): Promise<string | null> {
+    if (!password) return 'Enter your password to confirm.';
+    try {
+      await this.authApi.deleteAccount(password);
+    } catch (error) {
+      return authErrorMessage(toApiError(error), 'delete');
+    }
+    this.sessions.clear();
+    this.flash.set('Your account was deleted. Thank you for ordering with us.');
+    return null;
   }
   /** Sets a new password from the emailed link. Resolves to an error message, or null on success. */
   async resetPassword(token: string, next: string, confirm: string): Promise<string | null> {

@@ -1,7 +1,7 @@
 import type { ApiRequestError } from './api-errors';
 
 export type AuthContext =
-  'login' | 'register' | 'photo' | 'profile' | 'password' | 'forgot' | 'reset';
+  'login' | 'register' | 'photo' | 'profile' | 'password' | 'forgot' | 'reset' | 'delete';
 const TOO_MANY = 'Too many attempts. Please wait a few minutes and try again.';
 
 /** The API's `details` are `{ path, message }` per invalid field. */
@@ -47,6 +47,13 @@ export function authErrorMessage(error: ApiRequestError, context: AuthContext): 
       return 'This reset link is invalid or has expired. Ask for a new one from the sign-in page.';
     }
     return 'We could not change your password. Please try again.';
+  }
+  if (context === 'delete') {
+    if (error.status === 401) return 'Please sign in again to delete your account.';
+    if (error.status === 400) return 'That password is not right.';
+    // 403 (staff) and 409 (an order is still in progress) already say what to do.
+    if (error.status === 403 || error.status === 409) return error.message;
+    return 'We could not delete your account. Please try again.';
   }
   if (context === 'profile') {
     if (error.status === 401) return 'Please sign in again to change your details.';

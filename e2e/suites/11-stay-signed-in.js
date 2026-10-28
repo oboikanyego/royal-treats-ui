@@ -34,10 +34,10 @@ const ok=(c,m)=>console.log((c?'PASS':'FAIL')+'  '+m);
  await pg.click('button[aria-label="Open menu"]'); await pg.waitForSelector('.drawer-signout');
  ok((await pg.locator('.drawer-account').textContent()).includes('Thandi Mokoena'),'menu says who is signed in');
  const bb=await pg.locator('.drawer-signout').boundingBox(); ok(bb.width>250&&bb.height>=40,'menu Sign out is a full-width button');
- await pg.screenshot({path:'look-drawer-m.png'});
+
  await pg.click('.drawer-signout'); await pg.waitForTimeout(500); ok(await pg.locator('.mobile-account-trigger').evaluate(e=>e.textContent.includes('Sign in')),'after sign out the header offers "Sign in"');
  await ctx.close();
- const d=await b.newContext({viewport:{width:1280,height:800}}); await d.addInitScript(()=>localStorage.setItem('royal-welcome-v1','yes')); const dp=await d.newPage(); await signin(dp,true); await dp.goto(UI+'/'); await dp.waitForSelector('.nav-logout'); ok((await dp.locator('.nav-logout').textContent()).includes('Sign out'),'desktop header has a labelled Sign out'); await dp.screenshot({path:'look-desktop-head.png',clip:{x:0,y:0,width:1280,height:90}});
- await dp.goto(UI+'/account'); await dp.waitForSelector('.signout-btn'); await dp.screenshot({path:'look-portal-top.png',clip:{x:0,y:0,width:1280,height:120}});
+ const d=await b.newContext({viewport:{width:1280,height:800}}); await d.addInitScript(()=>localStorage.setItem('royal-welcome-v1','yes')); const dp=await d.newPage(); await signin(dp,true); await dp.goto(UI+'/'); await dp.waitForSelector('.nav-logout'); ok((await dp.locator('.nav-logout').textContent()).includes('Sign out'),'desktop header has a labelled Sign out');
+ await dp.goto(UI+'/account'); await dp.waitForSelector('.signout-btn');
  await b.close();
 })().catch(e=>{console.log('CRASH',e.message);process.exit(1)});
