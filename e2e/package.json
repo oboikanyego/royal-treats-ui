@@ -1,0 +1,18 @@
+{
+  "name": "royal-treats-e2e",
+  "private": true,
+  "description": "Browser suites for the Royal Treats site, run against a contract-faithful mock of the API.",
+  "scripts": {
+    "test": "node run.mjs",
+    "sync-api": "node scripts/sync-api-snapshot.mjs"
+  },
+  "dependencies": {
+    "express": "^5.3.0",
+    "mongoose": "^8.24.7",
+    "playwright": "1.63.0",
+    "sharp": "^0.35.5",
+    "socket.io": "^4.8.4",
+    "tsx": "^4.23.15",
+    "zod": "^3.25.76"
+  }
+}
