@@ -185,6 +185,14 @@
             >
               {{ screen() === 'account' ? '← Back' : 'My account' }}
             </button>
+            <button
+              *ngIf="user.role === 'admin'"
+              type="button"
+              class="secondary account-link signout-btn"
+              (click)="logout()"
+            >
+              <span aria-hidden="true">⎋</span> Sign out
+            </button>
           </div>
         </div>
 
