@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AdminLive } from './api/admin-live.service';
 import { CommerceState } from './commerce-state.service';
 import { type PortalScreen, authCopy, portalHeading } from './portal-headings';
@@ -22,6 +22,15 @@ import { AdminSettingsComponent } from './workspace/admin-settings.component';
 import { AccountSettingsComponent } from './workspace/account-settings.component';
 import { CourierWorkspaceComponent } from './workspace/courier-workspace.component';
 import { PasswordFieldComponent } from './workspace/password-field.component';
+
+const ADMIN_SCREENS: PortalScreen[] = [
+  'home',
+  'orders',
+  'products',
+  'couriers',
+  'settings',
+  'account',
+];
 
 /** Sign-in, registration and the signed-in workspace for each role. */
 @Component({
@@ -48,6 +57,8 @@ export class PortalComponent {
   readonly store = inject(CommerceState);
   readonly live = inject(AdminLive);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly router = inject(Router);
+  private readonly activeRoute = inject(ActivatedRoute);
   screen = signal<PortalScreen>('signin');
   error = '';
   notice = '';
@@ -62,8 +73,6 @@ export class PortalComponent {
   phone = '';
   photoError = '';
   uploadingPhoto = false;
-  /** The avatar menu in the admin app bar (phones). */
-  accountMenu = false;
 
   constructor() {
     if (this.store.session()) this.screen.set('home');
@@ -78,10 +87,7 @@ export class PortalComponent {
     });
     // A new-order alert links here with ?screen=orders.
     const route = inject(ActivatedRoute);
-    const sub = route.queryParamMap.subscribe((params) => {
-      if (params.get('screen') === 'orders' && this.store.session()?.role === 'admin')
-        this.screen.set('orders');
-    });
+    const sub = route.queryParamMap.subscribe(() => this.followAddress());
     inject(DestroyRef).onDestroy(() => sub.unsubscribe());
     // Follow the session: leave the sign-in screens once signed in (e.g. a session restored after a
     // reload), and come back to them when it ends (sign-out, or the server rejecting the token).
@@ -89,10 +95,20 @@ export class PortalComponent {
       const signedIn = !!this.store.session();
       untracked(() => {
         const onAuthScreen = ['signin', 'register', 'forgot'].includes(this.screen());
-        if (signedIn && onAuthScreen) this.screen.set('home');
+        if (signedIn && onAuthScreen) {
+          this.screen.set('home');
+          this.followAddress();
+        }
         if (!signedIn && !onAuthScreen) this.screen.set('signin');
       });
     });
+  }
+
+  /** An admin's screen is the address's ?screen= (no value means the overview). */
+  private followAddress() {
+    if (this.store.session()?.role !== 'admin') return;
+    const wanted = this.activeRoute.snapshot.queryParamMap.get('screen') as PortalScreen | null;
+    this.screen.set(wanted && ADMIN_SCREENS.includes(wanted) ? wanted : 'home');
   }
 
   authTitle() {
@@ -140,7 +156,6 @@ export class PortalComponent {
   }
 
   logout() {
-    this.accountMenu = false;
     this.store.signOut();
     this.screen.set('signin');
     this.error = '';
@@ -154,11 +169,18 @@ export class PortalComponent {
     this.notice = '';
     this.error = '';
     this.screen.set(to);
+    // Keep the address in step, so the bottom bar, the menu and the back button all agree.
+    if (this.store.session()?.role === 'admin')
+      void this.router.navigate([], {
+        relativeTo: this.activeRoute,
+        queryParams: { screen: to === 'home' ? null : to },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
   }
 
   /** A tap on the admin app bar: switch section, close the menu, keep the tab in view, go to the top. */
   tab(to: 'home' | 'products' | 'couriers' | 'settings' | 'orders' | 'account', event?: Event) {
-    this.accountMenu = false;
     this.nav(to);
     (event?.currentTarget as HTMLElement | null)?.scrollIntoView?.({
       inline: 'center',

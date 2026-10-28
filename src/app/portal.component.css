@@ -1537,188 +1537,7 @@ select:focus-visible {
   }
 }
 
-/* Admin on phones: an app bar with the section title, an account menu and tabs for every section. */
-.admin-appbar {
-  display: none;
-}
-@media (max-width: 700px) {
-  .portal:has(.admin-mode) {
-    padding: 0 0 calc(28px + env(safe-area-inset-bottom));
-  }
-  .workspace-sidebar,
-  .admin-mode .role-header {
-    display: none;
-  }
-  .admin-appbar {
-    display: block;
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    background: linear-gradient(165deg, #171a30, #28223d 70%, #382342);
-    color: #fff;
-    padding-top: env(safe-area-inset-top);
-    box-shadow: 0 4px 18px #12102440;
-  }
-  .appbar-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 14px 4px;
-    padding-left: max(14px, env(safe-area-inset-left));
-    padding-right: max(14px, env(safe-area-inset-right));
-  }
-  .appbar-brand,
-  .appbar-avatar {
-    display: grid;
-    place-items: center;
-    flex: 0 0 auto;
-    width: 44px;
-    height: 44px;
-    border: 0;
-    border-radius: 14px;
-    cursor: pointer;
-    overflow: hidden;
-    font-weight: 800;
-    font-size: 15px;
-  }
-  .appbar-brand {
-    background: linear-gradient(140deg, #fa5b9d, #b61c70);
-    color: #fff;
-    font-size: 26px;
-  }
-  .appbar-avatar {
-    background: linear-gradient(130deg, #ef6bad, #ffc8e1);
-    color: #6b2353;
-  }
-  .appbar-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .appbar-title {
-    flex: 1 1 auto;
-    min-width: 0;
-    margin: 0;
-    font:
-      700 21px Georgia,
-      serif;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .appbar-tabs {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    padding: 8px 14px 12px;
-  }
-  .appbar-tabs::-webkit-scrollbar {
-    display: none;
-  }
-  .appbar-tabs button {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    flex: 0 0 auto;
-    scroll-snap-align: center;
-    min-height: 44px;
-    padding: 0 16px;
-    border: 1px solid #ffffff2b;
-    border-radius: 99px;
-    background: #ffffff12;
-    color: #e5dff0;
-    font-size: 14px;
-    font-weight: 650;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  .appbar-tabs button.active {
-    background: linear-gradient(100deg, #e94190, #ba2b78);
-    border-color: transparent;
-    color: #fff;
-  }
-  .appbar-tabs .tab-badge {
-    min-width: 20px;
-    padding: 1px 6px;
-    border-radius: 99px;
-    background: #fff;
-    color: var(--rt-pink-dark, #b81361);
-    font-size: 12px;
-    font-weight: 800;
-    text-align: center;
-  }
-  .appbar-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 41;
-    border: 0;
-    background: #0000;
-    cursor: default;
-  }
-  .appbar-menu {
-    position: absolute;
-    z-index: 42;
-    top: calc(env(safe-area-inset-top) + 58px);
-    right: 12px;
-    width: min(260px, calc(100vw - 24px));
-    padding: 8px;
-    border-radius: 16px;
-    background: #fff;
-    color: #2d263c;
-    box-shadow: 0 14px 40px #12102455;
-  }
-  .appbar-menu p {
-    margin: 6px 10px 8px;
-    font-size: 13px;
-    color: #7d6676;
-  }
-  .appbar-menu b {
-    color: #2d263c;
-  }
-  .appbar-menu button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    min-height: 48px;
-    margin-top: 6px;
-    border: 1px solid #eadfe6;
-    border-radius: 12px;
-    background: #fff;
-    color: #2d263c;
-    font-size: 15px;
-    font-weight: 650;
-    cursor: pointer;
-  }
-  .appbar-menu button.danger {
-    border-color: var(--rt-pink, #ed1680);
-    color: var(--rt-pink-dark, #b81361);
-    font-weight: 700;
-  }
-  .workspace-main {
-    padding: 18px max(14px, env(safe-area-inset-left)) 24px max(14px, env(safe-area-inset-right));
-  }
-  /* Bigger, thumb-friendly order and product actions. */
-  .admin-mode .actions {
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .admin-mode .actions button,
-  .admin-mode .order-card button {
-    flex: 1 1 140px;
-    min-height: 48px;
-    font-size: 15px;
-  }
-  .admin-mode .product-line button {
-    min-height: 44px;
-    font-size: 14px;
-  }
-}
+/* Admin on phones keeps the shop's own header, bottom bar and menu: only a light strip of section pills is added. */
 
 /* Pause switch and the weekly hours editor. */
 .pause-card.on {
@@ -2121,4 +1940,149 @@ select:focus-visible {
 }
 .sound-dot {
   pointer-events: none;
+}
+
+/* ---- Admin on phones: the same look as the shop. Only a strip of section pills is added. ---- */
+.admin-subnav {
+  display: none;
+}
+@media (max-width: 700px) {
+  .portal:has(.admin-mode) {
+    background: transparent;
+    padding: 0 0 calc(112px + env(safe-area-inset-bottom));
+  }
+  .workspace-layout.admin-mode {
+    background: transparent;
+  }
+  .workspace-sidebar {
+    display: none;
+  }
+  .admin-subnav {
+    display: block;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: #ffffffee;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--rt-pink-border, #f3d8e4);
+  }
+  .appbar-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 16px;
+  }
+  .appbar-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .appbar-tabs button {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    flex: 0 0 auto;
+    scroll-snap-align: center;
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1px solid var(--rt-pink-border, #f3d8e4);
+    border-radius: 99px;
+    background: #fff;
+    color: #7c4a66;
+    font-size: 14px;
+    font-weight: 650;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .appbar-tabs button.active {
+    border-color: transparent;
+    background: linear-gradient(140deg, #fa4493, #c4166f);
+    color: #fff;
+    box-shadow: 0 6px 16px #d6176f33;
+  }
+  .appbar-tabs .tab-badge {
+    min-width: 20px;
+    padding: 1px 6px;
+    border-radius: 99px;
+    background: var(--rt-pink, #ed1680);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    text-align: center;
+  }
+  .appbar-tabs button.active .tab-badge {
+    background: #fff;
+    color: var(--rt-pink-deep, #d51672);
+  }
+  /* A plain page title, like the shop's other pages; the account and Sign out live in the shop menu. */
+  .admin-mode .role-header {
+    display: block;
+    margin: 0 0 14px;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+  .admin-mode .role-header small,
+  .admin-mode .role-user {
+    display: none;
+  }
+  .admin-mode .role-header h1 {
+    margin: 4px 0 2px;
+    color: var(--rt-plum, #3c1934);
+    font:
+      700 28px Georgia,
+      serif;
+    letter-spacing: -0.3px;
+  }
+  .admin-mode .role-header p {
+    margin: 0;
+    font-size: 13px;
+    color: #8a6f81;
+  }
+  .workspace-main {
+    padding: 16px 16px 8px;
+  }
+  .admin-mode .order-card,
+  .settings-card,
+  .admin-mode .product-line,
+  .admin-mode .panel,
+  .admin-mode .portal-stats > div {
+    border-color: var(--rt-pink-border, #f3d8e4);
+    box-shadow: 0 6px 18px #5a123a0d;
+  }
+  .settings-card header p,
+  .orders-meta {
+    color: #8a6f81;
+  }
+  .settings-card h2,
+  .admin-mode .pane h2 {
+    color: var(--rt-plum, #3c1934);
+  }
+  .settings-save {
+    background: linear-gradient(180deg, #fff0, #fff 35%);
+  }
+  .filter-chips button {
+    border-color: var(--rt-pink-border, #f3d8e4);
+    color: #7c4a66;
+  }
+}
+@media (min-width: 651px) and (max-width: 700px) {
+  .admin-subnav {
+    top: 0;
+  }
+}
+@media (max-width: 650px) {
+  .admin-subnav {
+    top: 64px;
+  }
+}
+@media (max-width: 700px) {
+  .admin-mode .portal-stats {
+    gap: 12px;
+  }
+  .admin-mode .order-card .order-recipients {
+    background: var(--rt-blush-soft, #fff8fb);
+  }
 }

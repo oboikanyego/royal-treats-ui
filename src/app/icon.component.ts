@@ -13,7 +13,10 @@ export type IconName =
   | 'close'
   | 'chevron'
   | 'logout'
-  | 'menu-lines';
+  | 'menu-lines'
+  | 'tag'
+  | 'users'
+  | 'gear';
 
 /** Simple line icons, drawn the same way on every phone (emoji and symbols differ on iOS and Android). */
 @Component({
@@ -79,6 +82,22 @@ export type IconName =
       <path d="M4 7h16" />
       <path d="M4 12h16" />
       <path d="M4 17h10" />
+    </ng-container>
+    <ng-container *ngSwitchCase="'tag'">
+      <path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9-9-9Z" />
+      <circle cx="8" cy="8" r="1.3" />
+    </ng-container>
+    <ng-container *ngSwitchCase="'users'">
+      <circle cx="9" cy="8" r="3.5" />
+      <path d="M2.5 20c.6-3.4 3.2-5 6.5-5s5.9 1.6 6.5 5" />
+      <path d="M16 4.6a3.5 3.5 0 0 1 0 6.8" />
+      <path d="M18 15.3c1.9.6 3.1 2 3.5 4.7" />
+    </ng-container>
+    <ng-container *ngSwitchCase="'gear'">
+      <circle cx="12" cy="12" r="3" />
+      <path
+        d="M12 2.5v2.4M12 19.1v2.4M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.9 19.1l1.7-1.7M17.4 6.6l1.7-1.7"
+      />
     </ng-container>
     <ng-container *ngSwitchCase="'chevron'"><path d="m9 6 6 6-6 6" /></ng-container>
     <ng-container *ngSwitchCase="'logout'">

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, effect, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AdminLive } from './api/admin-live.service';
 import { Busy } from './busy.service';
@@ -36,20 +36,19 @@ export class AppComponent {
   /** The active page, from the route's `data.page`, for highlighting navigation. */
   readonly page = signal('home');
   menu = false;
+  /** The admin screen in the address (`?screen=`), or 'home'. */
+  readonly adminScreen = signal('home');
   readonly showWelcome = signal(!localStorage.getItem('royal-welcome-v1'));
 
   constructor() {
     if (this.showWelcome()) setTimeout(() => this.dismissWelcome(), 2200);
-    // On phones the admin workspace has its own app bar, so the shop's header, tabs and footer step aside.
-    effect(() => {
-      const inAdmin = this.page() === 'portal' && this.store.session()?.role === 'admin';
-      document.body.classList.toggle('admin-shell', inAdmin);
-    });
     const sub = this.router.events.subscribe((e) => {
       if (!(e instanceof NavigationEnd)) return;
       let route = this.router.routerState.snapshot.root;
       while (route.firstChild) route = route.firstChild;
       this.page.set(String(route.data['page'] ?? 'home'));
+      // Which admin screen is open lives in the address (?screen=), for the bottom bar and the menu.
+      this.adminScreen.set(String(route.queryParams['screen'] ?? 'home'));
       this.menu = false;
     });
     inject(DestroyRef).onDestroy(() => sub.unsubscribe());
@@ -72,11 +71,34 @@ export class AppComponent {
       .join('')
       .toUpperCase();
   }
+  /** From the menu or the bottom bar to one of the admin's own screens. */
+  openAdmin(screen: string) {
+    this.menu = false;
+    const wanted = screen === 'home' ? null : screen;
+    const current = this.router.parseUrl(this.router.url);
+    if (
+      current.root.children['primary']?.segments.join('/') === 'account' &&
+      (current.queryParams['screen'] ?? null) === wanted
+    ) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    void this.router.navigate(['/account'], {
+      queryParams: { screen: screen === 'home' ? null : screen },
+    });
+  }
   signOut() {
     this.store.signOut();
     this.go('home');
   }
   go(p: string) {
-    this.router.navigateByUrl(pagePaths[p] ?? '/');
+    const target = pagePaths[p] ?? '/';
+    // Tapping the tab you are already on does nothing to the router, so scroll to the top instead, as apps do.
+    if (this.router.url.split(/[?#]/)[0] === target) {
+      this.menu = false;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    void this.router.navigateByUrl(target);
   }
 }
