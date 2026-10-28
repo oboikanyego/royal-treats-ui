@@ -31,6 +31,9 @@ export function fromApiSettings(s: ApiSettings, defaults: Settings): Settings {
     storeName: s.storeName ?? defaults.storeName,
     address: s.address ?? defaults.address,
     supportEmail: s.supportEmail ?? defaults.supportEmail,
+    ...((s.supportPhone ?? defaults.supportPhone) === undefined
+      ? {}
+      : { supportPhone: s.supportPhone ?? defaults.supportPhone }),
     open: s.open ?? defaults.open,
     close: s.close ?? defaults.close,
     latitude: s.latitude ?? null,

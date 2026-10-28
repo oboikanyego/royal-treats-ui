@@ -3,6 +3,7 @@ import {
   DestroyRef,
   ElementRef,
   ViewEncapsulation,
+  computed,
   effect,
   inject,
   signal,
@@ -55,6 +56,8 @@ const ADMIN_SCREENS: PortalScreen[] = [
 })
 export class PortalComponent {
   readonly store = inject(CommerceState);
+  /** The shop's own number from Settings, or empty when it has not set one. */
+  readonly shopPhone = computed(() => (this.store.settings().supportPhone ?? '').trim());
   readonly live = inject(AdminLive);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly router = inject(Router);
@@ -111,6 +114,10 @@ export class PortalComponent {
     if (this.store.session()?.role !== 'admin') return;
     const wanted = this.activeRoute.snapshot.queryParamMap.get('screen') as PortalScreen | null;
     this.screen.set(wanted && ADMIN_SCREENS.includes(wanted) ? wanted : 'home');
+  }
+
+  telHref(phone: string): string {
+    return 'tel:' + phone.replace(/\s+/g, '');
   }
 
   authTitle() {

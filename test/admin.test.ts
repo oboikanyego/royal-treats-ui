@@ -172,6 +172,19 @@ test('the settings payload drops the fixed radius and trims text', () => {
   assert.ok(!('radiusKm' in payload));
 });
 
+test('the shop phone number is optional, checked, trimmed, and left out until it exists', () => {
+  assert.equal(settingsProblem(settings({ supportPhone: '' })), null);
+  assert.equal(settingsProblem(settings({ supportPhone: '014 123 4567' })), null);
+  assert.match(settingsProblem(settings({ supportPhone: 'call me' }))!, /shop phone/);
+  assert.match(settingsProblem(settings({ supportPhone: '123' }))!, /shop phone/);
+  assert.ok(!('supportPhone' in toSettingsPayload(settings())));
+  assert.equal(
+    toSettingsPayload(settings({ supportPhone: ' 014 123 4567 ' })).supportPhone,
+    '014 123 4567',
+  );
+  assert.equal(toSettingsPayload(settings({ supportPhone: '' })).supportPhone, '');
+});
+
 test('a courier request is trimmed but the password is sent as typed', () => {
   assert.deepEqual(
     toCourierRequest({

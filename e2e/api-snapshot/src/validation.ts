@@ -44,6 +44,17 @@ export const forgotPassword = z
       .transform((v) => v.toLowerCase()),
   })
   .strict();
+export const passwordRequest = z
+  .object({
+    email: z
+      .string()
+      .trim()
+      .email()
+      .max(254)
+      .transform((v) => v.toLowerCase()),
+    newPassword: z.string().min(12).max(128),
+  })
+  .strict();
 export const resetPassword = z
   .object({
     token: z.string().regex(/^[A-Za-z0-9_-]{43}$/),
@@ -62,6 +73,7 @@ export const settingsInput = z
     storeName: z.string().trim().min(1).max(100),
     address: z.string().trim().min(1).max(300),
     supportEmail: z.union([z.literal(''), z.string().email().max(254)]),
+    supportPhone: z.union([z.literal(''), phone]).optional(),
     open: time,
     close: time,
     latitude: z.number().min(-90).max(90).nullable(),
