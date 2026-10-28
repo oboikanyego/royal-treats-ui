@@ -18,6 +18,11 @@ The Netlify build uses `netlify.toml` (Node 22, `npm run build`, publish `dist/r
 
 Loading feedback: a thin bar at the top of the page shows whenever a page change or a request to the API lasts more than 200 ms (quick ones never flash it). A tapped product card shows a spinner and further taps are ignored until the page opens. The code for the menu, product, basket, checkout and orders pages is downloaded in the background once the first page is up (`data: { preload: true }` on the route), so most taps do not wait for a download. Hover effects only apply on devices that really hover (`@media (hover: hover)`): on a phone the first tap on a card whose hover state changes can be swallowed as a hover.
 
+## Tests
+
+- `npm test`: unit tests (pure logic: mapping, validation, messages).
+- `npm run e2e`: browser suites against a contract-faithful mock of the API, 17 suites (see `e2e/README.md`). CI runs both on every pull request, plus the production and local builds.
+
 ## Customers
 
 - Browse the menu (search, categories, availability filter, sorting), choose sizes, sauces/flavours and toppings, and label each line with a person's name for group orders.

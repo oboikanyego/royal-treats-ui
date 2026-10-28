@@ -9,7 +9,8 @@
     "format": "prettier --write \"src/**/*.{ts,html,css}\" \"*.{json,md}\"",
     "format:check": "prettier --check \"src/**/*.{ts,html,css}\" \"*.{json,md}\"",
     "test": "node --import tsx --test \"test/*.test.ts\"",
-    "build:local": "ng build --configuration local"
+    "build:local": "ng build --configuration local",
+    "e2e": "node e2e/run.mjs"
   },
   "dependencies": {
     "@angular/common": "^20.3.0",

@@ -1,0 +1,30 @@
+name: Browser tests
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install the site's dependencies
+        run: npm install --no-audit --no-fund
+      - name: Install the browser test dependencies
+        run: npm install --no-audit --no-fund --prefix e2e
+      - name: Install Chromium
+        run: npx --prefix e2e playwright install --with-deps chromium
+      - name: Browser suites (mock API, local-config build)
+        run: node e2e/run.mjs
+      - name: Keep the logs of failed suites
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-output
+          path: e2e/test-output
+          if-no-files-found: ignore
