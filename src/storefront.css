@@ -3373,5 +3373,17 @@ app-root a {
   }
   footer {
     padding-bottom: calc(100px + env(safe-area-inset-bottom));
+@media (max-width: 700px) {
+  body.admin-shell .top,
+  body.admin-shell .nav,
+  body.admin-shell .mobile-bottom-nav,
+  body.admin-shell footer {
+    display: none;
+  }
+  body.admin-shell main {
+    min-height: 100vh;
+  }
+  body.admin-shell .live-toasts {
+    top: max(10px, env(safe-area-inset-top));
   }
 }
