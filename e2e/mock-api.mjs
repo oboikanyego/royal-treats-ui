@@ -27,7 +27,7 @@ const extra = [
 ];
 const bulk = Array.from({ length: 130 }, (_, i) => ({ _id: 'bulk' + i, name: 'Bulk ' + i, category: 'Milkshakes', description: 'b', image: 'https://images.unsplash.com/z',
   deliverable: false, available: true, variants: [{ label: 'S', priceCents: 1000 + i }], sauces: ['Vanilla'], toppings: [] }));
-let resets = new Map(); let lastReset = null;
+let resets = new Map(); let lastReset = null; let pwRequests = new Map();
 let mode = { mailOff: false, delayMs: 0, failNext: 0, failAlways: false, bulk: false, expireTokens: false, limitAuth: false, dropOrderResponse: 0, soldOut: [], imagesOff: false, raceOnAccept: false };
 const orders = [];
 const log = [];
@@ -43,7 +43,7 @@ const stub = fs.readFileSync(new URL('./assets/stub.png', import.meta.url));
 const users = new Map(); const sessions = new Map(); let nextId = 1;
 const addUser = (name, email, phone, password, role = 'customer') => { const u = { id: 'u' + nextId++, name, email, phone, password, role, active: true, photo: null }; users.set(email, u); return u; };
 let receiptHtml = DEFAULT_RECEIPT_TEMPLATE;
-const resetUsers = () => { receiptHtml = DEFAULT_RECEIPT_TEMPLATE;  resets.clear(); lastReset = null; resetCatalogue(); orders.length = 0; users.clear(); sessions.clear(); nextId = 1; addUser('Royal Admin', 'admin@royaltreats.test', '0740000000', 'AdminPass-12345', 'admin'); addUser('Sipho Courier', 'courier@royaltreats.test', '0740000001', 'CourierPass-12345', 'courier'); };
+const resetUsers = () => { receiptHtml = DEFAULT_RECEIPT_TEMPLATE;  resets.clear(); lastReset = null; pwRequests.clear(); resetCatalogue(); orders.length = 0; users.clear(); sessions.clear(); nextId = 1; addUser('Royal Admin', 'admin@royaltreats.test', '0740000000', 'AdminPass-12345', 'admin'); addUser('Sipho Courier', 'courier@royaltreats.test', '0740000001', 'CourierPass-12345', 'courier'); };
 resetUsers();
 const userView = (u) => ({ id: u.id, name: u.name, email: u.email, phone: u.phone, role: u.role, active: u.active });
 const issue = (u, remember = false) => { const token = randomBytes(32).toString('base64url'); const expiresAt = new Date(Date.now() + (remember === true ? 30 * 24 : 8) * 3600e3); sessions.set(token, { userId: u.id, expiresAt }); return { token, expiresAt: expiresAt.toISOString() }; };
@@ -110,6 +110,16 @@ const server = http.createServer(async (req, res) => {
     if (u && u.active && !mode.mailOff) { const token = randomBytes(32).toString('base64url'); resets.set(token, u.id); lastReset = { email: u.email, token }; }
     return json(202, { ok: true });
   }
+  if (P === '/api/v1/auth/password-requests' && req.method === 'POST') {
+    if (mode.limitAuth) { res.statusCode = 429; res.setHeader('content-type', 'text/plain'); return res.end('Too many requests, please try again later.'); }
+    let body; try { body = JSON.parse((await readBody(req)).toString() || '{}'); } catch { return json(400, { error: 'Invalid request body' }); }
+    const okEmail = typeof body.email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email);
+    const okPass = typeof body.newPassword === 'string' && body.newPassword.length >= 12 && body.newPassword.length <= 128;
+    if (!okEmail || !okPass || Object.keys(body).length !== 2) return json(400, { error: 'Invalid input', details: [{ path: [okEmail ? 'newPassword' : 'email'], message: 'Invalid' }] });
+    const u = users.get(body.email.toLowerCase());
+    if (u && u.active && u.role !== 'admin') pwRequests.set(u.id, { id: 'pr' + u.id, userId: u.id, newPassword: body.newPassword, at: new Date().toISOString() });
+    return json(202, { ok: true });
+  }
   if (P === '/api/v1/auth/reset-password' && req.method === 'POST') {
     let body; try { body = JSON.parse((await readBody(req)).toString() || '{}'); } catch { return json(400, { error: 'Invalid request body' }); }
     if (typeof body.newPassword !== 'string' || body.newPassword.length < 12 || body.newPassword.length > 128) return json(400, { error: 'Invalid input', details: [{ path: ['newPassword'], message: 'String must contain at least 12 character(s)' }] });
@@ -173,9 +183,20 @@ const server = http.createServer(async (req, res) => {
         if (o.fulfillment !== 'delivery' || !['Ready for Delivery', 'Out for Delivery'].includes(o.status)) return json(409, { error: 'A courier can only be assigned to a delivery that is ready or out for delivery' });
         o.courierId = c.id; stamp(o, 'Out for Delivery'); hub.pendingChanged(); return json(200, view2(o, u));
       }
+      if (P === '/api/v1/admin/password-requests' && req.method === 'GET') {
+        const items = [...pwRequests.values()].map((r) => { const c = [...users.values()].find((x) => x.id === r.userId); const mine = orders.filter((o) => o.customerId === c.id); return { id: r.id, name: c.name, email: c.email, phone: c.phone, role: c.role, requestedAt: r.at, orderCount: mine.length, lastOrderAt: mine.length ? mine[mine.length - 1].createdAt ?? null : null }; });
+        return json(200, { items });
+      }
+      const prm = /^\/api\/v1\/admin\/password-requests\/([^/]+?)(\/approve)?$/.exec(P);
+      if (prm && (req.method === 'POST' && prm[2] || req.method === 'DELETE' && !prm[2])) {
+        const r = [...pwRequests.values()].find((x) => x.id === prm[1]); if (!r) return json(404, { error: 'That request is no longer there' });
+        pwRequests.delete(r.userId);
+        if (prm[2]) { const c = [...users.values()].find((x) => x.id === r.userId); c.password = r.newPassword; for (const [t, s2] of [...sessions]) if (s2.userId === c.id) { sessions.delete(t); hub.signedOut(t); } }
+        res.statusCode = 204; return res.end();
+      }
       if (P === '/api/v1/admin/dashboard' && req.method === 'GET') {
         const by = new Map(); for (const o of orders) { const r = by.get(o.status) ?? { _id: o.status, count: 0, totalCents: 0 }; r.count++; r.totalCents += o.totalCents; by.set(o.status, r); }
-        const rows = [...by.values()]; return json(200, { ordersByStatus: rows, completedRevenueCents: by.get('Completed')?.totalCents ?? 0, products: catalogue.length });
+        const rows = [...by.values()]; return json(200, { ordersByStatus: rows, completedRevenueCents: by.get('Completed')?.totalCents ?? 0, products: catalogue.length, passwordRequests: pwRequests.size });
       }
       if (P === '/api/v1/admin/images' && req.method === 'POST') {
         const body = await readBody(req);

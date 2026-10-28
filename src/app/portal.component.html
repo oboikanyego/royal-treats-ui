@@ -35,14 +35,7 @@
           >Keep me signed in on this device</span
         ></label
       ><button class="primary wide">Sign in</button>
-      <button
-        type="button"
-        class="link"
-        *ngIf="store.settings().passwordResetEnabled"
-        (click)="openForgot()"
-      >
-        Forgot your password?
-      </button>
+      <button type="button" class="link" (click)="openForgot()">Forgot your password?</button>
       <button type="button" class="link" (click)="screen.set('register')">
         New customer? Register here
       </button>
@@ -57,13 +50,29 @@
             required
             [(ngModel)]="email"
             autocomplete="email" /></label
-        ><button class="primary wide" [disabled]="sendingReset">
-          {{ sendingReset ? 'Sending…' : 'Send me a reset link' }}
+        ><rt-password-field
+          label="New password"
+          name="newPassword"
+          autocomplete="new-password"
+          [(value)]="newPassword"
+        /><rt-password-field
+          label="Repeat the new password"
+          name="confirmPassword"
+          autocomplete="new-password"
+          [(value)]="confirmPassword"
+        />
+        <p class="helper">
+          12 to 128 characters. The shop cannot see it. Once the shop has checked that it is you and
+          approved the request, you can sign in with it.
+        </p>
+        <button class="primary wide" [disabled]="sendingReset">
+          {{ sendingReset ? 'Sending…' : 'Ask the shop to change it' }}
         </button>
       </ng-container>
       <p class="alert success-alert" *ngIf="resetSent" role="status">
-        If there is an account for {{ email }}, we have emailed it a link to choose a new password.
-        It works once and expires in 1 hour. Check your spam folder if it does not arrive.
+        Thank you. If there is an account for {{ email }}, the shop has your request. Once they have
+        checked it is you and approved it, sign in with your new password. To speed it up, contact
+        the shop. Until then your old password still works.
       </p>
       <button type="button" class="link" (click)="screen.set('signin')">← Back to sign in</button>
     </form>

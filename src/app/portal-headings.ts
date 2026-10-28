@@ -55,7 +55,7 @@ export function authCopy(screen: PortalScreen): { title: string; subtitle: strin
     case 'forgot':
       return {
         title: 'Forgot your password?',
-        subtitle: 'We will email you a link to choose a new one',
+        subtitle: 'Choose a new password and the shop will approve it',
       };
     default:
       return { title: 'Welcome back', subtitle: 'Sign in to your Royal Treats account' };

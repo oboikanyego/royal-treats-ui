@@ -37,8 +37,9 @@ export function authErrorMessage(error: ApiRequestError, context: AuthContext): 
     return 'We could not create your account. Please try again.';
   }
   if (context === 'forgot') {
-    if (error.status === 400) return 'Enter a valid email address.';
-    return 'We could not send the email just now. Please try again in a few minutes.';
+    if (error.status === 400)
+      return 'Enter a valid email address and a new password of 12 to 128 characters.';
+    return 'We could not send your request just now. Please try again in a few minutes.';
   }
   if (context === 'reset') {
     if (error.status === 400) {

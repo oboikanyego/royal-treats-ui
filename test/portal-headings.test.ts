@@ -29,5 +29,5 @@ test('the sign-in, register and forgot-password screens each have their own titl
   assert.equal(authCopy('signin').title, 'Welcome back');
   assert.equal(authCopy('register').title, 'Join Royal Treats');
   assert.equal(authCopy('forgot').title, 'Forgot your password?');
-  assert.match(authCopy('forgot').subtitle, /email you a link/);
+  assert.match(authCopy('forgot').subtitle, /shop will approve it/);
 });

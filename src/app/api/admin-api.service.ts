@@ -8,6 +8,7 @@ import type {
   ApiImage,
   ApiReceiptTemplate,
   ApiOrder,
+  ApiPasswordRequest,
   ApiProduct,
   ApiSettings,
   ApiUser,
@@ -34,6 +35,22 @@ export class AdminApi {
   /** The template on a sample order, without saving it. */
   previewReceipt(html: string): Promise<string> {
     return firstValueFrom(this.api.postText('/admin/templates/receipt/preview', { html }));
+  }
+
+  passwordRequests(): Promise<ApiPasswordRequest[]> {
+    return firstValueFrom(
+      this.api.get<{ items: ApiPasswordRequest[] }>('/admin/password-requests'),
+    ).then((r) => r.items);
+  }
+  approvePasswordRequest(id: string): Promise<void> {
+    return firstValueFrom(
+      this.api.post<void>(`/admin/password-requests/${encodeURIComponent(id)}/approve`, {}),
+    );
+  }
+  declinePasswordRequest(id: string): Promise<void> {
+    return firstValueFrom(
+      this.api.delete<void>(`/admin/password-requests/${encodeURIComponent(id)}`),
+    );
   }
 
   dashboard(): Promise<ApiDashboard> {
