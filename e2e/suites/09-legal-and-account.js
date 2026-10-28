@@ -36,7 +36,7 @@ const txt=async(pg,sel)=>(await pg.locator(sel).first().textContent()).replace(/
  await pg.click('button:has-text("Register here")'); ok(await pg.locator('.password-toggle').count()===1,'the register form has the toggle too');
  // ---------- customer account: details + password ----------
  ({ctx,pg}=await mk(b)); await signIn(pg,'thandi@example.com','a-long-enough-pass');
- await pg.click('button:has-text("My account")'); await pg.waitForSelector('rt-account-settings');
+ await pg.click('.role-user button:has-text("My account")'); await pg.waitForSelector('rt-account-settings');
  ok((await txt(pg,'.role-header h1'))==='My account','the header says "My account"');
  await pg.fill('rt-account-settings input[name=name]','Thandi M'); await pg.fill('rt-account-settings input[name=phone]','074 555 0000'); await pg.click('rt-account-settings button:has-text("Save details")'); await pg.waitForSelector('rt-account-settings .success-alert');
  const me=await call('/auth/login',{method:'POST',body:{email:'thandi@example.com',password:'a-long-enough-pass'}});

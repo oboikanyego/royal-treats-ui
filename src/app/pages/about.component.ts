@@ -2,11 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommerceState } from '../commerce-state.service';
+import { ImageSetPipe, ImageSrcPipe } from '../image.pipes';
 
 @Component({
   selector: 'section[rt-about]',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ImageSrcPipe, ImageSetPipe],
   templateUrl: './about.component.html',
   host: { class: 'about-page' },
 })

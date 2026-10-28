@@ -4,11 +4,12 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Busy } from '../busy.service';
 import { CatalogueProduct, CommerceState } from '../commerce-state.service';
+import { ImageSetPipe, ImageSrcPipe } from '../image.pipes';
 
 @Component({
   selector: 'section[rt-home]',
   standalone: true,
-  imports: [CommonModule, RouterLink, RandPipe],
+  imports: [CommonModule, RouterLink, RandPipe, ImageSrcPipe, ImageSetPipe],
   templateUrl: './home.component.html',
 })
 export class HomeComponent {

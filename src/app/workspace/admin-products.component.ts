@@ -21,6 +21,7 @@ import { toApiError } from '../api/api-errors';
 import { CATEGORY_OPTIONS, isDeliverableCategory } from '../catalogue-config';
 import { CatalogueProduct, CommerceState } from '../commerce-state.service';
 import { RandPipe } from '../rand.pipe';
+import { ImageSrcPipe } from '../image.pipes';
 
 const CATEGORIES = Object.keys(CATEGORY_OPTIONS);
 
@@ -28,7 +29,7 @@ const CATEGORIES = Object.keys(CATEGORY_OPTIONS);
 @Component({
   selector: 'rt-admin-products',
   standalone: true,
-  imports: [CommonModule, FormsModule, RandPipe],
+  imports: [CommonModule, FormsModule, RandPipe, ImageSrcPipe],
   templateUrl: './admin-products.component.html',
   encapsulation: ViewEncapsulation.None,
 })

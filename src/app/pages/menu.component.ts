@@ -6,11 +6,12 @@ import { Router } from '@angular/router';
 import { CatalogueFilters } from '../catalogue-filters.service';
 import { Busy } from '../busy.service';
 import { CatalogueProduct, CommerceState } from '../commerce-state.service';
+import { ImageSetPipe, ImageSrcPipe } from '../image.pipes';
 
 @Component({
   selector: 'section[rt-menu]',
   standalone: true,
-  imports: [CommonModule, FormsModule, RandPipe],
+  imports: [CommonModule, FormsModule, RandPipe, ImageSrcPipe, ImageSetPipe],
   templateUrl: './menu.component.html',
   host: { class: 'menu-section' },
 })

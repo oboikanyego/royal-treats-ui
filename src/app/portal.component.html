@@ -137,6 +137,16 @@
           </button>
         </div>
       </nav>
+      <nav class="admin-subnav role-subnav" *ngIf="user.role !== 'admin'" aria-label="Your pages">
+        <div class="appbar-tabs">
+          <button [class.active]="screen() !== 'account'" (click)="tab('home', $event)">
+            {{ user.role === 'courier' ? 'Deliveries' : 'My profile' }}
+          </button>
+          <button [class.active]="screen() === 'account'" (click)="tab('account', $event)">
+            My account
+          </button>
+        </div>
+      </nav>
       <aside class="workspace-sidebar" *ngIf="user.role === 'admin'" aria-label="Admin navigation">
         <div class="workspace-brand">
           <span class="brand-crown">♛</span>

@@ -2203,3 +2203,154 @@ select:focus-visible {
   min-height: 40px;
   font-size: 13px;
 }
+
+/* ---- Phones: customer, courier and the admin's Products and Delivery team look like the rest of the app ---- */
+@media (max-width: 700px) {
+  /* The shop's own header is already on screen; Sign out lives in its menu. */
+  .portal:has(.workspace-layout) > .portal-top {
+    display: none;
+  }
+  .portal:has(.workspace-layout) {
+    padding: 0 0 calc(112px + env(safe-area-inset-bottom));
+    background: transparent;
+  }
+  .workspace-layout:not(.admin-mode) .role-header {
+    display: block;
+    margin: 0 0 14px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    color: inherit;
+  }
+  .workspace-layout:not(.admin-mode) .role-header small,
+  .workspace-layout:not(.admin-mode) .role-user {
+    display: none;
+  }
+  .workspace-layout:not(.admin-mode) .role-header h1 {
+    margin: 4px 0 2px;
+    color: var(--rt-plum, #3c1934);
+    font:
+      700 28px Georgia,
+      serif;
+    letter-spacing: -0.3px;
+  }
+  .workspace-layout:not(.admin-mode) .role-header p {
+    margin: 0;
+    font-size: 13px;
+    color: #8a6f81;
+  }
+  /* Courier: jobs and deliveries as the same kind of ticket as the admin's orders. */
+  .workspace-layout:not(.admin-mode) .workspace-main h2 {
+    margin: 18px 0 4px;
+    font:
+      700 21px Georgia,
+      serif;
+    color: var(--rt-plum, #3c1934);
+  }
+  .workspace-layout:not(.admin-mode) .order-card {
+    padding: 16px;
+    border: 1px solid var(--rt-pink-border, #f3d8e4);
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 6px 18px #5a123a0d;
+  }
+  .workspace-layout:not(.admin-mode) .order-card > div:first-child b {
+    font-size: 17px;
+  }
+  .workspace-layout:not(.admin-mode) .order-card > div:first-child span {
+    padding: 4px 11px;
+    border-radius: 99px;
+    background: #fff0f7;
+    color: #b81361;
+    font-size: 12px;
+    font-weight: 750;
+    white-space: nowrap;
+  }
+  .workspace-layout:not(.admin-mode) .order-card button {
+    width: 100%;
+    min-height: 50px;
+    font-size: 15px;
+  }
+  .workspace-layout:not(.admin-mode) .order-card a[href^='tel:'] {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 14px;
+    border-radius: 99px;
+    background: #fff0f7;
+    color: #b81361;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  /* Products. */
+  .admin-mode .products-head .eyebrow,
+  .admin-mode .products-head h2,
+  .admin-mode .products-head .helper {
+    display: none;
+  }
+  .admin-mode .products-head {
+    margin-bottom: 12px;
+  }
+  .admin-mode .products-head .add-product {
+    width: 100%;
+    min-height: 52px;
+    font-size: 16px;
+  }
+  .admin-mode .product-line {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    align-items: center;
+    gap: 12px 14px;
+    padding: 14px;
+    border-radius: 18px;
+  }
+  .admin-mode .product-line img {
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+    object-fit: cover;
+  }
+  .admin-mode .product-line .pline-info b {
+    font-size: 16px;
+    color: #2d263c;
+  }
+  .admin-mode .product-line .pline-info p {
+    margin: 3px 0;
+    font-size: 14px;
+    color: #5d586f;
+  }
+  .admin-mode .product-line .pline-info small {
+    color: #8a6f81;
+  }
+  .admin-mode .product-line .pline-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 10px;
+  }
+  .admin-mode .product-line .pline-actions button {
+    flex: 1 1 0;
+    min-height: 46px;
+    font-size: 14px;
+    white-space: normal;
+  }
+  /* Delivery team. */
+  .admin-mode .pane > h2:first-child {
+    display: none;
+  }
+}
+.stock-pill {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 9px;
+  border-radius: 99px;
+  background: #e8f6ee;
+  color: #1d6b3d;
+  font-size: 12px;
+  font-weight: 750;
+}
+.stock-pill.out {
+  background: #fdecee;
+  color: #a51a41;
+}

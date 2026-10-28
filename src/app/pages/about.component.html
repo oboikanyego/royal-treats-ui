@@ -8,7 +8,7 @@
     </p>
     <button class="primary" routerLink="/menu">Explore our treats ↗</button>
   </div>
-  <img [src]="featureImage()" alt="Fresh mini donuts" />
+  <img [src]="featureImage() | imgSrc: 900" alt="Fresh mini donuts" decoding="async" />
 </div>
 <div class="about-values">
   <div>
@@ -42,7 +42,14 @@
 </div>
 <div class="about-feature-grid">
   <div *ngFor="let p of store.products()">
-    <img [src]="p.image" [alt]="p.name" />
+    <img
+      [src]="p.image | imgSrc: 480"
+      [attr.srcset]="p.image | imgSet: [320, 480, 640]"
+      sizes="(max-width: 650px) 90vw, 300px"
+      [alt]="p.name"
+      loading="lazy"
+      decoding="async"
+    />
     <h3>{{ p.name }}</h3>
     <p>{{ p.description }}</p>
   </div>

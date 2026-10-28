@@ -1,6 +1,13 @@
 <ng-container *ngIf="selected() as product">
   <button class="back" routerLink="/menu">← Back to menu</button
-  ><img class="feature-img" [src]="product.image" [alt]="product.name" />
+  ><img
+    class="feature-img"
+    [src]="product.image | imgSrc: 800"
+    [attr.srcset]="product.image | imgSet: [480, 800, 1200]"
+    sizes="(max-width: 650px) 100vw, 560px"
+    [alt]="product.name"
+    decoding="async"
+  />
   <h1>{{ product.name }}</h1>
   <b class="pink">From {{ product.price | rand }}</b>
   <p class="muted">Freshly made, customised with your favourite flavours and toppings.</p>
