@@ -300,3 +300,24 @@ test('assigning a courier has its own plain messages', () => {
   assert.match(adminErrorMessage(err(500), 'assign'), /could not assign the courier/);
   assert.match(adminErrorMessage(err(429), 'assign'), /Too many requests/);
 });
+
+test('settings validation covers the pause message and the weekly hours', () => {
+  const week = Array.from({ length: 7 }, () => ({ closed: false, open: '09:00', close: '17:00' }));
+  assert.equal(settingsProblem(settings({ weeklyHours: week })), null);
+  assert.match(settingsProblem(settings({ pauseMessage: 'x'.repeat(201) }))!, /200 characters/);
+  assert.match(
+    settingsProblem(settings({ weeklyHours: week.map((d) => ({ ...d, closed: true })) }))!,
+    /at least one day/,
+  );
+  const payload = toSettingsPayload(
+    settings({ ordersPaused: true, pauseMessage: ' Back Monday ', weeklyHours: week }),
+  );
+  assert.equal(payload.ordersPaused, true);
+  assert.equal(payload.pauseMessage, 'Back Monday');
+  assert.equal(payload.weeklyHours?.length, 7);
+  assert.equal(
+    'weeklyHours' in toSettingsPayload(settings()),
+    false,
+    'no weekly hours means none are sent',
+  );
+});

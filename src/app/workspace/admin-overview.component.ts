@@ -17,6 +17,7 @@ import { adminErrorMessage } from '../api/admin-messages';
 import { dashboardSummary } from '../api/admin-view';
 import { toApiError } from '../api/api-errors';
 import type { ApiDashboard } from '../api/api-types';
+import { weekSummary } from '../opening-hours';
 import { CommerceState } from '../commerce-state.service';
 import { RandPipe } from '../rand.pipe';
 
@@ -37,6 +38,7 @@ export class AdminOverviewComponent implements OnInit {
 
   readonly dashboard = signal<ApiDashboard | null>(null);
   readonly error = signal('');
+  readonly hoursText = computed(() => weekSummary(this.store.settings()));
   readonly summary = computed(() => {
     const d = this.dashboard();
     return d ? dashboardSummary(d) : null;

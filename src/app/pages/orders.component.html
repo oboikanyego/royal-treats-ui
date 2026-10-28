@@ -49,6 +49,9 @@
       Placed {{ order.createdAt | date: 'd MMM y, HH:mm' }}
     </p>
     <p class="pink" *ngIf="order.status === 'Cancelled'">This order was cancelled.</p>
+    <p class="muted" *ngIf="order.status === 'Cancelled' && order.cancelNote">
+      {{ order.cancelNote }}
+    </p>
     <div class="timeline" *ngIf="order.status !== 'Cancelled'">
       <div
         *ngFor="let step of stepsFor(order.fulfillment)"

@@ -23,6 +23,11 @@ export type ApiSettings = {
   radiusKm?: number;
   /** True when the API can send email, so "Forgot password?" can work. */
   passwordResetEnabled?: boolean;
+  /** While true the API refuses new orders; customers see `pauseMessage`. */
+  ordersPaused?: boolean;
+  pauseMessage?: string;
+  /** Seven days, Sunday first; absent means every day uses open/close. */
+  weeklyHours?: { closed: boolean; open: string; close: string }[] | null;
 };
 export type Paginated<T> = { items: T[]; total: number; page: number; limit: number };
 export type ApiUser = {
@@ -65,6 +70,7 @@ export type ApiOrder = {
   createdAt?: string;
   /** The statuses the calling user may move this order to (see the API's allowedStatuses). */
   allowedStatuses?: string[];
+  history?: { status: string; actorId?: string; at?: string; note?: string }[];
 };
 export type OrderRequest = {
   fulfillment: 'collection' | 'delivery';
@@ -104,6 +110,9 @@ export type SettingsPayload = {
   close: string;
   latitude: number | null;
   longitude: number | null;
+  ordersPaused?: boolean;
+  pauseMessage?: string;
+  weeklyHours?: { closed: boolean; open: string; close: string }[];
 };
 export type ApiDashboard = {
   ordersByStatus: { _id: string; count: number; totalCents: number }[];

@@ -37,6 +37,12 @@ export function fromApiSettings(s: ApiSettings, defaults: Settings): Settings {
     longitude: s.longitude ?? null,
     radiusKm: s.radiusKm ?? defaults.radiusKm,
     passwordResetEnabled: s.passwordResetEnabled ?? defaults.passwordResetEnabled ?? false,
+    ordersPaused: s.ordersPaused ?? defaults.ordersPaused ?? false,
+    pauseMessage: s.pauseMessage ?? defaults.pauseMessage ?? '',
+    weeklyHours:
+      Array.isArray(s.weeklyHours) && s.weeklyHours.length === 7
+        ? s.weeklyHours.map((d) => ({ closed: !!d.closed, open: d.open, close: d.close }))
+        : ((s.weeklyHours === undefined ? defaults.weeklyHours : null) ?? null),
   };
 }
 
@@ -90,5 +96,6 @@ export function fromApiOrder(o: ApiOrder): DeliveryOrder {
     notes: o.notes,
     createdAt: o.createdAt,
     allowedStatuses: o.allowedStatuses ?? [],
+    cancelNote: o.status === 'Cancelled' ? o.history?.at(-1)?.note : undefined,
   };
 }
