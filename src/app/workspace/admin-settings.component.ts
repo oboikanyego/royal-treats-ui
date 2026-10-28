@@ -7,6 +7,7 @@ import { settingsProblem, toSettingsPayload } from '../api/admin-payloads';
 import { toApiError } from '../api/api-errors';
 import { geocodeAddress, mapLink } from '../api/geocode';
 import { CommerceState, Settings } from '../commerce-state.service';
+import { AdminReceiptComponent } from './admin-receipt.component';
 import {
   WEEKDAYS,
   WEEK_DISPLAY_ORDER,
@@ -22,7 +23,7 @@ import {
 @Component({
   selector: 'rt-admin-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AdminReceiptComponent],
   templateUrl: './admin-settings.component.html',
   encapsulation: ViewEncapsulation.None,
 })

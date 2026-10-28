@@ -23,12 +23,22 @@ export function toApiError(failure: unknown): ApiRequestError {
   const status = typeof f.status === 'number' ? f.status : 0;
   if (status === 0)
     return new ApiRequestError(0, 'Cannot reach the server. Check your connection.');
-  const body = f.error as { error?: unknown; details?: unknown } | null | undefined;
+  // A text response (a receipt) reports its failure as the JSON text of the API's error body.
+  const body = (typeof f.error === 'string' ? parseJson(f.error) : f.error) as
+    { error?: unknown; details?: unknown } | null | undefined;
   const message =
     typeof body?.error === 'string' && body.error
       ? body.error
       : `The server returned an error (${status}).`;
   return new ApiRequestError(status, message, body?.details);
+}
+
+function parseJson(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
 }
 
 /** Network failures, timeouts and gateway errors are worth retrying for a read. */

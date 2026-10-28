@@ -11,7 +11,7 @@ if (!process.argv[2] || !fs.existsSync(path.join(api, 'src'))) {
   console.error('Usage: node scripts/sync-api-snapshot.mjs <path to a royal-treats-api checkout>');
   process.exit(2);
 }
-const entry = ['catalogue', 'validation', 'images', 'order-rules', 'security', 'live'];
+const entry = ['catalogue', 'validation', 'images', 'order-rules', 'security', 'live', 'receipt'];
 const seen = new Set();
 const todo = [...entry];
 while (todo.length) {

@@ -31,6 +31,31 @@ export class ApiClient {
     return this.once(this.http.get(environment.apiUrl + path, { responseType: 'blob' }));
   }
 
+  /** GET a text response (a receipt's HTML). Not retried: the person is waiting for it. */
+  getText(path: string): Observable<string> {
+    return this.once(
+      this.http.get(environment.apiUrl + path, {
+        responseType: 'text',
+        headers: { Accept: 'text/html' },
+      }),
+    );
+  }
+
+  /** POST that answers with text (a template preview). */
+  postText(path: string, body: unknown): Observable<string> {
+    return this.once(
+      this.http.post(environment.apiUrl + path, body, {
+        responseType: 'text',
+        headers: { Accept: 'text/html' },
+      }),
+    );
+  }
+
+  /** DELETE with a JSON answer. */
+  delete<T>(path: string): Observable<T> {
+    return this.once(this.http.delete<T>(environment.apiUrl + path));
+  }
+
   /** Writes are never retried automatically: repeating a sign-in or an order is not always safe. */
   post<T>(path: string, body: unknown = {}, headers?: Record<string, string>): Observable<T> {
     return this.once(this.http.post<T>(environment.apiUrl + path, body, { headers }));

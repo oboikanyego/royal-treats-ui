@@ -127,6 +127,15 @@
       </button>
     </div>
 
+    <div class="actions receipt-row">
+      <button
+        type="button"
+        class="secondary"
+        (click)="receipts.showOrder(order.id, order.ref || order.id)"
+      >
+        Print receipt
+      </button>
+    </div>
     <div class="actions" *ngIf="order.allowedStatuses?.length">
       <ng-container *ngFor="let next of order.allowedStatuses">
         <button

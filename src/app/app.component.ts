@@ -6,6 +6,7 @@ import { Busy } from './busy.service';
 import { CartService } from './cart.service';
 import { CommerceState } from './commerce-state.service';
 import { IconComponent } from './icon.component';
+import { ReceiptDialogComponent } from './receipt-dialog.component';
 
 const pagePaths: Record<string, string> = {
   home: '/',
@@ -23,7 +24,7 @@ const pagePaths: Record<string, string> = {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, IconComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, IconComponent, ReceiptDialogComponent],
   templateUrl: './app.component.html',
 })
 export class AppComponent {

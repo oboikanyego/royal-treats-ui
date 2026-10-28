@@ -22,6 +22,7 @@ import type { DeliveryOrder } from '../commerce-state.service';
 import type { ApiUser } from '../api/api-types';
 import { groupByRecipient, mapsLink, statusLabel } from '../order-view';
 import { RandPipe } from '../rand.pipe';
+import { ReceiptViewer } from '../receipt-viewer.service';
 
 const REFRESH_MS = 30_000;
 
@@ -37,6 +38,7 @@ export class AdminOrdersComponent implements OnInit {
   private readonly ordersApi = inject(OrdersApi);
   private readonly admin = inject(AdminApi);
   readonly live = inject(AdminLive);
+  readonly receipts = inject(ReceiptViewer);
   private readonly feed = new OrderFeed(
     (page, limit) => this.ordersApi.list(page, limit, statusesFor(this.filter())),
     20,

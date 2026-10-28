@@ -23,6 +23,10 @@ export class OrdersApi {
     if (statuses?.length) params['status'] = statuses.join(',');
     return firstValueFrom(this.api.get<Paginated<ApiOrder>>('/orders', params));
   }
+  /** The printable receipt for an order, as HTML. */
+  receipt(id: string): Promise<string> {
+    return firstValueFrom(this.api.getText(`/orders/${encodeURIComponent(id)}/receipt`));
+  }
   setStatus(id: string, status: string): Promise<ApiOrder> {
     return firstValueFrom(
       this.api.patch<ApiOrder>(`/orders/${encodeURIComponent(id)}/status`, { status }),

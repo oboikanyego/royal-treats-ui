@@ -14,6 +14,7 @@ const { assertProductImage } = await load('images.ts');
 const { priceOrder, allowedStatuses, assertStatusChange } = await load('order-rules.ts');
 const { ApiError } = await load('security.ts');
 const { createLiveHub } = await load('live.ts');
+const { DEFAULT_RECEIPT_TEMPLATE, RECEIPT_PLACEHOLDERS, SAMPLE_RECEIPT, receiptData, renderReceipt, validateReceiptTemplate } = await load('receipt.ts');
 const { randomUUID, createHash } = await import('node:crypto');
 const view = (p) => ({ id: p._id, name: p.name, category: p.category, description: p.description, image: p.image,
   available: p.available ?? true, deliverable: p.deliverable, priceCents: Math.min(...p.variants.map((v) => v.priceCents)),
@@ -41,7 +42,8 @@ import fs from 'node:fs';
 const stub = fs.readFileSync(new URL('./assets/stub.png', import.meta.url));
 const users = new Map(); const sessions = new Map(); let nextId = 1;
 const addUser = (name, email, phone, password, role = 'customer') => { const u = { id: 'u' + nextId++, name, email, phone, password, role, active: true, photo: null }; users.set(email, u); return u; };
-const resetUsers = () => { resets.clear(); lastReset = null; resetCatalogue(); orders.length = 0; users.clear(); sessions.clear(); nextId = 1; addUser('Royal Admin', 'admin@royaltreats.test', '0740000000', 'AdminPass-12345', 'admin'); addUser('Sipho Courier', 'courier@royaltreats.test', '0740000001', 'CourierPass-12345', 'courier'); };
+let receiptHtml = DEFAULT_RECEIPT_TEMPLATE;
+const resetUsers = () => { receiptHtml = DEFAULT_RECEIPT_TEMPLATE;  resets.clear(); lastReset = null; resetCatalogue(); orders.length = 0; users.clear(); sessions.clear(); nextId = 1; addUser('Royal Admin', 'admin@royaltreats.test', '0740000000', 'AdminPass-12345', 'admin'); addUser('Sipho Courier', 'courier@royaltreats.test', '0740000001', 'CourierPass-12345', 'courier'); };
 resetUsers();
 const userView = (u) => ({ id: u.id, name: u.name, email: u.email, phone: u.phone, role: u.role, active: u.active });
 const issue = (u, remember = false) => { const token = randomBytes(32).toString('base64url'); const expiresAt = new Date(Date.now() + (remember === true ? 30 * 24 : 8) * 3600e3); sessions.set(token, { userId: u.id, expiresAt }); return { token, expiresAt: expiresAt.toISOString() }; };
@@ -243,6 +245,23 @@ const server = http.createServer(async (req, res) => {
     let wanted; if (url.searchParams.has('status')) { try { wanted = statusFilter.parse(url.searchParams.get('status')); } catch { return json(400, { error: 'Invalid input', details: [{ path: ['status'], message: 'Invalid status' }] }); } }
     const mine = orders.filter((o) => (u.role === 'admin' || (u.role === 'courier' ? o.courierId === u.id : o.customerId === u.id)) && (!wanted || wanted.includes(o.status)));
     return json(200, { items: mine.slice((page - 1) * limit, page * limit).map((o) => view2(o, u)), total: mine.length, page, limit });
+  }
+  const receiptMatch = P.match(/^\/api\/v1\/orders\/([^/]+)\/receipt$/);
+  const html = (code, text) => { res.statusCode = code; res.setHeader('content-type', 'text/html; charset=utf-8'); res.setHeader('content-security-policy', "default-src 'none'; style-src 'unsafe-inline'; img-src data:"); res.end(text); };
+  if (receiptMatch && req.method === 'GET') {
+    const u = userFor(req); if (!u) return json(401, { error: 'Sign in required' });
+    const o = orders.find((x) => x.id === receiptMatch[1] && (u.role === 'admin' || (u.role === 'customer' && x.customerId === u.id) || (u.role === 'courier' && x.courierId === u.id)));
+    if (!o) return json(404, { error: 'Order not found' });
+    return html(200, renderReceipt(receiptHtml, receiptData({ ...o, _id: o.id }, settings)));
+  }
+  if (P.startsWith('/api/v1/admin/templates/receipt')) {
+    const u = userFor(req); if (!u) return json(401, { error: 'Sign in required' }); if (u.role !== 'admin') return json(403, { error: 'Access denied' });
+    const editor = () => ({ html: receiptHtml, customised: receiptHtml !== DEFAULT_RECEIPT_TEMPLATE, updatedAt: null, placeholders: RECEIPT_PLACEHOLDERS });
+    const readHtml = async () => { try { const b = JSON.parse((await readBody(req)).toString() || '{}'); if (typeof b.html !== 'string' || Object.keys(b).length !== 1) throw new Error('bad'); return b.html; } catch { return null; } };
+    if (P === '/api/v1/admin/templates/receipt' && req.method === 'GET') return json(200, editor());
+    if (P === '/api/v1/admin/templates/receipt' && req.method === 'DELETE') { receiptHtml = DEFAULT_RECEIPT_TEMPLATE; return json(200, editor()); }
+    if (P === '/api/v1/admin/templates/receipt' && req.method === 'PUT') { const h = await readHtml(); if (h === null) return json(400, { error: 'Invalid input' }); receiptHtml = validateReceiptTemplate(h); return json(200, editor()); }
+    if (P === '/api/v1/admin/templates/receipt/preview' && req.method === 'POST') { const h = await readHtml(); if (h === null) return json(400, { error: 'Invalid input' }); return html(200, renderReceipt(validateReceiptTemplate(h), SAMPLE_RECEIPT)); }
   }
   const m = P.match(/^\/api\/v1\/orders\/([^/]+)\/status$/);
   if (m && req.method === 'PATCH') {

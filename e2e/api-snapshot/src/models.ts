@@ -100,6 +100,17 @@ export const Settings = mongoose.model(
     options,
   ),
 );
+/** Editable documents, like the receipt template: one record per name, seeded when the service starts. */
+export const Template = mongoose.model(
+  'Template',
+  new Schema(
+    {
+      _id: String,
+      html: { type: String, required: true },
+    },
+    options,
+  ),
+);
 const orderSchema = new Schema(
   {
     _id: String,
@@ -154,6 +165,7 @@ export async function connectDatabase(uri: string) {
     PasswordReset.init(),
     Product.init(),
     Settings.init(),
+    Template.init(),
     Order.init(),
   ]);
 }
