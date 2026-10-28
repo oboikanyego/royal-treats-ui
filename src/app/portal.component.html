@@ -65,14 +65,23 @@
           12 to 128 characters. The shop cannot see it. Once the shop has checked that it is you and
           approved the request, you can sign in with it.
         </p>
+        <p class="helper shop-call" *ngIf="shopPhone() as phone">
+          To get it approved sooner, call the shop on
+          <a [href]="telHref(phone)">{{ phone }}</a
+          >.
+        </p>
         <button class="primary wide" [disabled]="sendingReset">
           {{ sendingReset ? 'Sending…' : 'Ask the shop to change it' }}
         </button>
       </ng-container>
       <p class="alert success-alert" *ngIf="resetSent" role="status">
         Thank you. If there is an account for {{ email }}, the shop has your request. Once they have
-        checked it is you and approved it, sign in with your new password. To speed it up, contact
-        the shop. Until then your old password still works.
+        checked it is you and approved it, sign in with your new password. To speed it up,
+        <ng-container *ngIf="shopPhone() as phone"
+          >call the shop on <a [href]="telHref(phone)">{{ phone }}</a
+          >.</ng-container
+        ><ng-container *ngIf="!shopPhone()">contact the shop.</ng-container>
+        Until then your old password still works.
       </p>
       <button type="button" class="link" (click)="screen.set('signin')">← Back to sign in</button>
     </form>

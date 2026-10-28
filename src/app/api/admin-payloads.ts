@@ -95,6 +95,9 @@ export function settingsProblem(s: Settings): string | null {
   const email = s.supportEmail.trim();
   if (email && (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254))
     return 'Enter a valid support email address, or leave it blank.';
+  const shopPhone = (s.supportPhone ?? '').trim();
+  if (shopPhone && !/^\+?[0-9 ]{9,16}$/.test(shopPhone))
+    return 'Enter a valid shop phone number (digits and spaces), or leave it blank.';
   if (!TIME.test(s.open) || !TIME.test(s.close)) return 'Enter opening and closing times.';
   if (s.open === s.close) return 'Opening and closing time must differ.';
   if ((s.pauseMessage ?? '').trim().length > 200)
@@ -119,6 +122,7 @@ export function toSettingsPayload(s: Settings): SettingsPayload {
     storeName: s.storeName.trim(),
     address: s.address.trim(),
     supportEmail: s.supportEmail.trim(),
+    ...(s.supportPhone === undefined ? {} : { supportPhone: s.supportPhone.trim() }),
     open: s.open,
     close: s.close,
     latitude: s.latitude,

@@ -126,6 +126,19 @@
       <p class="settings-note">
         Customers email you from their own email app; the site never sends messages on its own.
       </p>
+      <label
+        >Shop phone number<input
+          type="tel"
+          name="supportPhone"
+          autocomplete="tel"
+          inputmode="tel"
+          placeholder="014 123 4567"
+          [(ngModel)]="settings.supportPhone"
+      /></label>
+      <p class="settings-note">
+        Shown to customers who forgot their password, so they can call you to get it approved
+        sooner. Leave it blank to hide it.
+      </p>
     </section>
 
     <section class="settings-card delivery-card">

@@ -18,6 +18,7 @@ const OLD='a-long-enough-pass', NEW='brand-new-long-pass';
  await pg.click('button:has-text("Forgot your password?")'); await pg.waitForSelector('button:has-text("Ask the shop to change it")');
  ok((await pg.locator('.auth-head h1').textContent()).includes('Forgot your password?'),'the screen is titled "Forgot your password?"');
  ok(await pg.locator('.password-toggle').count()===2,'both new-password boxes have Show/Hide');
+ ok(await pg.locator('.shop-call').count()===0,'no phone line while the shop has not set a number');
  // 2. checks before anything is sent
  await pg.fill('input[name=email]','not-an-email'); await pg.click('button:has-text("Ask the shop to change it")'); await pg.waitForSelector('p.error');
  ok((await pg.locator('p.error').textContent()).includes('valid email'),'a bad address is refused');
@@ -64,6 +65,23 @@ const OLD='a-long-enough-pass', NEW='brand-new-long-pass';
  // 8. staff accounts cannot be taken over this way
  const staff=await call('/auth/password-requests',{method:'POST',body:{email:'admin@royaltreats.test',newPassword:NEW}});
  ok(staff.status===202&&(await call('/admin/password-requests',{token:adminTok})).body.items.length===0,'a request for an admin account is accepted quietly and creates nothing');
+ // 8b. the shop's phone number appears once the admin sets it (and is cleared again)
+ const settingsNow=(await call('/settings')).body;
+ const put=(extra)=>call('/admin/settings',{method:'PUT',token:adminTok,body:{storeName:settingsNow.storeName,address:settingsNow.address,supportEmail:settingsNow.supportEmail,open:settingsNow.open,close:settingsNow.close,latitude:settingsNow.latitude??null,longitude:settingsNow.longitude??null,...extra}});
+ ok((await put({supportPhone:'call me'})).status===400,'the API refuses a shop phone that is not a number');
+ ok((await put({supportPhone:'014 123 4567'})).status===200,'the admin can set the shop phone');
+ let fp=await mk(b); await fp.goto(UI+'/account'); await fp.click('button:has-text("Forgot your password?")'); await fp.waitForSelector('.shop-call');
+ ok((await fp.locator('.shop-call a').getAttribute('href'))==='tel:0141234567'&&(await fp.locator('.shop-call').textContent()).includes('014 123 4567'),'the form shows the shop number as a tap-to-call link');
+ await fp.fill('input[name=email]','thandi@example.com'); await fp.fill('input[name=newPassword]',NEW); await fp.fill('input[name=confirmPassword]',NEW); await fp.click('button:has-text("Ask the shop to change it")'); await fp.waitForSelector('.success-alert');
+ ok((await fp.locator('.success-alert a').getAttribute('href'))==='tel:0141234567','the thank-you message offers the number too');
+ await put({supportPhone:''}); fp=await mk(b); await fp.goto(UI+'/account'); await fp.click('button:has-text("Forgot your password?")'); await fp.waitForSelector('input[name=newPassword]');
+ ok(await fp.locator('.shop-call').count()===0,'clearing the number hides the line again');
+ // admin Settings field
+ await pg.click('.sidebar-navigation button:has-text("Settings")'); await pg.waitForSelector('input[name=supportPhone]');
+ await pg.fill('input[name=supportPhone]','082 000 1111'); await pg.click('rt-admin-settings button.primary'); await pg.waitForSelector('rt-admin-settings .success-alert');
+ ok((await call('/settings')).body.supportPhone==='082 000 1111','the admin Settings screen saves the shop phone');
+ await pg.fill('input[name=supportPhone]','abc'); await pg.click('rt-admin-settings button.primary'); await pg.waitForSelector('rt-admin-settings .alert.error');
+ ok((await call('/settings')).body.supportPhone==='082 000 1111','a bad number is refused and nothing changes');
  // 9. phone: the form and the admin card fit the screen
  const ph=await mk(b,390,844); await ph.goto(UI+'/account'); await ph.click('button:has-text("Forgot your password?")'); await ph.waitForSelector('input[name=newPassword]');
  ok(await ph.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'the form has no sideways scroll on a phone');

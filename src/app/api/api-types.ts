@@ -16,6 +16,7 @@ export type ApiSettings = {
   storeName?: string;
   address?: string;
   supportEmail?: string;
+  supportPhone?: string;
   open?: string;
   close?: string;
   latitude?: number | null;
@@ -106,6 +107,8 @@ export type SettingsPayload = {
   storeName: string;
   address: string;
   supportEmail: string;
+  /** Left out until the shop has one, so an API without the field still accepts the save. */
+  supportPhone?: string;
   open: string;
   close: string;
   latitude: number | null;

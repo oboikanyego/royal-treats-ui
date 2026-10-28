@@ -49,6 +49,8 @@ export type Settings = {
   storeName: string;
   address: string;
   supportEmail: string;
+  /** The shop's own number, shown where customers need to reach it; empty or missing = not shown. */
+  supportPhone?: string;
   /** Set by the API: whether it can email a password reset link. */
   passwordResetEnabled?: boolean;
   /** Set by the shop: new orders are refused while true. */

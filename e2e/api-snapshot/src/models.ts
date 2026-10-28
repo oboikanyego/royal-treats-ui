@@ -46,6 +46,21 @@ export const PasswordReset = mongoose.model(
     options,
   ),
 );
+/**
+ * A customer's or courier's request to set a new password, waiting for an admin to approve it.
+ * Only the scrambled password is kept, so nobody (an admin included) can read it. One per account.
+ */
+export const PasswordRequest = mongoose.model(
+  'PasswordRequest',
+  new Schema(
+    {
+      userId: { type: Schema.Types.ObjectId, required: true, unique: true },
+      passwordHash: { type: String, required: true },
+      expiresAt: { type: Date, required: true, index: { expires: 0 } },
+    },
+    options,
+  ),
+);
 export const Product = mongoose.model(
   'Product',
   new Schema(
@@ -78,6 +93,8 @@ export const Settings = mongoose.model(
       storeName: { type: String, default: 'Royal Treats' },
       address: { type: String, default: '34 10th Avenue, Thabazimbi' },
       supportEmail: { type: String, default: '' },
+      /** The shop's own number, shown to customers who need to reach it (empty = not shown). */
+      supportPhone: { type: String, default: '' },
       open: { type: String, default: '10:00' },
       close: { type: String, default: '23:00' },
       latitude: { type: Number, default: null },
@@ -163,6 +180,7 @@ export async function connectDatabase(uri: string) {
     User.init(),
     Session.init(),
     PasswordReset.init(),
+    PasswordRequest.init(),
     Product.init(),
     Settings.init(),
     Template.init(),
