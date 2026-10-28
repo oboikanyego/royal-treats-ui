@@ -112,36 +112,13 @@
   </section>
   <ng-container *ngIf="store.session() as user">
     <div class="workspace-layout" [class.admin-mode]="user.role === 'admin'">
-      <header class="admin-appbar" *ngIf="user.role === 'admin'">
-        <div class="appbar-row">
-          <button
-            class="appbar-brand"
-            type="button"
-            (click)="tab('home', $event)"
-            aria-label="Overview"
-          >
-            ♛
-          </button>
-          <h2 class="appbar-title">{{ heading(user.role).title }}</h2>
-          <button
-            class="appbar-avatar"
-            type="button"
-            (click)="accountMenu = !accountMenu"
-            [attr.aria-expanded]="accountMenu"
-            aria-haspopup="menu"
-            aria-label="Account menu"
-          >
-            <img *ngIf="user.photo" [src]="user.photo" alt="" /><span *ngIf="!user.photo">{{
-              initials(user.name)
-            }}</span>
-          </button>
-        </div>
-        <nav class="appbar-tabs" aria-label="Admin sections">
+      <nav class="admin-subnav" *ngIf="user.role === 'admin'" aria-label="Manage the shop">
+        <div class="appbar-tabs">
           <button [class.active]="screen() === 'home'" (click)="tab('home', $event)">
-            <span aria-hidden="true">▦</span>Overview
+            Overview
           </button>
           <button [class.active]="screen() === 'orders'" (click)="tab('orders', $event)">
-            <span aria-hidden="true">▤</span>Orders
+            Orders
             <small
               class="tab-badge"
               *ngIf="live.pending()"
@@ -150,35 +127,16 @@
             >
           </button>
           <button [class.active]="screen() === 'products'" (click)="tab('products', $event)">
-            <span aria-hidden="true">◈</span>Products
+            Products
           </button>
           <button [class.active]="screen() === 'couriers'" (click)="tab('couriers', $event)">
-            <span aria-hidden="true">♙</span>Delivery
+            Delivery team
           </button>
           <button [class.active]="screen() === 'settings'" (click)="tab('settings', $event)">
-            <span aria-hidden="true">⚙</span>Settings
+            Settings
           </button>
-        </nav>
-        <ng-container *ngIf="accountMenu">
-          <button
-            class="appbar-backdrop"
-            type="button"
-            aria-label="Close menu"
-            (click)="accountMenu = false"
-          ></button>
-          <div class="appbar-menu" role="menu">
-            <p>
-              Signed in as <b>{{ user.name }}</b>
-            </p>
-            <button role="menuitem" type="button" (click)="tab('account', $event)">
-              My account
-            </button>
-            <button role="menuitem" type="button" class="danger" (click)="logout()">
-              <span aria-hidden="true">⎋</span> Sign out
-            </button>
-          </div>
-        </ng-container>
-      </header>
+        </div>
+      </nav>
       <aside class="workspace-sidebar" *ngIf="user.role === 'admin'" aria-label="Admin navigation">
         <div class="workspace-brand">
           <span class="brand-crown">♛</span>

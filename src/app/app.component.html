@@ -107,7 +107,11 @@
     <button [class.current]="page() === 'menu' || page() === 'product'" (click)="go('menu')">
       <rt-icon name="menu" /><span>Our Menu</span><rt-icon name="chevron" />
     </button>
-    <button [class.current]="page() === 'orders'" (click)="go('orders')">
+    <button
+      *ngIf="store.session()?.role !== 'admin'"
+      [class.current]="page() === 'orders'"
+      (click)="go('orders')"
+    >
       <rt-icon name="orders" /><span>My Orders</span><rt-icon name="chevron" />
     </button>
     <button [class.current]="page() === 'about'" (click)="go('about')">
@@ -115,6 +119,41 @@
     </button>
     <button [class.current]="page() === 'contact'" (click)="go('contact')">
       <rt-icon name="mail" /><span>Contact</span><rt-icon name="chevron" />
+    </button>
+  </div>
+  <div class="drawer-links drawer-admin" *ngIf="store.session()?.role === 'admin'">
+    <p class="drawer-group">Manage the shop</p>
+    <button
+      [class.current]="page() === 'portal' && adminScreen() === 'home'"
+      (click)="openAdmin('home')"
+    >
+      <rt-icon name="workspace" /><span>Overview</span><rt-icon name="chevron" />
+    </button>
+    <button
+      [class.current]="page() === 'portal' && adminScreen() === 'orders'"
+      (click)="openAdmin('orders')"
+    >
+      <rt-icon name="orders" /><span>Orders</span>
+      <small class="drawer-badge" *ngIf="live.pending()">{{ live.pending() }}</small
+      ><rt-icon name="chevron" />
+    </button>
+    <button
+      [class.current]="page() === 'portal' && adminScreen() === 'products'"
+      (click)="openAdmin('products')"
+    >
+      <rt-icon name="tag" /><span>Products</span><rt-icon name="chevron" />
+    </button>
+    <button
+      [class.current]="page() === 'portal' && adminScreen() === 'couriers'"
+      (click)="openAdmin('couriers')"
+    >
+      <rt-icon name="users" /><span>Delivery team</span><rt-icon name="chevron" />
+    </button>
+    <button
+      [class.current]="page() === 'portal' && adminScreen() === 'settings'"
+      (click)="openAdmin('settings')"
+    >
+      <rt-icon name="gear" /><span>Settings</span><rt-icon name="chevron" />
     </button>
   </div>
   <div class="drawer-foot">
@@ -161,8 +200,20 @@
   <button [class.current]="page() === 'menu' || page() === 'product'" (click)="go('menu')">
     <rt-icon name="menu" /><span>Menu</span>
   </button>
-  <button [class.current]="page() === 'orders'" (click)="go('orders')">
+  <button
+    *ngIf="store.session()?.role !== 'admin'"
+    [class.current]="page() === 'orders'"
+    (click)="go('orders')"
+  >
     <rt-icon name="orders" /><span>Orders</span>
+  </button>
+  <button
+    *ngIf="store.session()?.role === 'admin'"
+    [class.current]="page() === 'portal' && adminScreen() === 'orders'"
+    (click)="openAdmin('orders')"
+  >
+    <rt-icon name="orders" /><span>Orders</span>
+    <small *ngIf="live.pending()">{{ live.pending() }}</small>
   </button>
   <button
     *ngIf="!store.session() || store.session()?.role === 'customer'"
@@ -173,8 +224,10 @@
   </button>
   <button
     *ngIf="store.session()?.role === 'admin' || store.session()?.role === 'courier'"
-    [class.current]="page() === 'portal'"
-    (click)="go('portal')"
+    [class.current]="
+      page() === 'portal' && (store.session()?.role !== 'admin' || adminScreen() !== 'orders')
+    "
+    (click)="store.session()?.role === 'admin' ? openAdmin('home') : go('portal')"
   >
     <rt-icon name="workspace" /><span>Workspace</span>
   </button>

@@ -3376,21 +3376,6 @@ app-root a {
   }
 }
 
-@media (max-width: 700px) {
-  body.admin-shell .top,
-  body.admin-shell .nav,
-  body.admin-shell .mobile-bottom-nav,
-  body.admin-shell footer {
-    display: none;
-  }
-  body.admin-shell main {
-    min-height: 100vh;
-  }
-  body.admin-shell .live-toasts {
-    top: max(10px, env(safe-area-inset-top));
-  }
-}
-
 .pause-banner {
   display: flex;
   flex-wrap: wrap;
@@ -3404,9 +3389,6 @@ app-root a {
   font-size: 14px;
   text-align: center;
 }
-body.admin-shell .pause-banner {
-  display: none;
-}
 .pause-note {
   margin: 0 0 12px;
   padding: 12px 14px;
@@ -3415,4 +3397,28 @@ body.admin-shell .pause-banner {
   color: #6b4700;
   border: 1px solid #f0d28a;
   font-weight: 600;
+}
+
+.drawer-group {
+  margin: 6px 14px 2px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: #a8567f;
+}
+.drawer-admin {
+  border-top: 1px solid var(--rt-pink-border);
+  margin-top: 4px;
+  padding-top: 12px;
+}
+.drawer-badge {
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 99px;
+  background: var(--rt-pink);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
 }
