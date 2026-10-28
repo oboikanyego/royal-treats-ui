@@ -3096,3 +3096,18 @@ app-root a {
   color: #1b7f3b;
   font-weight: 700;
 }
+
+@media (max-width: 700px) {
+  body.admin-shell .top,
+  body.admin-shell .nav,
+  body.admin-shell .mobile-bottom-nav,
+  body.admin-shell footer {
+    display: none;
+  }
+  body.admin-shell main {
+    min-height: 100vh;
+  }
+  body.admin-shell .live-toasts {
+    top: max(10px, env(safe-area-inset-top));
+  }
+}

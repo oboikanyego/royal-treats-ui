@@ -60,6 +60,8 @@ export class PortalComponent {
   phone = '';
   photoError = '';
   uploadingPhoto = false;
+  /** The avatar menu in the admin app bar (phones). */
+  accountMenu = false;
 
   constructor() {
     if (this.store.session()) this.screen.set('home');
@@ -127,6 +129,7 @@ export class PortalComponent {
   }
 
   logout() {
+    this.accountMenu = false;
     this.store.signOut();
     this.screen.set('signin');
     this.error = '';
@@ -140,6 +143,18 @@ export class PortalComponent {
     this.notice = '';
     this.error = '';
     this.screen.set(to);
+  }
+
+  /** A tap on the admin app bar: switch section, close the menu, keep the tab in view, go to the top. */
+  tab(to: 'home' | 'products' | 'couriers' | 'settings' | 'orders' | 'account', event?: Event) {
+    this.accountMenu = false;
+    this.nav(to);
+    (event?.currentTarget as HTMLElement | null)?.scrollIntoView?.({
+      inline: 'center',
+      block: 'nearest',
+      behavior: 'smooth',
+    });
+    window.scrollTo({ top: 0 });
   }
 
   initials(name: string): string {
