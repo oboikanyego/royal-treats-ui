@@ -2,6 +2,7 @@ import { Injectable, effect, inject, signal, untracked } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import type { Socket } from 'socket.io-client';
 import { environment } from '../../environments/environment';
+import { AdminApi } from './admin-api.service';
 import { SessionService } from './session.service';
 import {
   type LiveAlert,
@@ -24,6 +25,8 @@ const SOUND_KEY = 'royal-alert-sound';
 export class AdminLive {
   private readonly sessions = inject(SessionService);
   private readonly title = inject(Title);
+  private readonly admin = inject(AdminApi);
+  private requestsTimer: ReturnType<typeof setInterval> | null = null;
   private socket: Socket | null = null;
   /** Bumped on every attempt, so a connection that finishes loading after a sign-out is dropped. */
   private attempt = 0;
@@ -31,6 +34,8 @@ export class AdminLive {
 
   /** Pending orders, or null until the API has said (or when not connected). */
   readonly pending = signal<number | null>(null);
+  /** People waiting for the shop to approve a new password, or null until the API has said. */
+  readonly passwordRequests = signal<number | null>(null);
   readonly alerts = signal<LiveAlert[]>([]);
   /** Goes up whenever the API reports something that may change an orders list, so lists refresh. */
   readonly changes = signal(0);
@@ -75,6 +80,8 @@ export class AdminLive {
     const attempt = ++this.attempt;
     // After a page reload the browser only lets audio start once the admin has clicked something.
     document.addEventListener('pointerdown', () => this.unlockAudio(), { once: true });
+    void this.refreshPasswordRequests();
+    this.requestsTimer = setInterval(() => void this.refreshPasswordRequests(), 60_000);
     const { io } = await import('socket.io-client');
     if (attempt !== this.attempt) return;
     const socket = io(socketOrigin(environment.apiUrl), { auth: { token } });
@@ -96,7 +103,19 @@ export class AdminLive {
     });
   }
 
+  /** Password requests do not arrive over the socket, so the count is asked for on sign-in and every minute. */
+  async refreshPasswordRequests(): Promise<void> {
+    try {
+      this.passwordRequests.set((await this.admin.dashboard()).passwordRequests ?? 0);
+    } catch {
+      // Keep the last count; the next minute asks again.
+    }
+  }
+
   private disconnect(): void {
+    if (this.requestsTimer) clearInterval(this.requestsTimer);
+    this.requestsTimer = null;
+    this.passwordRequests.set(null);
     this.attempt++;
     this.socket?.disconnect();
     this.socket = null;

@@ -125,6 +125,12 @@
         <div class="appbar-tabs">
           <button [class.active]="screen() === 'home'" (click)="tab('home', $event)">
             Overview
+            <small
+              class="tab-badge"
+              *ngIf="live.passwordRequests()"
+              aria-label="Password requests waiting"
+              >{{ live.passwordRequests() }}</small
+            >
           </button>
           <button [class.active]="screen() === 'orders'" (click)="tab('orders', $event)">
             Orders
@@ -165,6 +171,12 @@
         <nav class="sidebar-navigation">
           <button [class.active]="screen() === 'home'" (click)="nav('home')">
             <span>▦</span> Overview
+            <small
+              class="pending-count"
+              *ngIf="live.passwordRequests()"
+              aria-label="Password requests waiting"
+              >{{ live.passwordRequests() }}</small
+            >
           </button>
           <button [class.active]="screen() === 'orders'" (click)="nav('orders')">
             <span>▤</span> Orders

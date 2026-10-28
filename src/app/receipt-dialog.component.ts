@@ -49,7 +49,10 @@ import { ReceiptViewer } from './receipt-viewer.service';
         [srcdoc]="doc"
       ></iframe>
       <div class="receipt-foot">
-        <button type="button" class="primary" [disabled]="!viewer.html()" (click)="print()">
+        <button type="button" class="primary" [disabled]="!viewer.html()" (click)="download()">
+          Download
+        </button>
+        <button type="button" class="secondary" [disabled]="!viewer.html()" (click)="print()">
           Print or save as PDF
         </button>
         <button type="button" class="secondary" (click)="viewer.close()">Close</button>
@@ -66,6 +69,16 @@ export class ReceiptDialogComponent {
     const html = this.viewer.html();
     return html ? this.sanitizer.bypassSecurityTrustHtml(html) : null;
   });
+
+  /** Saves the receipt as a web page file the customer keeps. */
+  download(): void {
+    const url = URL.createObjectURL(new Blob([this.viewer.html()], { type: 'text/html' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = this.viewer.fileName();
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url));
+  }
 
   print(): void {
     const frame = this.frame()?.nativeElement.contentWindow;

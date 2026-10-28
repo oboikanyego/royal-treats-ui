@@ -8,6 +8,8 @@ export class ReceiptViewer {
   private readonly orders = inject(OrdersApi);
   readonly open = signal(false);
   readonly title = signal('Receipt');
+  /** Name for the downloaded file, from the order reference. */
+  readonly fileName = signal('receipt.html');
   readonly html = signal('');
   readonly loading = signal(false);
   readonly error = signal('');
@@ -15,6 +17,7 @@ export class ReceiptViewer {
   /** Fetches an order's receipt from the API and opens the dialog. */
   async showOrder(orderId: string, ref: string): Promise<void> {
     this.begin(`Receipt ${ref}`);
+    this.fileName.set(`receipt-${ref.replace(/[^A-Za-z0-9_-]/g, '')}.html`);
     try {
       this.html.set(await this.orders.receipt(orderId));
     } catch (failure) {
@@ -29,13 +32,6 @@ export class ReceiptViewer {
     }
   }
 
-  /** Shows HTML that is already in hand (a template preview). */
-  showHtml(title: string, html: string): void {
-    this.begin(title);
-    this.html.set(html);
-    this.loading.set(false);
-  }
-
   close(): void {
     this.open.set(false);
     this.html.set('');
@@ -44,6 +40,7 @@ export class ReceiptViewer {
 
   private begin(title: string): void {
     this.title.set(title);
+    this.fileName.set('receipt.html');
     this.html.set('');
     this.error.set('');
     this.loading.set(true);

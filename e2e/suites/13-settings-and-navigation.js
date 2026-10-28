@@ -14,7 +14,7 @@ const ok=(c,m)=>console.log((c?'PASS':'FAIL')+'  '+m);
  await pg.tap('.appbar-tabs button:has-text("Settings")'); await pg.waitForSelector('.settings-page');
  ok(await pg.locator('input[name=latitude],input[name=longitude]').count()===0,'no latitude or longitude fields');
  ok((await pg.locator('.settings-page').innerText()).toLowerCase().includes("device's location")===false,'no "use this device\'s location" button');
- ok(await pg.locator('.settings-card').count()===6,'six settings cards (pause, shop, hours, contact, delivery, receipt)');
+ ok(await pg.locator('.settings-card').count()===5,'five settings cards (pause, shop, hours, contact, delivery)');
  // unchanged address + existing coordinates -> no lookup
  await pg.fill('input[name=storeName]','Royal Treats Thabazimbi'); await pg.tap('.settings-save button'); await pg.waitForSelector('.success-alert');
  ok(geoCalls.length===0&&puts.length===1&&puts[0].latitude!==null,'saving without changing the address does not look it up again and keeps the point');
