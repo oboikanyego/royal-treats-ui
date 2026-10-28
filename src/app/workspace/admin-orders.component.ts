@@ -49,6 +49,13 @@ export class AdminOrdersComponent implements OnInit {
   /** The filter is applied by the API, so it covers every order, not just the ones loaded. */
   readonly filter = signal<OrderFilter>('all');
   readonly orders = this.feed.orders;
+  readonly filters: { value: OrderFilter; label: string }[] = [
+    { value: 'all', label: 'All' },
+    { value: 'pending', label: 'Waiting' },
+    { value: 'active', label: 'In progress' },
+    { value: 'completed', label: 'Done' },
+    { value: 'cancelled', label: 'Cancelled' },
+  ];
   readonly message = signal<{ kind: 'error' | 'notice'; text: string } | null>(null);
   readonly confirming = signal<string | null>(null);
   readonly busy = signal<string | null>(null);

@@ -1826,3 +1826,299 @@ select:focus-visible {
     grid-column: 1 / -1;
   }
 }
+
+/* ---- Orders list: filter chips and order tickets ---- */
+.orders-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.filter-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  padding: 2px 2px 4px;
+  margin: 0 -2px;
+}
+.filter-chips::-webkit-scrollbar {
+  display: none;
+}
+.filter-chips button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid #e3e0ec;
+  border-radius: 99px;
+  background: #fff;
+  color: #4a4560;
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.filter-chips button.active {
+  border-color: transparent;
+  background: linear-gradient(100deg, #e94190, #ba2b78);
+  color: #fff;
+  box-shadow: 0 6px 16px #d6176f33;
+}
+.chip-badge {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 99px;
+  background: #d98200;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+.filter-chips button.active .chip-badge {
+  background: #fff;
+  color: #ba2b78;
+}
+.sound-toggle {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 10px;
+  margin: 0 !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #6a6580;
+  cursor: pointer;
+  align-self: flex-start;
+}
+.sound-toggle {
+  position: relative;
+}
+.sound-toggle input {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 40px;
+  height: 24px;
+  margin: 0;
+  transform: translateY(-50%);
+  opacity: 0;
+  cursor: pointer;
+}
+.sound-dot {
+  position: relative;
+  width: 40px;
+  height: 24px;
+  border-radius: 99px;
+  background: #d9d6e3;
+  transition: background 0.2s;
+}
+.sound-dot::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px #2a1b3d33;
+  transition: transform 0.2s;
+}
+.sound-toggle input:checked + .sound-dot {
+  background: #20a05a;
+}
+.sound-toggle input:checked + .sound-dot::after {
+  transform: translateX(16px);
+}
+.sound-toggle input:focus-visible + .sound-dot {
+  outline: 3px solid #e9439055;
+  outline-offset: 2px;
+}
+.orders-meta {
+  margin: 12px 2px 4px;
+  font-size: 12px;
+  color: #8a869b;
+}
+.admin-mode .order-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 12px 0;
+  padding: 16px 16px 16px 20px;
+  border: 1px solid #e8e6ed;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px #2c23400d;
+}
+.admin-mode .order-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 6px;
+  background: var(--oc, #b8b4c8);
+}
+.order-card[data-status='Pending'] {
+  --oc: #d98200;
+}
+.order-card[data-status='Confirmed'],
+.order-card[data-status='Preparing'] {
+  --oc: #3b7be0;
+}
+.order-card[data-status='Ready for Collection'],
+.order-card[data-status='Ready for Delivery'] {
+  --oc: #20a05a;
+}
+.order-card[data-status='Out for Delivery'] {
+  --oc: #8a4fd6;
+}
+.order-card[data-status='Completed'] {
+  --oc: #9aa0ad;
+}
+.order-card[data-status='Cancelled'] {
+  --oc: #d0405a;
+}
+.admin-mode .order-card > div,
+.admin-mode .order-card > p {
+  margin: 0;
+}
+.oc-head,
+.oc-customer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.oc-ref b {
+  display: block;
+  font-size: 17px;
+  letter-spacing: 0.2px;
+  color: #252337;
+}
+.oc-ref small,
+.oc-customer small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: #8a869b;
+}
+.oc-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.admin-mode .order-card .oc-status {
+  padding: 4px 11px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--oc, #b8b4c8) 14%, #fff);
+  color: color-mix(in srgb, var(--oc, #6b6780) 80%, #000);
+  font-size: 12px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+.oc-total {
+  font-size: 17px;
+  color: #252337;
+}
+.oc-customer b {
+  font-size: 15px;
+  color: #2d263c;
+}
+.oc-call {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 99px;
+  background: #fff0f7;
+  color: #b81361;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.oc-when {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: #5d586f;
+}
+.oc-when > span {
+  display: flex;
+  gap: 8px;
+}
+.oc-where {
+  color: #3a3550;
+  font-weight: 600;
+}
+.admin-mode .order-card .order-recipients {
+  margin: 0;
+  padding: 12px;
+  border-radius: 14px;
+  background: #f8f9fc;
+}
+.admin-mode .order-card .order-recipients > div {
+  align-items: flex-start;
+}
+.admin-mode .order-card .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.admin-mode .order-card .actions .primary {
+  flex: 2 1 190px;
+  white-space: normal;
+}
+.admin-mode .order-card .actions .secondary {
+  flex: 1 1 120px;
+}
+.admin-mode .order-card .assign-row {
+  align-items: flex-end;
+}
+.admin-mode .order-card .assign-row label {
+  flex: 1 1 200px;
+  margin: 0;
+}
+@media (max-width: 700px) {
+  .admin-mode .order-card .actions button {
+    min-height: 50px;
+  }
+}
+.admin-mode .order-card .oc-when {
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.admin-mode .order-card .oc-when > span {
+  color: #5d586f;
+  font-size: 13px;
+  font-weight: 500;
+  justify-content: flex-start;
+  text-align: left;
+}
+.admin-mode .order-card .oc-when > .oc-where {
+  color: #3a3550;
+  font-weight: 650;
+}
+.oc-when > span > span[aria-hidden='true'] {
+  color: #b81361;
+}
+.filter-chips {
+  padding: 6px 8px 10px;
+  margin: -4px -8px 0;
+}
+.admin-mode .order-card .order-recipients {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+.filter-chips button.active {
+  box-shadow: none;
+}
+.sound-dot {
+  pointer-events: none;
+}

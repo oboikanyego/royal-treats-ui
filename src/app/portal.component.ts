@@ -1,6 +1,7 @@
 import {
   Component,
   DestroyRef,
+  ElementRef,
   ViewEncapsulation,
   effect,
   inject,
@@ -46,6 +47,7 @@ import { PasswordFieldComponent } from './workspace/password-field.component';
 export class PortalComponent {
   readonly store = inject(CommerceState);
   readonly live = inject(AdminLive);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   screen = signal<PortalScreen>('signin');
   error = '';
   notice = '';
@@ -65,6 +67,15 @@ export class PortalComponent {
 
   constructor() {
     if (this.store.session()) this.screen.set('home');
+    // However the screen changes, keep the active admin tab in view on a narrow phone.
+    effect(() => {
+      this.screen();
+      setTimeout(() =>
+        this.host.nativeElement.shadowRoot
+          ?.querySelector<HTMLElement>('.appbar-tabs button.active')
+          ?.scrollIntoView?.({ inline: 'center', block: 'nearest' }),
+      );
+    });
     // A new-order alert links here with ?screen=orders.
     const route = inject(ActivatedRoute);
     const sub = route.queryParamMap.subscribe((params) => {
