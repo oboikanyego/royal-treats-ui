@@ -2086,3 +2086,39 @@ select:focus-visible {
     background: var(--rt-blush-soft, #fff8fb);
   }
 }
+
+/* Delete my account: a quiet, clearly separate section at the bottom of My account. */
+.delete-panel {
+  border-color: #f3c6d0;
+}
+.delete-panel p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #5d4a54;
+}
+.danger-outline,
+.danger {
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: var(--rt-radius-sm, 10px);
+  font-weight: 700;
+  cursor: pointer;
+}
+.danger-outline {
+  border: 1.5px solid #c62850;
+  background: #fff;
+  color: #c62850;
+}
+.danger {
+  border: 0;
+  background: #c62850;
+  color: #fff;
+}
+.delete-panel .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.delete-panel .actions > * {
+  flex: 1 1 160px;
+}

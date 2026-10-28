@@ -49,6 +49,9 @@
       Placed {{ order.createdAt | date: 'd MMM y, HH:mm' }}
     </p>
     <p class="pink" *ngIf="order.status === 'Cancelled'">This order was cancelled.</p>
+    <p class="muted" *ngIf="order.status === 'Cancelled' && stepTime(order, 'Cancelled') as at">
+      Cancelled {{ at | date: 'd MMM, HH:mm' }}
+    </p>
     <p class="muted" *ngIf="order.status === 'Cancelled' && order.cancelNote">
       {{ order.cancelNote }}
     </p>
@@ -58,6 +61,9 @@
         [class.done]="stepDone(stepsFor(order.fulfillment), order.status, step)"
       >
         ● {{ stepText(order, step) }}
+        <small class="step-time" *ngIf="stepTime(order, step) as at">{{
+          at | date: 'd MMM, HH:mm'
+        }}</small>
       </div>
     </div>
     <p>

@@ -49,3 +49,24 @@ test('the terms state the rules the app really enforces', () => {
 });
 
 test('the pages carry a date', () => assert.match(LEGAL_UPDATED, /^\d{1,2} \w+ \d{4}$/));
+
+test('the pages describe what the site really does: deleting an account, automatic cancellation, pausing', () => {
+  const privacy = text(privacySections(shop));
+  for (const needle of [
+    'Delete my account',
+    'without anything that identifies you',
+    'order still in progress',
+    'cancelled automatically',
+    'confirm that your account was deleted',
+    'when each step happened',
+  ])
+    assert.ok(privacy.includes(needle), needle);
+  const terms = text(termsSections(shop));
+  for (const needle of [
+    'within that day’s opening hours',
+    'pause new orders',
+    'Orders that are not completed',
+    'one full working day',
+  ])
+    assert.ok(terms.includes(needle), needle);
+});

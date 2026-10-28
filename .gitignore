@@ -29,3 +29,4 @@ yarn-error.log*
 /e2e/.dist/
 /e2e/node_modules/
 /e2e/package-lock.json
+/e2e/*.png

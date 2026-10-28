@@ -47,6 +47,10 @@ export class AuthApi {
   resetPassword(token: string, newPassword: string) {
     return firstValueFrom(this.api.post<void>('/auth/reset-password', { token, newPassword }));
   }
+  /** Deletes the signed-in customer's account (the API checks the password). */
+  deleteAccount(password: string) {
+    return firstValueFrom(this.api.post<void>('/me/delete', { password }));
+  }
   uploadPhoto(file: File) {
     const form = new FormData();
     form.set('photo', file); // the API reads the multipart field named `photo`

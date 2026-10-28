@@ -46,6 +46,7 @@ resetUsers();
 const userView = (u) => ({ id: u.id, name: u.name, email: u.email, phone: u.phone, role: u.role, active: u.active });
 const issue = (u, remember = false) => { const token = randomBytes(32).toString('base64url'); const expiresAt = new Date(Date.now() + (remember === true ? 30 * 24 : 8) * 3600e3); sessions.set(token, { userId: u.id, expiresAt }); return { token, expiresAt: expiresAt.toISOString() }; };
 const bearer = (req) => req.headers.authorization?.match(/^Bearer ([A-Za-z0-9_-]{43})$/)?.[1];
+const stamp = (o, status, note) => { (o.history ??= []).push({ status, at: new Date().toISOString(), ...(note ? { note } : {}) }); o.status = status; return o; };
 const userFor = (req) => { if (mode.expireTokens) return null; const t = bearer(req); const s = t && sessions.get(t); return s ? [...users.values()].find((u) => u.id === s.userId) : null; };
 const readBody = async (req) => { const chunks = []; for await (const c of req) chunks.push(c); return Buffer.concat(chunks); };
 const ACCOUNT_KEYS = ['name', 'email', 'phone', 'password', 'acceptedTerms', 'remember'];
@@ -61,7 +62,7 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'OPTIONS') { res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE'); res.setHeader('Access-Control-Allow-Headers', req.headers['access-control-request-headers'] ?? ''); res.statusCode = 204; return res.end(); }
   const json = (code, body) => { res.statusCode = code; res.setHeader('content-type', 'application/json'); res.end(JSON.stringify(body)); };
   if (url.pathname === '/__mode') { let b = ''; for await (const c of req) b += c; mode = { ...mode, ...JSON.parse(b || '{}') }; log.length = 0; resetUsers(); return json(200, mode); }
-  if (url.pathname === '/__advance') { const o = orders.find((x) => x.id === url.searchParams.get('id')); o.status = url.searchParams.get('status'); hub.pendingChanged(); return json(200, o); }
+  if (url.pathname === '/__advance') { const o = orders.find((x) => x.id === url.searchParams.get('id')); stamp(o, url.searchParams.get('status')); hub.pendingChanged(); return json(200, o); }
   if (url.pathname === '/__drop') { mode.dropOrderResponse = +url.searchParams.get('n'); return json(200, mode); }
   if (url.pathname === '/__flag') { for (const [k, v] of url.searchParams) mode[k] = v === '1'; return json(200, mode); }
   if (url.pathname === '/__orders') return json(200, orders);
@@ -136,6 +137,18 @@ const server = http.createServer(async (req, res) => {
     for (const [t, s2] of [...sessions]) if (s2.userId === u.id && t !== mine) { sessions.delete(t); hub.signedOut(t); }
     res.statusCode = 204; return res.end();
   }
+  if (P === '/api/v1/me/delete' && req.method === 'POST') {
+    const u = userFor(req); if (!u) return json(401, { error: 'Sign in required' });
+    let body; try { body = JSON.parse((await readBody(req)).toString() || '{}'); } catch { return json(400, { error: 'Invalid request body' }); }
+    if (typeof body.password !== 'string' || !body.password || Object.keys(body).length !== 1) return json(400, { error: 'Invalid input' });
+    if (u.role !== 'customer') return json(403, { error: 'Only customer accounts can be deleted here. Ask the shop owner to change staff accounts' });
+    if (u.password !== body.password) return json(400, { error: 'Password is incorrect' });
+    const mine = orders.filter((o) => o.customerId === u.id);
+    if (mine.some((o) => !['Completed', 'Cancelled'].includes(o.status))) return json(409, { error: 'You still have orders in progress. Please wait until they are finished, or ask the shop to cancel them, then try again' });
+    for (const o of mine) { o.customer = 'Deleted customer'; o.phone = ''; o.notes = ''; delete o.address; delete o.latitude; delete o.longitude; delete o.distanceKm; for (const i of o.items) i.recipient = ''; }
+    for (const [t, s] of [...sessions]) if (s.userId === u.id) sessions.delete(t);
+    users.delete(u.email); res.statusCode = 204; return res.end();
+  }
   if (P === '/api/v1/me' && req.method === 'GET') { const u = userFor(req); return u ? json(200, userView(u)) : json(401, { error: 'Sign in required' }); }
   if (P === '/api/v1/me/photo' && req.method === 'PUT') {
     const u = userFor(req); if (!u) return json(401, { error: 'Sign in required' });
@@ -156,7 +169,7 @@ const server = http.createServer(async (req, res) => {
         const c = [...users.values()].find((x) => x.id === body.courierId && x.role === 'courier' && x.active); if (!c) return json(404, { error: 'Courier not found' });
         const o = orders.find((x) => x.id === am[1]); if (!o) return json(404, { error: 'Order not found' });
         if (o.fulfillment !== 'delivery' || !['Ready for Delivery', 'Out for Delivery'].includes(o.status)) return json(409, { error: 'A courier can only be assigned to a delivery that is ready or out for delivery' });
-        o.courierId = c.id; o.status = 'Out for Delivery'; hub.pendingChanged(); return json(200, view2(o, u));
+        o.courierId = c.id; stamp(o, 'Out for Delivery'); hub.pendingChanged(); return json(200, view2(o, u));
       }
       if (P === '/api/v1/admin/dashboard' && req.method === 'GET') {
         const by = new Map(); for (const o of orders) { const r = by.get(o.status) ?? { _id: o.status, count: 0, totalCents: 0 }; r.count++; r.totalCents += o.totalCents; by.set(o.status, r); }
@@ -203,9 +216,9 @@ const server = http.createServer(async (req, res) => {
   if (am && req.method === 'POST') {
     const u = userFor(req); if (!u) return json(401, { error: 'Sign in required' }); if (u.role !== 'courier') return json(403, { error: 'Access denied' });
     const o = orders.find((x) => x.id === am[1] && x.fulfillment === 'delivery' && x.status === 'Ready for Delivery' && !x.courierId);
-    if (mode.raceOnAccept && o) { o.courierId = 'someone-else'; o.status = 'Out for Delivery'; }
+    if (mode.raceOnAccept && o) { o.courierId = 'someone-else'; stamp(o, 'Out for Delivery'); }
     if (!o || mode.raceOnAccept) return json(409, { error: 'Job is no longer available' });
-    o.courierId = u.id; o.status = 'Out for Delivery'; return json(200, view2(o, u));
+    o.courierId = u.id; stamp(o, 'Out for Delivery'); return json(200, view2(o, u));
   }
   try {
   if (P === '/api/v1/orders' && req.method === 'POST') {
@@ -218,7 +231,7 @@ const server = http.createServer(async (req, res) => {
     const products = catalogue.map((p) => ({ ...p, available: (p.available ?? true) && !mode.soldOut.includes(p._id) }));
     if (settings.ordersPaused) return json(409, { error: settings.pauseMessage ? `Orders are paused: ${settings.pauseMessage}` : 'Orders are paused right now. Please check back soon' });
     const priced = priceOrder(input, products, settings);
-    const order = { ...input, ...priced, id: 'RT-' + randomUUID(), status: 'Pending', customerId: u.id, customer: u.name, phone: u.phone, idempotencyKey: key, requestHash, createdAt: new Date().toISOString() };
+    const order = { ...input, ...priced, id: 'RT-' + randomUUID(), status: 'Pending', history: [{ status: 'Pending', at: new Date().toISOString() }], customerId: u.id, customer: u.name, phone: u.phone, idempotencyKey: key, requestHash, createdAt: new Date().toISOString() };
     orders.unshift(order);
     hub.orderCreated({ id: order.id, customer: order.customer, fulfillment: order.fulfillment, totalCents: order.totalCents, itemCount: order.items.reduce((n, i) => n + i.qty, 0), date: order.date, time: order.time, createdAt: order.createdAt });
     if (mode.dropOrderResponse > 0) { mode.dropOrderResponse--; return req.socket.destroy(); }
@@ -237,7 +250,7 @@ const server = http.createServer(async (req, res) => {
     const o = orders.find((x) => x.id === m[1]); if (!o) return json(404, { error: 'Order not found' });
     const { status } = JSON.parse((await readBody(req)).toString() || '{}');
     assertStatusChange({ ...o }, { _id: u.id, role: u.role }, status);
-    o.status = status; hub.pendingChanged(); return json(200, view2(o, u));
+    stamp(o, status); hub.pendingChanged(); return json(200, view2(o, u));
   }
   } catch (e) { if (e instanceof ApiError) return json(e.status, { error: e.message }); throw e; }
   return json(404, { error: 'Endpoint not found' });

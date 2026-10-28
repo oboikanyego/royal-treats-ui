@@ -66,6 +66,13 @@ export function shortRef(id: string): string {
 }
 
 /** An API order (cents) as the DeliveryOrder the UI already renders (rand). */
+/** When the order reached each status: the latest history entry for each, as ISO times. */
+export function stepTimes(history: ApiOrder['history']): Record<string, string> {
+  const times: Record<string, string> = {};
+  for (const step of history ?? []) if (step.status && step.at) times[step.status] = step.at;
+  return times;
+}
+
 export function fromApiOrder(o: ApiOrder): DeliveryOrder {
   return {
     id: o.id,
@@ -97,5 +104,6 @@ export function fromApiOrder(o: ApiOrder): DeliveryOrder {
     createdAt: o.createdAt,
     allowedStatuses: o.allowedStatuses ?? [],
     cancelNote: o.status === 'Cancelled' ? o.history?.at(-1)?.note : undefined,
+    stepTimes: stepTimes(o.history),
   };
 }

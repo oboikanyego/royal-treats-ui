@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fromApiProduct, fromApiSettings } from '../src/app/api/api-mappers';
+import { fromApiProduct, fromApiSettings, stepTimes } from '../src/app/api/api-mappers';
 import type { ApiProduct } from '../src/app/api/api-types';
 
 // Shaped like royal-treats-api's productView for the seeded launch products.
@@ -148,4 +148,22 @@ test('the pause and weekly hours come through, and a short or missing week means
   assert.equal(s.weeklyHours?.[0]?.closed, true);
   assert.equal(fromApiSettings({ weeklyHours: week.slice(0, 3) }, defaults).weeklyHours, null);
   assert.equal(fromApiSettings({}, defaults).ordersPaused, false);
+});
+
+test('each status gets the time the order reached it, the latest when it happened twice, and nothing without a time', () => {
+  assert.deepEqual(stepTimes(undefined), {});
+  assert.deepEqual(
+    stepTimes([
+      { status: 'Pending', at: '2026-11-02T08:00:00.000Z' },
+      { status: 'Confirmed', at: '2026-11-02T08:10:00.000Z' },
+      { status: 'Out for Delivery', at: '2026-11-02T09:00:00.000Z' },
+      { status: 'Out for Delivery', at: '2026-11-02T09:30:00.000Z' },
+      { status: 'Preparing' },
+    ]),
+    {
+      Pending: '2026-11-02T08:00:00.000Z',
+      Confirmed: '2026-11-02T08:10:00.000Z',
+      'Out for Delivery': '2026-11-02T09:30:00.000Z',
+    },
+  );
 });

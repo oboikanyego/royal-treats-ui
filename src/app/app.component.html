@@ -166,6 +166,10 @@
     </p>
   </div>
 </nav>
+<div class="flash-banner" role="status" *ngIf="store.flash() as note">
+  <span>{{ note }}</span>
+  <button type="button" (click)="store.flash.set(null)" aria-label="Dismiss">✕</button>
+</div>
 <div class="pause-banner" role="status" *ngIf="store.settings().ordersPaused">
   <b>Orders are paused.</b>
   <span *ngIf="store.settings().pauseMessage as note">{{ note }}</span>

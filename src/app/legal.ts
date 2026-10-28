@@ -23,7 +23,7 @@ export function privacySections(shop: ShopInfo): LegalSection[] {
       heading: 'What we collect',
       bullets: [
         'Your account: your name, email address and phone number, a password (we only keep it in scrambled form, so we cannot read it) and, if you add one, a profile picture.',
-        'Your orders: what you ordered, the date and time you asked for, any notes you wrote, the names you gave to share treats with, and whether you collect or want delivery.',
+        'Your orders: what you ordered, the date and time you asked for, when each step happened (placed, accepted, ready, collected or delivered, cancelled), any notes you wrote, the names you gave to share treats with, and whether you collect or want delivery.',
         'For delivery: your delivery address and the location your device shares when you tap “Check my delivery location”.',
         'Technical information: our hosting providers may keep standard logs (such as your IP address) to keep the service secure and working.',
       ],
@@ -32,7 +32,7 @@ export function privacySections(shop: ShopInfo): LegalSection[] {
       heading: 'Why we use it',
       bullets: [
         'To create and run your account.',
-        'To take, prepare, deliver and collect your orders, and to contact you about them by phone or email. We email you when we receive your order and at each step, and when you ask to reset your password. These emails are about your orders and account, not marketing.',
+        'To take, prepare, deliver and collect your orders, and to contact you about them by phone or email. We email you when we receive your order and at each step (including when an order is cancelled automatically), when you ask to reset your password, and to confirm that your account was deleted. These emails are about your orders and account, not marketing.',
         'To keep the service secure and to prevent fraud and abuse.',
         'To keep the records we must keep by law, such as for accounting.',
       ],
@@ -56,7 +56,7 @@ export function privacySections(shop: ShopInfo): LegalSection[] {
     {
       heading: 'How long we keep it',
       paragraphs: [
-        'We keep your information while your account is active and for as long as we need it for the purposes above and to meet accounting and other legal record-keeping requirements. After that we delete it or remove anything that identifies you.',
+        'We keep your account information while your account is active. You can delete your account yourself at any time under Account, “Delete my account”. When you do, we delete your name, email address, phone number, password, profile picture and sign-ins, and we remove your name, phone number, address, notes and the names of the people you shared treats with from your past orders. We keep those orders, without anything that identifies you, for our accounts and other record-keeping the law requires. An account with an order still in progress can be deleted once that order is finished or cancelled.',
       ],
     },
     {
@@ -68,7 +68,7 @@ export function privacySections(shop: ShopInfo): LegalSection[] {
     {
       heading: 'Your rights',
       paragraphs: [
-        `Under POPIA you may ask us what information we hold about you, ask us to correct it or to delete it, object to how we use it, and withdraw your consent. You can correct your name and phone number yourself under Account. For anything else, ${contact(shop)}. If you are not happy with how we handle your information you may complain to the Information Regulator (South Africa) at https://inforegulator.org.za.`,
+        `Under POPIA you may ask us what information we hold about you, ask us to correct it or to delete it, object to how we use it, and withdraw your consent. You can correct your name and phone number, and delete your account, yourself under Account. For anything else, such as a copy of your information or a change of email address, ${contact(shop)}. If you are not happy with how we handle your information you may complain to the Information Regulator (South Africa) at https://inforegulator.org.za.`,
       ],
     },
     {
@@ -103,7 +103,7 @@ export function termsSections(shop: ShopInfo): LegalSection[] {
     {
       heading: 'Pre-orders and confirmation',
       paragraphs: [
-        'Every order is a pre-order. When you place one you are asking for your treats on the date and time you chose. We confirm the order, and the date and time, ourselves: the order is only accepted once we mark it as confirmed. We may decline or cancel an order, for example if an item is not available, and we will contact you if we do.',
+        'Every order is a pre-order. When you place one you are asking for your treats on the date and time you chose, which must be on a day we are open and within that day’s opening hours. We confirm the order, and the date and time, ourselves: the order is only accepted once we mark it as confirmed. We may decline or cancel an order, for example if an item is not available, and we will contact you if we do. We may also pause new orders for a while; the site then shows a notice and orders cannot be placed.',
       ],
     },
     {
@@ -122,6 +122,12 @@ export function termsSections(shop: ShopInfo): LegalSection[] {
       heading: 'Changing or cancelling an order',
       paragraphs: [
         `Only the shop can change or cancel an order. If you need a change, ${contact(shop)} as early as you can. Because nothing is paid in advance, there is nothing to refund if an order is cancelled.`,
+      ],
+    },
+    {
+      heading: 'Orders that are not completed',
+      paragraphs: [
+        'If an order is still open one full working day after the date and time you chose (the same time on the next day we are open), it is cancelled automatically and we email you. Nothing is paid in advance, so there is nothing to refund.',
       ],
     },
     {
