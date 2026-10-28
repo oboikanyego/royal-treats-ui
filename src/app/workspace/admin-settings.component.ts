@@ -7,6 +7,13 @@ import { settingsProblem, toSettingsPayload } from '../api/admin-payloads';
 import { toApiError } from '../api/api-errors';
 import { geocodeAddress, mapLink } from '../api/geocode';
 import { CommerceState, Settings } from '../commerce-state.service';
+import {
+  WEEKDAYS,
+  WEEK_DISPLAY_ORDER,
+  editableWeek,
+  everydayHours,
+  type DayHours,
+} from '../opening-hours';
 
 /**
  * Business settings: name, address, hours and support email. The store's map point is worked out
@@ -23,6 +30,9 @@ export class AdminSettingsComponent {
   private readonly store = inject(CommerceState);
   private readonly admin = inject(AdminApi);
   settings: Settings = { ...this.store.settings() };
+  /** The week being edited, Sunday first like the API; shown Monday first. */
+  week: DayHours[] = editableWeek(this.settings);
+  readonly days = WEEK_DISPLAY_ORDER.map((index) => ({ index, name: WEEKDAYS[index] }));
   /** The address as last saved, to know when the map point must be looked up again. */
   private savedAddress = this.settings.address.trim();
   readonly notice = signal('');
@@ -40,10 +50,22 @@ export class AdminSettingsComponent {
     return point ? mapLink(point.latitude, point.longitude) : '';
   });
 
+  /** Handy when most days are the same: copy Monday's hours to every other day. */
+  copyMonday() {
+    const monday = this.week[1];
+    if (!monday) return;
+    this.week = this.week.map((_, i) => (i === 1 ? monday : { ...monday }));
+  }
+
   async save() {
     this.notice.set('');
     this.warning.set('');
-    const problem = settingsProblem(this.settings);
+    const first = everydayHours(this.week);
+    const problem = settingsProblem({
+      ...this.settings,
+      ...(first ?? {}),
+      weeklyHours: this.week,
+    });
     if (problem) {
       this.error.set(problem);
       return;
@@ -51,7 +73,9 @@ export class AdminSettingsComponent {
     this.saving.set(true);
     this.error.set('');
     try {
-      const next = { ...this.settings };
+      const next = { ...this.settings, weeklyHours: this.week.map((d) => ({ ...d })) };
+      const everyday = everydayHours(next.weeklyHours);
+      if (everyday) Object.assign(next, everyday);
       const addressChanged = next.address.trim() !== this.savedAddress;
       if (addressChanged || next.latitude === null || next.longitude === null) {
         const found = await geocodeAddress(next.address);
@@ -73,6 +97,7 @@ export class AdminSettingsComponent {
       const saved = await this.admin.saveSettings(toSettingsPayload(next), this.store.settings());
       this.store.applySettings(saved);
       this.settings = { ...saved };
+      this.week = editableWeek(saved);
       this.savedAddress = saved.address.trim();
       this.located.set(
         saved.latitude !== null && saved.longitude !== null

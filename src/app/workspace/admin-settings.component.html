@@ -3,6 +3,31 @@
   <div class="alert warning-alert" *ngIf="warning()" role="status">{{ warning() }}</div>
   <div class="alert error" *ngIf="error()" role="alert">{{ error() }}</div>
   <form class="settings-form" (ngSubmit)="save()">
+    <section class="settings-card pause-card" [class.on]="settings.ordersPaused">
+      <header>
+        <span class="settings-icon" aria-hidden="true">⏸</span>
+        <div>
+          <h2>Pause orders</h2>
+          <p>Stop new orders for a while. Customers see a banner and cannot check out.</p>
+        </div>
+      </header>
+      <label class="pause-switch"
+        ><input type="checkbox" name="ordersPaused" [(ngModel)]="settings.ordersPaused" /><span>{{
+          settings.ordersPaused ? 'Orders are paused' : 'Taking orders'
+        }}</span></label
+      >
+      <label *ngIf="settings.ordersPaused"
+        >Message for customers (optional)<input
+          name="pauseMessage"
+          maxlength="200"
+          placeholder="Back on Monday"
+          [(ngModel)]="settings.pauseMessage"
+      /></label>
+      <p class="settings-note" *ngIf="settings.ordersPaused">
+        Orders already placed are not affected. Remember to save, and switch this off to reopen.
+      </p>
+    </section>
+
     <section class="settings-card">
       <header>
         <span class="settings-icon" aria-hidden="true">♛</span>
@@ -39,18 +64,46 @@
         <div>
           <h2>Opening hours</h2>
           <p>
-            Orders can be placed for times between
-            <b>{{ settings.open }}</b> and <b>{{ settings.close }}</b
-            >.
+            Customers can only order for an open day and a time inside that day's hours. Switch a
+            day off to close it.
           </p>
         </div>
       </header>
-      <div class="settings-row">
-        <label>Opens<input type="time" required name="open" [(ngModel)]="settings.open" /></label>
-        <label
-          >Closes<input type="time" required name="close" [(ngModel)]="settings.close"
-        /></label>
+      <div class="week">
+        <div class="week-day" *ngFor="let day of days" [class.closed]="week[day.index]!.closed">
+          <label class="week-switch"
+            ><input
+              type="checkbox"
+              [name]="'open' + day.index"
+              [ngModel]="!week[day.index]!.closed"
+              (ngModelChange)="week[day.index]!.closed = !$event"
+            /><span>{{ day.name }}</span></label
+          >
+          <ng-container *ngIf="!week[day.index]!.closed; else closedDay">
+            <input
+              type="time"
+              required
+              [name]="'from' + day.index"
+              [attr.name]="'from' + day.index"
+              [attr.aria-label]="day.name + ' opens'"
+              [(ngModel)]="week[day.index]!.open"
+            />
+            <span class="week-to" aria-hidden="true">to</span>
+            <input
+              type="time"
+              required
+              [name]="'to' + day.index"
+              [attr.name]="'to' + day.index"
+              [attr.aria-label]="day.name + ' closes'"
+              [(ngModel)]="week[day.index]!.close"
+            />
+          </ng-container>
+          <ng-template #closedDay><span class="week-closed">Closed</span></ng-template>
+        </div>
       </div>
+      <button type="button" class="secondary week-copy" (click)="copyMonday()">
+        Copy Monday's hours to every day
+      </button>
     </section>
 
     <section class="settings-card">

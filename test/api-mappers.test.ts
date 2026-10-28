@@ -84,7 +84,13 @@ test('optional text fields default to empty strings', () => {
 test('settings overlay the defaults, and unconfigured coordinates are null', () => {
   assert.deepEqual(
     fromApiSettings({ storeName: 'Royal Treats', supportEmail: '', radiusKm: 5 }, defaults),
-    { ...defaults, passwordResetEnabled: false },
+    {
+      ...defaults,
+      passwordResetEnabled: false,
+      ordersPaused: false,
+      pauseMessage: '',
+      weeklyHours: null,
+    },
   );
   const s = fromApiSettings(
     { open: '09:00', close: '20:00', latitude: -24.59, longitude: 27.41, supportEmail: 'a@b.test' },
@@ -114,4 +120,32 @@ test('the API says whether password reset is available, and the admin saving set
   assert.equal(fromApiSettings({}, defaults).passwordResetEnabled, false);
   const current = { ...defaults, passwordResetEnabled: true };
   assert.equal(fromApiSettings({ storeName: 'S2' }, current).passwordResetEnabled, true); // the PUT reply lacks it
+});
+
+test('the pause and weekly hours come through, and a short or missing week means every day the same', () => {
+  const defaults = {
+    storeName: 'S',
+    address: 'A',
+    supportEmail: '',
+    open: '10:00',
+    close: '23:00',
+    latitude: null,
+    longitude: null,
+    radiusKm: 5,
+  };
+  const week = Array.from({ length: 7 }, (_, i) => ({
+    closed: i === 0,
+    open: '09:00',
+    close: '17:00',
+  }));
+  const s = fromApiSettings(
+    { ordersPaused: true, pauseMessage: 'Back Monday', weeklyHours: week },
+    defaults,
+  );
+  assert.equal(s.ordersPaused, true);
+  assert.equal(s.pauseMessage, 'Back Monday');
+  assert.equal(s.weeklyHours?.length, 7);
+  assert.equal(s.weeklyHours?.[0]?.closed, true);
+  assert.equal(fromApiSettings({ weeklyHours: week.slice(0, 3) }, defaults).weeklyHours, null);
+  assert.equal(fromApiSettings({}, defaults).ordersPaused, false);
 });

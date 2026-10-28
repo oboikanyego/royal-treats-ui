@@ -35,7 +35,16 @@ export class CheckoutComponent {
 
   name = '';
   phone = '';
-  date = '';
+  /** The chosen date lives in a signal so the list of times follows that weekday's hours. */
+  readonly chosenDate = signal('');
+  get date(): string {
+    return this.chosenDate();
+  }
+  set date(value: string) {
+    this.chosenDate.set(value);
+    // A time that is not offered on the new day would be refused, so ask again.
+    if (this.time && !this.store.inHours(this.time, value)) this.time = '';
+  }
   time = '';
   fulfillment: 'collection' | 'delivery' = 'collection';
   deliveryAddress = '';
@@ -48,8 +57,18 @@ export class CheckoutComponent {
     Array.from(
       { length: 48 },
       (_, i) => String(Math.floor(i / 2)).padStart(2, '0') + ':' + (i % 2 ? '30' : '00'),
-    ).filter((t) => this.store.inHours(t)),
+    ).filter((t) => this.store.inHours(t, this.chosenDate())),
   );
+  /** What to tell the customer about the hours: the chosen day's, or that the shop is closed then. */
+  readonly hoursNote = computed(() => {
+    const date = this.chosenDate();
+    if (!date) return "Choose a date to see that day's opening hours.";
+    const hours = this.store.hoursOn(date);
+    return hours
+      ? `Open ${hours.open}–${hours.close} on that day.`
+      : 'We are closed on that day. Please choose another date.';
+  });
+  readonly paused = computed(() => !!this.store.settings().ordersPaused);
   readonly deliveryCheck = computed(() =>
     this.store.canDeliver(this.cart(), this.deliveryLat(), this.deliveryLng()),
   );
@@ -67,6 +86,14 @@ export class CheckoutComponent {
       this.name = user.name;
       this.phone = user.phone;
     }
+  }
+
+  /** The shop's own words when it has paused orders. */
+  pausedMessage(): string {
+    const note = (this.store.settings().pauseMessage ?? '').trim();
+    return note
+      ? `Orders are paused: ${note}`
+      : 'Orders are paused right now. Please check back soon.';
   }
 
   useDeliveryLocation() {
@@ -93,6 +120,10 @@ export class CheckoutComponent {
 
   async place() {
     this.checkoutError = '';
+    if (this.paused()) {
+      this.checkoutError = this.pausedMessage();
+      return;
+    }
     if (this.store.session()?.role !== 'customer') {
       this.checkoutError = 'Please sign in or register as a customer before placing an order.';
       return;
@@ -107,7 +138,11 @@ export class CheckoutComponent {
       this.checkoutError = 'Complete your contact details and collection time.';
       return;
     }
-    if (!this.store.inHours(this.time)) {
+    if (!this.store.hoursOn(this.date)) {
+      this.checkoutError = 'We are closed on that day. Please choose another date.';
+      return;
+    }
+    if (!this.store.inHours(this.time, this.date)) {
       this.checkoutError = 'Choose a time within the store opening hours.';
       return;
     }

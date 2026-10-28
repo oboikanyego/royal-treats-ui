@@ -44,9 +44,12 @@
   </ng-container>
   <div class="panel">
     <h2>Store operations</h2>
+    <p class="pause-note" *ngIf="store.settings().ordersPaused">
+      Orders are <strong>paused</strong>. Customers cannot check out until you switch this off in
+      Settings.
+    </p>
     <p>
-      Open from <strong>{{ store.settings().open }}</strong> to
-      <strong>{{ store.settings().close }}</strong
+      Hours: <strong>{{ hoursText() }}</strong
       >.
     </p>
     <p>Delivery: <strong>Mini donuts only, maximum 5 km</strong>.</p>
