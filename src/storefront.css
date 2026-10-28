@@ -3422,3 +3422,13 @@ app-root a {
   font-weight: 800;
   text-align: center;
 }
+
+/* On a short screen the menu scrolls; its parts must keep their height instead of being squeezed flat. */
+.nav.drawer > * {
+  flex-shrink: 0;
+}
+.nav.drawer .drawer-account,
+.nav.drawer .drawer-links button,
+.nav.drawer .drawer-signout {
+  flex-shrink: 0;
+}
