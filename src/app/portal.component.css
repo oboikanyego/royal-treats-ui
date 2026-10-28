@@ -1296,3 +1296,32 @@ select:focus-visible {
   line-height: 1.45;
   font-weight: 400;
 }
+
+.portal-session {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.portal-session .signed-in-as {
+  color: #7d6676;
+  font-size: 13px;
+  text-align: right;
+}
+.portal-session .signed-in-as b {
+  color: #3a2437;
+}
+.portal .signout-btn {
+  border: 1.5px solid var(--rt-pink);
+  color: #a51a61;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.portal .check.remember {
+  font-size: 14px;
+  color: #5d4a59;
+}
+@media (max-width: 520px) {
+  .portal-session .signed-in-as {
+    display: none;
+  }
+}
