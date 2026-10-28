@@ -4,11 +4,12 @@ import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CartItem, CartService } from '../cart.service';
+import { ImageSetPipe, ImageSrcPipe } from '../image.pipes';
 
 @Component({
   selector: 'section[rt-cart]',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, RandPipe],
+  imports: [CommonModule, FormsModule, RouterLink, RandPipe, ImageSrcPipe],
   templateUrl: './cart.component.html',
   host: { class: 'cart-section' },
 })

@@ -29,7 +29,7 @@ const advance=(id,status)=>fetch(CTRL+'/__advance?id='+id+'&status='+encodeURICo
  ok(!!cancelled&&/Cancelled \d{1,2} [A-Z][a-z]{2}, \d\d:\d\d/.test(cancelled),'a cancelled order says when it was cancelled');
  ok(((await call('/orders?limit=50',{token:c.token})).body.items.find((o)=>o.id===o1.id).history||[]).every((h)=>!('actorId' in h)&&h.at),'the customer is not sent who moved the order along');
  // ---- delete my account ----
- await pg.goto(UI+'/account'); await pg.waitForSelector('.profile-pane'); await pg.click('button:has-text("My account")'); await pg.waitForSelector('rt-account-settings');
+ await pg.goto(UI+'/account'); await pg.waitForSelector('.profile-pane'); await pg.click('.role-user button:has-text("My account")'); await pg.waitForSelector('rt-account-settings');
  ok(await pg.locator('.delete-panel').count()===1,'a customer sees "Delete my account"');
  ok((await pg.locator('.delete-panel').innerText()).includes('We keep those orders'),'it says what is deleted and what is kept');
  ok(await pg.locator('.delete-panel input').count()===0,'no password box until they ask to delete');

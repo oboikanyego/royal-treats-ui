@@ -5,7 +5,7 @@
     <p>With a new menu and a few additions to our <em>Royal Delights ♡</em></p>
     <button class="primary" routerLink="/menu">Order Now →</button>
   </div>
-  <img [src]="heroImage()" alt="Delicious milkshake" />
+  <img [src]="heroImage() | imgSrc: 900" alt="Delicious milkshake" decoding="async" />
 </div>
 <h2 class="center">Sweet Treats, Bigger Smiles ♡</h2>
 <div class="categories">
@@ -14,7 +14,14 @@
     (click)="open(p)"
     [class.opening]="busy.navigationInProgress() && tapped() === p.id"
   >
-    <img [src]="p.image" [alt]="p.name" /><b>{{ p.name }}</b>
+    <img
+      [src]="p.image | imgSrc: 160"
+      [alt]="p.name"
+      width="80"
+      height="80"
+      loading="lazy"
+      decoding="async"
+    /><b>{{ p.name }}</b>
   </button>
 </div>
 <div class="benefits">
@@ -34,7 +41,14 @@
   >
     <span class="stock-tag" *ngIf="!p.available">Sold out</span
     ><span class="product-category-label">{{ p.category }}</span
-    ><img [src]="p.image" [alt]="p.name" />
+    ><img
+      [src]="p.image | imgSrc: 480"
+      [attr.srcset]="p.image | imgSet: [320, 480, 640]"
+      sizes="(max-width: 650px) 46vw, 300px"
+      [alt]="p.name"
+      loading="lazy"
+      decoding="async"
+    />
     <div class="product-content">
       <b>{{ p.name }}</b>
       <p>{{ p.description }}</p>

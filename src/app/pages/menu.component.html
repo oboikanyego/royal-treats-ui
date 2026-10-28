@@ -78,7 +78,14 @@
       >
         <span class="stock-tag" *ngIf="!p.available">Sold out</span
         ><span class="product-category-label">{{ p.category }}</span
-        ><img [src]="p.image" [alt]="p.name" loading="lazy" />
+        ><img
+          [src]="p.image | imgSrc: 480"
+          [attr.srcset]="p.image | imgSet: [320, 480, 640]"
+          sizes="(max-width: 650px) 46vw, 300px"
+          [alt]="p.name"
+          loading="lazy"
+          decoding="async"
+        />
         <div class="product-content">
           <b>{{ p.name }}</b>
           <p>{{ p.description }}</p>

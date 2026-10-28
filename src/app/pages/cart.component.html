@@ -24,7 +24,7 @@
   </div>
 </div>
 <article class="cart-item group-cart-item" *ngFor="let i of cart()">
-  <img [src]="i.image" [alt]="i.name" />
+  <img [src]="i.image | imgSrc: 200" [alt]="i.name" loading="lazy" decoding="async" />
   <div class="cart-item-info">
     <b>{{ i.name }}</b
     ><small>{{ itemDetails(i) }}</small

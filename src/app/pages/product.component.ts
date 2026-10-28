@@ -8,11 +8,12 @@ import { map } from 'rxjs';
 import { CartService } from '../cart.service';
 import { optionsFor } from '../catalogue-config';
 import { CatalogueProduct, CommerceState } from '../commerce-state.service';
+import { ImageSetPipe, ImageSrcPipe } from '../image.pipes';
 
 @Component({
   selector: 'section[rt-product]',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, RandPipe],
+  imports: [CommonModule, FormsModule, RouterLink, RandPipe, ImageSrcPipe, ImageSetPipe],
   templateUrl: './product.component.html',
 })
 export class ProductComponent {

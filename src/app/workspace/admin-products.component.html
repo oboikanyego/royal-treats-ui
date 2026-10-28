@@ -1,26 +1,41 @@
 <div class="pane">
-  <div class="section-row">
+  <div class="section-row products-head">
     <div>
       <span class="eyebrow">SWEET INVENTORY</span>
       <h2>Product catalogue</h2>
       <p class="helper">Keep your shelves fresh and your menu beautifully curated.</p>
     </div>
-    <button type="button" class="primary" (click)="edit()">+ Add product</button>
+    <button type="button" class="primary add-product" (click)="edit()">+ Add product</button>
   </div>
   <div class="alert success-alert" *ngIf="notice()" role="status">{{ notice() }}</div>
   <div class="alert error" *ngIf="error()" role="alert">{{ error() }}</div>
   <p *ngIf="!store.products().length">No products yet. Add the first one.</p>
   <div class="product-line" *ngFor="let p of store.products()">
-    <img *ngIf="p.image" [src]="p.image" [alt]="p.name" />
-    <div>
+    <img
+      *ngIf="p.image"
+      [src]="p.image | imgSrc: 160"
+      [alt]="p.name"
+      width="64"
+      height="64"
+      loading="lazy"
+      decoding="async"
+    />
+    <div class="pline-info">
       <b>{{ p.name }}</b>
-      <p>From {{ p.price | rand }} · {{ p.available ? 'In stock' : 'Out of stock' }}</p>
+      <p>
+        From {{ p.price | rand }}
+        <span class="stock-pill" [class.out]="!p.available">{{
+          p.available ? 'In stock' : 'Out of stock'
+        }}</span>
+      </p>
       <small>{{ p.deliverable ? 'Delivery enabled' : 'Collection only' }} · {{ p.category }}</small>
     </div>
-    <button type="button" class="secondary" (click)="edit(p)">Edit</button
-    ><button type="button" class="secondary" (click)="pendingAvailability.set(p)">
-      {{ p.available ? 'Mark sold out' : 'Restock' }}
-    </button>
+    <div class="pline-actions">
+      <button type="button" class="secondary" (click)="edit(p)">Edit</button
+      ><button type="button" class="secondary" (click)="pendingAvailability.set(p)">
+        {{ p.available ? 'Mark sold out' : 'Restock' }}
+      </button>
+    </div>
   </div>
 
   <div class="modal-backdrop" *ngIf="edited() as p" (click)="closeEditor()" role="presentation">
@@ -102,7 +117,7 @@
           </label>
           <div class="media-upload">
             <div class="media-preview" *ngIf="p.image">
-              <img [src]="p.image" alt="Selected product picture" />
+              <img [src]="p.image | imgSrc: 640" alt="Selected product picture" />
             </div>
             <div class="media-guide">
               <strong>Product cover photo</strong>
