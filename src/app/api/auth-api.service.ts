@@ -15,11 +15,14 @@ export class AuthApi {
     phone: string;
     password: string;
     acceptedTerms: true;
+    remember?: boolean;
   }) {
     return firstValueFrom(this.api.post<AuthResponse>('/auth/register', input));
   }
-  login(email: string, password: string) {
-    return firstValueFrom(this.api.post<AuthResponse>('/auth/login', { email, password }));
+  login(email: string, password: string, remember = false) {
+    return firstValueFrom(
+      this.api.post<AuthResponse>('/auth/login', { email, password, remember }),
+    );
   }
   /** Revokes the current token on the server. */
   logout() {

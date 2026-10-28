@@ -1494,8 +1494,43 @@ app-root {
   font-size: 10px;
 }
 .desktop-nav .nav-logout {
-  color: #8a7080;
-  font-size: 12px;
+  color: var(--rt-pink-dark);
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid #f5bed2;
+  background: #fff;
+  border-radius: 999px;
+  padding: 9px 15px;
+  white-space: nowrap;
+}
+.nav .drawer-user {
+  padding: 14px 32px 6px;
+  color: #7d6676;
+  font-size: 14px;
+  border-top: 1px solid #f1e1e9;
+}
+.nav .drawer-user b {
+  color: #3a2437;
+}
+.nav button.drawer-signout {
+  margin: 4px 32px 18px;
+  width: calc(100% - 64px);
+  text-align: center;
+  border: 1.5px solid var(--rt-pink);
+  border-radius: 12px;
+  color: var(--rt-pink-dark);
+  font-weight: 700;
+  padding: 13px 16px;
+}
+.mobile-account-trigger .trigger-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+.mobile-account-trigger .trigger-icon {
+  display: block;
+  line-height: 1.1;
 }
 .top > button.mobile-account-trigger {
   display: none;
@@ -1803,8 +1838,9 @@ main > section.home {
     display: block;
     color: var(--rt-pink-dark);
     font-size: 22px;
-    min-width: 42px;
+    min-width: 48px;
     padding: 5px;
+    text-align: center;
   }
   .top .logo {
     font-size: 17px;

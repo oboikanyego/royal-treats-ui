@@ -1,14 +1,16 @@
 import { Injectable, signal } from '@angular/core';
 import type { ApiUser } from './api-types';
-import { TokenStore, safeSessionStorage } from './token-store';
+import { TokenStore, safeStorage } from './token-store';
 
 /**
- * Who is signed in through the API: the user, their picture, and the bearer token (kept in
- * sessionStorage by TokenStore). The HTTP interceptor reads the token from here.
+ * Who is signed in through the API: the user, their picture, and the bearer token. With "keep me
+ * signed in" the token is kept in localStorage (until it expires or the user signs out);
+ * otherwise in sessionStorage (gone when the tab closes). The HTTP interceptor reads it from here.
  */
 @Injectable({ providedIn: 'root' })
 export class SessionService {
-  private readonly tokens = new TokenStore(safeSessionStorage());
+  private readonly kept = new TokenStore(safeStorage('local'));
+  private readonly tabOnly = new TokenStore(safeStorage('session'));
   readonly user = signal<ApiUser | null>(null);
   /** Object URL of the profile picture, when there is one. */
   readonly photoUrl = signal<string | null>(null);
@@ -18,11 +20,13 @@ export class SessionService {
   readonly expired = signal(false);
 
   token(): string | null {
-    return this.tokens.read();
+    return this.kept.read() ?? this.tabOnly.read();
   }
 
-  start(user: ApiUser, token: string, expiresAt: string): void {
-    this.tokens.write(token, expiresAt);
+  start(user: ApiUser, token: string, expiresAt: string, remember = false): void {
+    this.kept.clear();
+    this.tabOnly.clear();
+    (remember ? this.kept : this.tabOnly).write(token, expiresAt);
     this.expired.set(false);
     this.user.set(user);
   }
@@ -35,7 +39,8 @@ export class SessionService {
 
   /** Forget the session. `expired` marks a rejected token rather than a deliberate sign-out. */
   clear(expired = false): void {
-    this.tokens.clear();
+    this.kept.clear();
+    this.tabOnly.clear();
     this.user.set(null);
     this.setPhoto(null);
     this.expired.set(expired);

@@ -3,7 +3,7 @@ export type ShopInfo = { storeName: string; address: string; supportEmail: strin
 export type LegalSection = { heading: string; paragraphs?: string[]; bullets?: string[] };
 
 /** Shown at the top of both pages; change it together with TERMS_VERSION in royal-treats-api. */
-export const LEGAL_UPDATED = '27 October 2026';
+export const LEGAL_UPDATED = '28 October 2026';
 
 const contact = (shop: ShopInfo) =>
   shop.supportEmail.trim()
@@ -74,7 +74,7 @@ export function privacySections(shop: ShopInfo): LegalSection[] {
     {
       heading: 'Cookies and browser storage',
       paragraphs: [
-        'We do not use advertising or tracking cookies. Your browser keeps a sign-in token while you are signed in (it is removed when you close the tab or sign out), your basket, and a note that you have seen the welcome screen.',
+        'We do not use advertising or tracking cookies. Your browser keeps a sign-in token while you are signed in (if you tick "Keep me signed in" it stays on this device for up to 30 days; otherwise it is removed when you close the tab; signing out always removes it), your basket, and a note that you have seen the welcome screen.',
       ],
     },
     {

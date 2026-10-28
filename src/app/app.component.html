@@ -41,14 +41,22 @@
     <button *ngIf="store.session()" class="nav-account" (click)="go('portal')">
       ◉ {{ store.session()?.name }} <small>{{ store.session()?.role | titlecase }}</small>
     </button>
-    <button *ngIf="store.session()" class="nav-logout" (click)="signOut()">Sign out</button>
+    <button
+      *ngIf="store.session()"
+      class="nav-logout"
+      (click)="signOut()"
+      title="Sign out of your account"
+    >
+      <span aria-hidden="true">⎋</span> Sign out
+    </button>
   </nav>
   <button
     class="mobile-account-trigger"
     (click)="go('portal')"
     [attr.aria-label]="store.session() ? 'Open account' : 'Sign in'"
   >
-    {{ store.session() ? '◉' : '♙' }}
+    <span class="trigger-icon" aria-hidden="true">{{ store.session() ? '◉' : '♙' }}</span>
+    <span class="trigger-label">{{ store.session() ? 'Account' : 'Sign in' }}</span>
   </button>
   <button
     class="header-cart"
@@ -73,9 +81,13 @@
             ? 'My account'
             : 'Sign in / Register'
           : (n | titlecase)
-    }}</button
-  ><button *ngIf="store.session()" class="drawer-signout" (click)="signOut()">
-    Sign out of {{ store.session()?.name }}
+    }}
+  </button>
+  <div class="drawer-user" *ngIf="store.session()">
+    Signed in as <b>{{ store.session()?.name }}</b>
+  </div>
+  <button *ngIf="store.session()" class="drawer-signout" (click)="signOut()">
+    <span aria-hidden="true">⎋</span> Sign out
   </button>
 </nav>
 <div class="api-banner" role="status" *ngIf="store.catalogueStatus() === 'slow'">

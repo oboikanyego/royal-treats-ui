@@ -146,10 +146,11 @@ export class CommerceState {
   private async startApiSession(
     call: () => ReturnType<AuthApi['login']>,
     context: AuthContext,
+    remember: boolean,
   ): Promise<string | null> {
     try {
       const { user, token, expiresAt } = await call();
-      this.sessions.start(user, token, expiresAt);
+      this.sessions.start(user, token, expiresAt, remember);
       void this.loadPhoto();
       return null;
     } catch (error) {
@@ -184,6 +185,7 @@ export class CommerceState {
     phone: string,
     password: string,
     acceptedTerms: boolean,
+    remember = true,
   ): Promise<string | null> {
     const problem =
       registrationProblem({ name, email, phone, password }) ?? consentProblem(acceptedTerms);
@@ -196,8 +198,10 @@ export class CommerceState {
           phone: phone.trim(),
           password,
           acceptedTerms: true,
+          remember,
         }),
       'register',
+      remember,
     );
   }
   /** Changes the signed-in user's name and phone. Resolves to an error message, or null on success. */
@@ -245,10 +249,11 @@ export class CommerceState {
       return authErrorMessage(toApiError(error), 'reset');
     }
   }
-  async signIn(email: string, password: string): Promise<string | null> {
+  async signIn(email: string, password: string, remember = true): Promise<string | null> {
     return this.startApiSession(
-      () => this.authApi.login(email.trim().toLowerCase(), password),
+      () => this.authApi.login(email.trim().toLowerCase(), password, remember),
       'login',
+      remember,
     );
   }
   /** Uploads a profile picture to the API. */

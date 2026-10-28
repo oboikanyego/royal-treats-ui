@@ -71,3 +71,25 @@ test('the token lives under its own key, so it cannot clash with other keys', ()
   new TokenStore(storage, () => NOW).write('abc', later);
   assert.deepEqual([...storage.data.keys()], ['royal-api-session']);
 });
+test('a kept sign-in and a tab-only one live in different storages and sign-out clears both', async () => {
+  const { SessionService } = await import('../src/app/api/session.service');
+  const stores = { local: memory(), session: memory() };
+  const g = globalThis as Record<string, unknown>;
+  g['localStorage'] = stores.local;
+  g['sessionStorage'] = stores.session;
+  const user = { id: 'u', name: 'N', email: 'e', phone: 'p', role: 'customer', active: true };
+  const soon = new Date(Date.now() + 3_600_000).toISOString();
+  const s = new SessionService();
+  s.start(user, 'kept-token', soon, true);
+  assert.equal(stores.local.data.size, 1);
+  assert.equal(stores.session.data.size, 0);
+  assert.equal(s.token(), 'kept-token');
+  s.start(user, 'tab-token', soon, false);
+  assert.equal(stores.local.data.size, 0, 'the earlier kept token is replaced');
+  assert.equal(stores.session.data.size, 1);
+  assert.equal(s.token(), 'tab-token');
+  s.start(user, 'again', soon, true);
+  s.clear();
+  assert.equal(stores.local.data.size + stores.session.data.size, 0);
+  assert.equal(s.token(), null);
+});

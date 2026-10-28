@@ -4,7 +4,13 @@
       <span class="portal-logo-mark">♛</span
       ><span><b>Royal Treats</b><small>THE SWEET STUDIO · THABAZIMBI</small></span>
     </div>
-    <button class="secondary" *ngIf="store.session()" (click)="logout()">Sign out</button>
+    <div class="portal-session" *ngIf="store.session() as me">
+      <span class="signed-in-as"
+        >Signed in as <b>{{ me.name }}</b></span
+      ><button class="secondary signout-btn" (click)="logout()">
+        <span aria-hidden="true">⎋</span> Sign out
+      </button>
+    </div>
   </div>
   <section class="auth" *ngIf="!store.session()">
     <div class="auth-head">
@@ -24,7 +30,11 @@
         name="password"
         autocomplete="current-password"
         [(value)]="password"
-      /><button class="primary wide">Sign in</button>
+      /><label class="check remember"
+        ><input type="checkbox" name="remember" [(ngModel)]="remember" /><span
+          >Keep me signed in on this device</span
+        ></label
+      ><button class="primary wide">Sign in</button>
       <button
         type="button"
         class="link"
@@ -84,6 +94,10 @@
           >I have read the <a href="/privacy" target="_blank" rel="noopener">Privacy Notice</a> and
           the <a href="/terms" target="_blank" rel="noopener">Terms of Use</a> and I agree to
           them.</span
+        ></label
+      ><label class="check remember"
+        ><input type="checkbox" name="remember" [(ngModel)]="remember" /><span
+          >Keep me signed in on this device</span
         ></label
       ><button class="primary wide">Register</button
       ><button type="button" class="link" (click)="screen.set('signin')">

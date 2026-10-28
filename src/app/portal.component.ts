@@ -52,6 +52,8 @@ export class PortalComponent {
   email = '';
   password = '';
   consent = false;
+  /** "Keep me signed in on this device": on by default, as phones often drop a tab's session. */
+  remember = true;
   resetSent = false;
   sendingReset = false;
   name = '';
@@ -101,7 +103,7 @@ export class PortalComponent {
   }
 
   async login() {
-    this.error = (await this.store.signIn(this.email, this.password)) ?? '';
+    this.error = (await this.store.signIn(this.email, this.password, this.remember)) ?? '';
     if (this.error) return;
     this.screen.set('home');
     this.password = '';
@@ -109,8 +111,14 @@ export class PortalComponent {
 
   async register() {
     this.error =
-      (await this.store.register(this.name, this.email, this.phone, this.password, this.consent)) ??
-      '';
+      (await this.store.register(
+        this.name,
+        this.email,
+        this.phone,
+        this.password,
+        this.consent,
+        this.remember,
+      )) ?? '';
     if (!this.error) {
       this.screen.set('home');
       this.password = '';
