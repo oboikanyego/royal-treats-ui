@@ -9,6 +9,7 @@ import { OrdersApi } from '../api/orders-api.service';
 import { CommerceState, DeliveryOrder } from '../commerce-state.service';
 import { groupByRecipient, statusLabel, stepDone, stepsFor } from '../order-view';
 import { RandPipe } from '../rand.pipe';
+import { ReceiptViewer } from '../receipt-viewer.service';
 
 const PAGE_SIZE = 20;
 const REFRESH_MS = 30_000;
@@ -40,6 +41,7 @@ export class OrdersComponent {
   readonly groupByRecipient = groupByRecipient;
   readonly statusText = (order: DeliveryOrder) => statusLabel(order.status, order.fulfillment);
   /** When the order reached this step (ISO), or '' when it has not (or the API gave no time). */
+  readonly receipts = inject(ReceiptViewer);
   readonly stepTime = (order: DeliveryOrder, step: string) => order.stepTimes?.[step] ?? '';
   readonly stepText = (order: DeliveryOrder, step: string) => statusLabel(step, order.fulfillment);
   readonly isSet = (value: string | undefined) => !!value;

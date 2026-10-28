@@ -93,6 +93,13 @@
       Need to change or cancel this order? <a routerLink="/contact">Contact us</a>; only the shop
       can cancel an order.
     </p>
+    <button
+      type="button"
+      class="secondary receipt-button"
+      (click)="receipts.showOrder(order.id, order.ref || order.id)"
+    >
+      Print receipt
+    </button>
   </article>
 
   <button

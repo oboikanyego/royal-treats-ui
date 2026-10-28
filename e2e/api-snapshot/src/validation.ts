@@ -28,6 +28,12 @@ export const registration = account
     }),
   })
   .strict();
+export const accountDeletion = z
+  .object({ password: z.string().min(1).max(128) })
+  .strict();
+export const receiptTemplateInput = z
+  .object({ html: z.string().max(100_000) })
+  .strict();
 export const forgotPassword = z
   .object({
     email: z

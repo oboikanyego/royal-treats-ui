@@ -38,3 +38,18 @@ test('only network and gateway failures are retried', () => {
   for (const status of [400, 401, 403, 404, 409, 429, 500])
     assert.equal(isTransient(new ApiRequestError(status, 'x')), false);
 });
+
+test('a failed text request (a receipt) reports the API message from the JSON text of its body', () => {
+  const failure = { status: 404, error: '{"error":"Order not found"}' };
+  const e = toApiError(failure);
+  assert.equal(e.status, 404);
+  assert.equal(e.message, 'Order not found');
+  assert.equal(
+    toApiError({ status: 500, error: 'not json at all' }).message,
+    'The server returned an error (500).',
+  );
+  assert.equal(
+    toApiError({ status: 400, error: '{"error":"Bad","details":[1]}' }).details?.toString(),
+    '1',
+  );
+});

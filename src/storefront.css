@@ -3460,3 +3460,94 @@ app-root a {
   color: inherit;
   cursor: pointer;
 }
+
+/* ---- Receipt sheet (print dialog) ---- */
+.receipt-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: #2a0f2066;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+.receipt-sheet {
+  position: fixed;
+  z-index: 81;
+  inset: 5vh 50% auto;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  width: min(520px, 94vw);
+  max-height: 90vh;
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: 0 24px 70px #3c0f2a55;
+  overflow: hidden;
+}
+.receipt-sheet header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px 10px 20px;
+  border-bottom: 1px solid var(--rt-pink-border);
+}
+.receipt-sheet h2 {
+  margin: 0;
+  font:
+    700 18px Georgia,
+    serif;
+  color: var(--rt-plum);
+}
+.receipt-close {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--rt-blush);
+  color: var(--rt-pink-dark);
+  font-size: 16px;
+  cursor: pointer;
+}
+.receipt-frame {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 55vh;
+  border: 0;
+  background: #fff;
+}
+.receipt-state {
+  margin: 0;
+  padding: 24px 20px;
+  color: #7d6676;
+}
+.receipt-error {
+  color: #a51a41;
+}
+.receipt-sheet .receipt-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--rt-pink-border);
+}
+.receipt-sheet .receipt-foot button {
+  flex: 1 1 160px;
+  min-height: 48px;
+}
+.receipt-button {
+  margin-top: 6px;
+  min-height: 44px;
+}
+@media (max-width: 650px) {
+  .receipt-sheet {
+    inset: 0;
+    transform: none;
+    width: 100%;
+    max-height: none;
+    border-radius: 0;
+  }
+  .receipt-frame {
+    min-height: 0;
+  }
+}

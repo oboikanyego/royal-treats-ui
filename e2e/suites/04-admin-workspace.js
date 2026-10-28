@@ -45,7 +45,7 @@ let LASTPG;
  await card.locator('button:has-text("Mark Ready for Collection")').click(); await pg.waitForSelector('text=/is now Ready for Collection/');
  ok(await card.locator('button:has-text("Mark Collected")').count()===1,'collection order walks Confirmed → Preparing → Ready for Collection → Collected');
  await card.locator('button:has-text("Mark Collected")').click(); await pg.waitForSelector('text=/is now Collected/');
- ok(await card.locator('.actions button').count()===0,'a completed order has no actions');
+ ok(await card.locator('.actions:not(.receipt-row) button').count()===0,'a completed order has no status actions (only Print receipt)');
  // delivery order: Ready for Delivery then waits for a courier
  const dcard=pg.locator('rt-admin-orders .order-card',{hasText:'12 Test St'});
  for (const s of ['Confirmed','Preparing','Ready for Delivery']) { await dcard.locator(`button:has-text("Mark ${s}")`).click(); await pg.waitForSelector(`text=/is now ${s}/`); }

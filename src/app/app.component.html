@@ -195,6 +195,7 @@
     </button>
   </div>
 </div>
+<rt-receipt-dialog />
 <div class="busy-bar" *ngIf="busy.visible()" role="progressbar" aria-label="Loading"></div>
 <main id="main-content" [attr.aria-busy]="busy.visible()"><router-outlet /></main>
 <nav class="mobile-bottom-nav" *ngIf="!page().startsWith('admin')" aria-label="Mobile navigation">
