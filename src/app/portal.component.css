@@ -1404,6 +1404,139 @@ select:focus-visible {
   margin: 0;
 }
 
+/* Settings: a stack of cards, one idea each, with the save button always in reach. */
+.settings-page {
+  max-width: 720px;
+}
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.settings-card {
+  background: #fff;
+  border: 1px solid #e9e8f0;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 4px 18px #2a1b3d0a;
+}
+.settings-card header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.settings-card h2 {
+  margin: 0 0 3px;
+  font:
+    700 19px Georgia,
+    serif;
+  color: #252337;
+}
+.settings-card header p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #7d7a92;
+}
+.settings-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: linear-gradient(140deg, #fff0f7, #ffd9ea);
+  color: #b81361;
+  font-size: 20px;
+}
+.settings-card label {
+  display: block;
+  margin-top: 14px;
+  font-size: 13px;
+  font-weight: 650;
+  color: #3a3550;
+}
+.settings-card header + label {
+  margin-top: 0;
+}
+.settings-card input {
+  min-height: 48px;
+}
+.settings-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.settings-row label {
+  margin-top: 0;
+}
+.settings-note {
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #8a869b;
+}
+.delivery-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.delivery-status > span {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 800;
+}
+.delivery-status.ok {
+  background: #effaf3;
+  color: #20683c;
+}
+.delivery-status.ok > span {
+  background: #20683c;
+  color: #fff;
+}
+.delivery-status.ok a {
+  color: inherit;
+  font-weight: 700;
+  margin-left: 4px;
+}
+.delivery-status.off {
+  background: #fff6e8;
+  color: #8a5300;
+}
+.delivery-status.off > span {
+  background: #d98200;
+  color: #fff;
+}
+.warning-alert {
+  background: #fff6e8;
+  color: #8a5300;
+  border: 1px solid #f3d6a5;
+}
+.settings-save {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, #f8f9fc00, #f8f9fc 35%);
+}
+@media (max-width: 520px) {
+  .settings-card {
+    padding: 16px;
+    border-radius: 16px;
+  }
+}
+
 /* Admin on phones: an app bar with the section title, an account menu and tabs for every section. */
 .admin-appbar {
   display: none;

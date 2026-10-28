@@ -3097,6 +3097,285 @@ app-root a {
   font-weight: 700;
 }
 
+/* ---- Richer side menu (drawer) ---- */
+.rt-icon {
+  display: block;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+}
+.top > button.mobile-menu-trigger .rt-icon {
+  width: 26px;
+  height: 26px;
+  margin: auto;
+}
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: #2a0f2058;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  animation: drawer-fade 0.2s ease-out;
+}
+.nav.drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: auto;
+  z-index: 61;
+  display: flex;
+  flex-direction: column;
+  width: min(86vw, 340px);
+  max-width: none;
+  margin: 0;
+  padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: 0 26px 26px 0;
+  background: #fff;
+  box-shadow: 18px 0 50px #3c0f2a40;
+  animation: drawer-in 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.nav.drawer button {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+}
+.drawer-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 18px 18px 20px;
+  color: #fff;
+  background: linear-gradient(140deg, #fa4493, #b81361);
+  border-radius: 0 26px 0 0;
+}
+.drawer-logo {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 15px;
+  background: #ffffff2b;
+  font-size: 28px;
+}
+.drawer-head b {
+  display: block;
+  font:
+    700 21px Georgia,
+    serif;
+}
+.drawer-head small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  opacity: 0.85;
+}
+.nav.drawer .drawer-close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-left: auto;
+  border-radius: 14px;
+  background: #ffffff26;
+  color: #fff;
+}
+.nav.drawer .drawer-account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 14px 6px;
+  padding: 12px;
+  width: calc(100% - 28px);
+  border: 1px solid var(--rt-pink-border);
+  border-radius: 18px;
+  background: var(--rt-blush-soft);
+  color: var(--rt-plum);
+}
+.drawer-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  border-radius: 15px;
+  background: linear-gradient(130deg, #ef6bad, #ffc8e1);
+  color: #6b2353;
+  font-weight: 800;
+}
+.drawer-account-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.drawer-account-text b {
+  display: block;
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.drawer-account-text small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: #8a6f81;
+}
+.nav.drawer .drawer-account > .rt-icon,
+.nav.drawer .drawer-links .rt-icon:last-child {
+  width: 18px;
+  height: 18px;
+  color: #c9aabd;
+}
+.drawer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 14px;
+}
+.nav.drawer .drawer-links button {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 52px;
+  padding: 0 14px;
+  border-radius: 15px;
+  color: #3a2437;
+  font-size: 16px;
+  font-weight: 600;
+}
+.drawer-links button > span {
+  flex: 1 1 auto;
+}
+.drawer-links button > .rt-icon:first-child {
+  color: #a8567f;
+}
+.nav.drawer .drawer-links button.current {
+  background: linear-gradient(100deg, #fff0f7, #ffe1ef);
+  color: var(--rt-pink-dark);
+  box-shadow: inset 3px 0 0 var(--rt-pink);
+}
+.drawer-links button.current > .rt-icon:first-child {
+  color: var(--rt-pink-deep);
+}
+.drawer-foot {
+  margin-top: auto;
+  padding: 10px 14px 18px;
+}
+.nav.drawer .drawer-signout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin: 0 0 12px;
+  min-height: 50px;
+  border: 1.5px solid var(--rt-pink);
+  border-radius: 15px;
+  color: var(--rt-pink-dark);
+  font-size: 15px;
+  font-weight: 700;
+}
+.drawer-foot p {
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  color: #98828f;
+}
+.drawer-foot a {
+  color: inherit;
+}
+@keyframes drawer-in {
+  from {
+    transform: translateX(-100%);
+  }
+}
+@keyframes drawer-fade {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav.drawer,
+  .drawer-backdrop {
+    animation: none;
+  }
+}
+
+/* ---- Richer bottom tab bar (phones) ---- */
+@media (max-width: 650px) {
+  .mobile-bottom-nav {
+    left: 12px;
+    right: 12px;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    gap: 4px;
+    padding: 6px;
+    border: 1px solid #ffffffb0;
+    border-radius: 28px;
+    background: #ffffffd9;
+    backdrop-filter: saturate(1.6) blur(18px);
+    -webkit-backdrop-filter: saturate(1.6) blur(18px);
+    box-shadow:
+      0 14px 38px #5a123a33,
+      0 2px 6px #5a123a14,
+      inset 0 0 0 1px #f3d8e4;
+  }
+  .mobile-bottom-nav button {
+    gap: 2px;
+    min-height: 54px;
+    border-radius: 22px;
+    color: #7c6573;
+    font-size: 11px;
+    font-weight: 600;
+    transition:
+      background 0.2s,
+      color 0.2s,
+      transform 0.15s;
+  }
+  .mobile-bottom-nav button:active {
+    transform: scale(0.94);
+  }
+  .mobile-bottom-nav button .rt-icon {
+    width: 24px;
+    height: 24px;
+  }
+  .mobile-bottom-nav button > span {
+    font-size: 11px;
+    line-height: 1.1;
+  }
+  .mobile-bottom-nav button.current {
+    background: linear-gradient(140deg, #fa4493, #c4166f);
+    color: #fff;
+    box-shadow: 0 8px 18px #d6176f55;
+  }
+  .mobile-bottom-nav small {
+    top: 3px;
+    right: calc(50% - 24px);
+    min-width: 18px;
+    padding: 1px 5px;
+    border: 2px solid #fff;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1.3;
+    text-align: center;
+  }
+  .mobile-bottom-nav button.current small {
+    background: #fff;
+    color: var(--rt-pink-deep);
+    border-color: transparent;
+  }
+  main > section:not(.admin) {
+    padding-bottom: calc(110px + env(safe-area-inset-bottom));
+  }
+  footer {
+    padding-bottom: calc(100px + env(safe-area-inset-bottom));
+  }
+}
+
 @media (max-width: 700px) {
   body.admin-shell .top,
   body.admin-shell .nav,

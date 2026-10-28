@@ -1,56 +1,102 @@
-<div class="pane">
-  <h2>Business settings</h2>
+<div class="settings-page">
   <div class="alert success-alert" *ngIf="notice()" role="status">{{ notice() }}</div>
+  <div class="alert warning-alert" *ngIf="warning()" role="status">{{ warning() }}</div>
   <div class="alert error" *ngIf="error()" role="alert">{{ error() }}</div>
-  <form class="panel" (ngSubmit)="save()">
-    <label
-      >Store name<input
-        required
-        name="storeName"
-        maxlength="100"
-        [(ngModel)]="settings.storeName" /></label
-    ><label
-      >Opening time<input type="time" required name="open" [(ngModel)]="settings.open" /></label
-    ><label
-      >Closing time<input type="time" required name="close" [(ngModel)]="settings.close" /></label
-    ><label
-      >Store address<input
-        required
-        name="address"
-        maxlength="300"
-        [(ngModel)]="settings.address" /></label
-    ><label
-      >Business support email<input
-        type="email"
-        name="supportEmail"
-        [(ngModel)]="settings.supportEmail"
-        placeholder="support@yourbusiness.co.za"
-    /></label>
-    <p class="helper">
-      Visitors can contact support using their own email app. This site does not send messages.
-    </p>
-    <p>Delivery radius: <strong>5 km maximum</strong> (fixed business rule).</p>
-    <label
-      >Store latitude<input
-        name="latitude"
-        type="number"
-        step="any"
-        [(ngModel)]="settings.latitude" /></label
-    ><label
-      >Store longitude<input
-        name="longitude"
-        type="number"
-        step="any"
-        [(ngModel)]="settings.longitude" /></label
-    ><button type="button" class="secondary" (click)="useStoreLocation()">
-      Use this device's location as store
-    </button>
-    <p class="helper">
-      Set coordinates while physically at the store, not from another location. Distance is
-      straight-line, not road-driving distance.
-    </p>
-    <button class="primary wide" [disabled]="saving()">
-      {{ saving() ? 'Saving…' : 'Save settings' }}
-    </button>
+  <form class="settings-form" (ngSubmit)="save()">
+    <section class="settings-card">
+      <header>
+        <span class="settings-icon" aria-hidden="true">♛</span>
+        <div>
+          <h2>Your shop</h2>
+          <p>What customers see on the site and in their emails.</p>
+        </div>
+      </header>
+      <label
+        >Shop name<input
+          required
+          name="storeName"
+          maxlength="100"
+          autocomplete="organization"
+          [(ngModel)]="settings.storeName"
+      /></label>
+      <label
+        >Shop address<input
+          required
+          name="address"
+          maxlength="300"
+          autocomplete="street-address"
+          placeholder="Street, suburb and town"
+          [(ngModel)]="settings.address"
+      /></label>
+      <p class="settings-note">
+        We use this address to work out your delivery area, so include the suburb and town.
+      </p>
+    </section>
+
+    <section class="settings-card">
+      <header>
+        <span class="settings-icon" aria-hidden="true">◷</span>
+        <div>
+          <h2>Opening hours</h2>
+          <p>
+            Orders can be placed for times between
+            <b>{{ settings.open }}</b> and <b>{{ settings.close }}</b
+            >.
+          </p>
+        </div>
+      </header>
+      <div class="settings-row">
+        <label>Opens<input type="time" required name="open" [(ngModel)]="settings.open" /></label>
+        <label
+          >Closes<input type="time" required name="close" [(ngModel)]="settings.close"
+        /></label>
+      </div>
+    </section>
+
+    <section class="settings-card">
+      <header>
+        <span class="settings-icon" aria-hidden="true">✉</span>
+        <div>
+          <h2>Contact</h2>
+          <p>Where customer messages and new-order emails go.</p>
+        </div>
+      </header>
+      <label
+        >Support email<input
+          type="email"
+          name="supportEmail"
+          autocomplete="email"
+          inputmode="email"
+          placeholder="orders@yourshop.co.za"
+          [(ngModel)]="settings.supportEmail"
+      /></label>
+      <p class="settings-note">
+        Customers email you from their own email app; the site never sends messages on its own.
+      </p>
+    </section>
+
+    <section class="settings-card delivery-card">
+      <header>
+        <span class="settings-icon" aria-hidden="true">⌖</span>
+        <div>
+          <h2>Delivery</h2>
+          <p>Mini donuts only, up to <b>5 km</b> in a straight line from your address.</p>
+        </div>
+      </header>
+      <p class="delivery-status ok" *ngIf="located()">
+        <span aria-hidden="true">✓</span> Delivery is measured from your address.
+        <a [href]="mapUrl()" target="_blank" rel="noopener">Check it on the map</a>
+      </p>
+      <p class="delivery-status off" *ngIf="!located()">
+        <span aria-hidden="true">!</span> Delivery is off until we can find your address on the map.
+        Save your address to try.
+      </p>
+    </section>
+
+    <div class="settings-save">
+      <button class="primary wide" [disabled]="saving()">
+        {{ saving() ? 'Saving…' : 'Save settings' }}
+      </button>
+    </div>
   </form>
 </div>

@@ -5,6 +5,7 @@ import { AdminLive } from './api/admin-live.service';
 import { Busy } from './busy.service';
 import { CartService } from './cart.service';
 import { CommerceState } from './commerce-state.service';
+import { IconComponent } from './icon.component';
 
 const pagePaths: Record<string, string> = {
   home: '/',
@@ -22,7 +23,7 @@ const pagePaths: Record<string, string> = {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink],
+  imports: [CommonModule, RouterOutlet, RouterLink, IconComponent],
   templateUrl: './app.component.html',
 })
 export class AppComponent {
@@ -62,6 +63,14 @@ export class AppComponent {
   openOrders(alertId: string) {
     this.live.dismiss(alertId);
     this.router.navigate(['/account'], { queryParams: { screen: 'orders' } });
+  }
+  initials(name: string): string {
+    return name
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((x) => x[0] || '')
+      .join('')
+      .toUpperCase();
   }
   signOut() {
     this.store.signOut();

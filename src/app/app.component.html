@@ -24,7 +24,7 @@
     [attr.aria-expanded]="menu"
     aria-label="Open menu"
   >
-    ☰
+    <rt-icon name="menu-lines" />
   </button>
   <button class="logo" (click)="go('home')" aria-label="Royal Treats home">
     <span>♛</span>Royal Treats<small>EST. 2021</small>
@@ -68,27 +68,64 @@
     ><span>Cart</span>
   </button>
 </header>
-<nav class="nav" *ngIf="menu">
-  <button
-    *ngFor="let n of ['home', 'menu', 'orders', 'about', 'contact', 'portal']"
-    (click)="go(n)"
-  >
-    {{
-      n === 'orders'
-        ? 'My Orders'
-        : n === 'portal'
-          ? store.session()
-            ? 'My account'
-            : 'Sign in / Register'
-          : (n | titlecase)
-    }}
-  </button>
-  <div class="drawer-user" *ngIf="store.session()">
-    Signed in as <b>{{ store.session()?.name }}</b>
+<div class="drawer-backdrop" *ngIf="menu" (click)="menu = false" aria-hidden="true"></div>
+<nav class="nav drawer" *ngIf="menu" aria-label="Menu" (keydown.escape)="menu = false">
+  <div class="drawer-head">
+    <span class="drawer-logo" aria-hidden="true">♛</span>
+    <div>
+      <b>Royal Treats</b>
+      <small>Sweet treats, bigger smiles</small>
+    </div>
+    <button class="drawer-close" type="button" (click)="menu = false" aria-label="Close menu">
+      <rt-icon name="close" />
+    </button>
   </div>
-  <button *ngIf="store.session()" class="drawer-signout" (click)="signOut()">
-    <span aria-hidden="true">⎋</span> Sign out
+  <button class="drawer-account" type="button" (click)="go('portal')">
+    <span class="drawer-avatar" aria-hidden="true">
+      <ng-container *ngIf="store.session() as me; else guest">{{ initials(me.name) }}</ng-container>
+      <ng-template #guest><rt-icon name="user" /></ng-template>
+    </span>
+    <span class="drawer-account-text" *ngIf="store.session() as me; else guestText">
+      <b>{{ me.name }}</b>
+      <small
+        >{{ me.role | titlecase }} ·
+        {{ me.role === 'admin' ? 'Open workspace' : 'My account' }}</small
+      >
+    </span>
+    <ng-template #guestText>
+      <span class="drawer-account-text">
+        <b>Sign in or register</b>
+        <small>Order faster and track your orders</small>
+      </span>
+    </ng-template>
+    <rt-icon name="chevron" />
   </button>
+  <div class="drawer-links">
+    <button [class.current]="page() === 'home'" (click)="go('home')">
+      <rt-icon name="home" /><span>Home</span><rt-icon name="chevron" />
+    </button>
+    <button [class.current]="page() === 'menu' || page() === 'product'" (click)="go('menu')">
+      <rt-icon name="menu" /><span>Our Menu</span><rt-icon name="chevron" />
+    </button>
+    <button [class.current]="page() === 'orders'" (click)="go('orders')">
+      <rt-icon name="orders" /><span>My Orders</span><rt-icon name="chevron" />
+    </button>
+    <button [class.current]="page() === 'about'" (click)="go('about')">
+      <rt-icon name="about" /><span>About Us</span><rt-icon name="chevron" />
+    </button>
+    <button [class.current]="page() === 'contact'" (click)="go('contact')">
+      <rt-icon name="mail" /><span>Contact</span><rt-icon name="chevron" />
+    </button>
+  </div>
+  <div class="drawer-foot">
+    <button *ngIf="store.session()" class="drawer-signout" type="button" (click)="signOut()">
+      <rt-icon name="logout" /> Sign out
+    </button>
+    <p>
+      <a routerLink="/privacy" (click)="menu = false">Privacy Notice</a> ·
+      <a routerLink="/terms" (click)="menu = false">Terms of Use</a>
+    </p>
+  </div>
 </nav>
 <div class="api-banner" role="status" *ngIf="store.catalogueStatus() === 'slow'">
   <span class="api-banner-spinner" aria-hidden="true"></span>
@@ -114,27 +151,27 @@
 <main id="main-content" [attr.aria-busy]="busy.visible()"><router-outlet /></main>
 <nav class="mobile-bottom-nav" *ngIf="!page().startsWith('admin')" aria-label="Mobile navigation">
   <button [class.current]="page() === 'home'" (click)="go('home')">
-    <span aria-hidden="true">⌂</span>Home
+    <rt-icon name="home" /><span>Home</span>
   </button>
   <button [class.current]="page() === 'menu' || page() === 'product'" (click)="go('menu')">
-    <span aria-hidden="true">▦</span>Menu
+    <rt-icon name="menu" /><span>Menu</span>
   </button>
   <button [class.current]="page() === 'orders'" (click)="go('orders')">
-    <span aria-hidden="true">◷</span>Orders
+    <rt-icon name="orders" /><span>Orders</span>
   </button>
   <button
     *ngIf="!store.session() || store.session()?.role === 'customer'"
     [class.current]="page() === 'cart' || page() === 'checkout'"
     (click)="go('cart')"
   >
-    <span aria-hidden="true">🛒</span>Cart <small *ngIf="count()">{{ count() }}</small>
+    <rt-icon name="cart" /><span>Cart</span> <small *ngIf="count()">{{ count() }}</small>
   </button>
   <button
     *ngIf="store.session()?.role === 'admin' || store.session()?.role === 'courier'"
     [class.current]="page() === 'portal'"
     (click)="go('portal')"
   >
-    <span aria-hidden="true">◉</span>Workspace
+    <rt-icon name="workspace" /><span>Workspace</span>
   </button>
 </nav>
 <footer>
