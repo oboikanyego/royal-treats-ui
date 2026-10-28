@@ -39,11 +39,13 @@ const OLD='a-long-enough-pass', NEW='brand-new-long-pass';
  ok(list.length===1&&list[0].email==='thandi@example.com'&&!JSON.stringify(list).includes(NEW),'the admin API lists the request without any password');
  pg=await mk(b); await pg.goto(UI+'/account'); await pg.fill('input[name=email]','admin@royaltreats.test'); await pg.fill('input[name=password]','AdminPass-12345'); await pg.click('button.primary:has-text("Sign in")');
  await pg.waitForSelector('.password-requests .pw-request');
+ ok((await pg.locator('.sidebar-navigation button:has-text("Overview") .pending-count').innerText())==='1','the Overview menu shows a badge with the number of waiting requests');
  const card=(await pg.locator('.pw-request').textContent()).replace(/\s+/g,' ');
  ok(card.includes('Thandi Mokoena')&&card.includes('thandi@example.com')&&card.includes('074 123 4567')&&!card.includes(NEW),'the overview shows who is asking (name, email, phone) and never the password');
  // 5. decline leaves the password alone
  await pg.click('.pw-request button:has-text("Decline")'); await pg.waitForSelector('.password-requests .success-alert');
  ok((await pg.locator('.password-requests .success-alert').textContent()).includes('declined')&&(await pg.locator('.pw-request').count())===0,'declining removes the request');
+ ok(await pg.locator('.sidebar-navigation button:has-text("Overview") .pending-count').count()===0,'the badge goes away when none are waiting');
  ok((await login('thandi@example.com',OLD)).status===200,'after declining the old password still works');
  // 6. approve needs a second tap, then the password changes everywhere
  const signedIn=(await login('thandi@example.com',OLD)).body;
@@ -65,6 +67,11 @@ const OLD='a-long-enough-pass', NEW='brand-new-long-pass';
  // 9. phone: the form and the admin card fit the screen
  const ph=await mk(b,390,844); await ph.goto(UI+'/account'); await ph.click('button:has-text("Forgot your password?")'); await ph.waitForSelector('input[name=newPassword]');
  ok(await ph.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'the form has no sideways scroll on a phone');
+ // 9b. the badge shows on a phone tab and in the menu
+ await call('/auth/password-requests',{method:'POST',body:{email:'thandi@example.com',newPassword:NEW}});
+ const ap=await mk(b,390,844); await ap.goto(UI+'/account'); await ap.fill('input[name=email]','admin@royaltreats.test'); await ap.fill('input[name=password]','AdminPass-12345'); await ap.click('button.primary:has-text("Sign in")');
+ await ap.waitForSelector('.appbar-tabs .tab-badge');
+ ok((await ap.locator('.appbar-tabs button:has-text("Overview") .tab-badge').innerText())==='1','on a phone the Overview tab shows the badge');
  // 10. privacy text
  await pg.goto(UI+'/privacy'); await pg.waitForSelector('.legal-body h2'); const pr=await pg.locator('.legal-body').textContent();
  ok(pr.includes('ask us for a new one')&&pr.includes('nobody at the shop can read it'),'the privacy notice explains password requests');

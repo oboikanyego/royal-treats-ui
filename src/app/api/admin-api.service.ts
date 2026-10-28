@@ -6,7 +6,6 @@ import { fromApiProduct, fromApiSettings } from './api-mappers';
 import type {
   ApiDashboard,
   ApiImage,
-  ApiReceiptTemplate,
   ApiOrder,
   ApiPasswordRequest,
   ApiProduct,
@@ -22,20 +21,6 @@ import type {
 @Injectable({ providedIn: 'root' })
 export class AdminApi {
   private readonly api = inject(ApiClient);
-
-  receiptTemplate(): Promise<ApiReceiptTemplate> {
-    return firstValueFrom(this.api.get<ApiReceiptTemplate>('/admin/templates/receipt'));
-  }
-  saveReceiptTemplate(html: string): Promise<ApiReceiptTemplate> {
-    return firstValueFrom(this.api.put<ApiReceiptTemplate>('/admin/templates/receipt', { html }));
-  }
-  resetReceiptTemplate(): Promise<ApiReceiptTemplate> {
-    return firstValueFrom(this.api.delete<ApiReceiptTemplate>('/admin/templates/receipt'));
-  }
-  /** The template on a sample order, without saving it. */
-  previewReceipt(html: string): Promise<string> {
-    return firstValueFrom(this.api.postText('/admin/templates/receipt/preview', { html }));
-  }
 
   passwordRequests(): Promise<ApiPasswordRequest[]> {
     return firstValueFrom(

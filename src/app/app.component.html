@@ -127,7 +127,13 @@
       [class.current]="page() === 'portal' && adminScreen() === 'home'"
       (click)="openAdmin('home')"
     >
-      <rt-icon name="workspace" /><span>Overview</span><rt-icon name="chevron" />
+      <rt-icon name="workspace" /><span>Overview</span>
+      <small
+        class="drawer-badge"
+        *ngIf="live.passwordRequests()"
+        aria-label="Password requests waiting"
+        >{{ live.passwordRequests() }}</small
+      ><rt-icon name="chevron" />
     </button>
     <button
       [class.current]="page() === 'portal' && adminScreen() === 'orders'"

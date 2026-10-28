@@ -29,13 +29,6 @@ export type ApiSettings = {
   /** Seven days, Sunday first; absent means every day uses open/close. */
   weeklyHours?: { closed: boolean; open: string; close: string }[] | null;
 };
-export type ApiReceiptTemplate = {
-  html: string;
-  /** False while the seeded template is in use. */
-  customised: boolean;
-  updatedAt: string | null;
-  placeholders: { name: string; description: string }[];
-};
 export type Paginated<T> = { items: T[]; total: number; page: number; limit: number };
 export type ApiUser = {
   id: string;

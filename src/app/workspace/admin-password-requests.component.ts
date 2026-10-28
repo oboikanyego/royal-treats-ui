@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewEncapsulation, inject, signal } from '@angular/core';
 import { AdminApi } from '../api/admin-api.service';
+import { AdminLive } from '../api/admin-live.service';
 import { toApiError } from '../api/api-errors';
 import type { ApiPasswordRequest } from '../api/api-types';
 
@@ -17,6 +18,7 @@ import type { ApiPasswordRequest } from '../api/api-types';
 })
 export class AdminPasswordRequestsComponent implements OnInit {
   private readonly admin = inject(AdminApi);
+  private readonly live = inject(AdminLive);
   readonly requests = signal<ApiPasswordRequest[]>([]);
   readonly loading = signal(true);
   readonly error = signal('');
@@ -32,7 +34,9 @@ export class AdminPasswordRequestsComponent implements OnInit {
   async load() {
     this.error.set('');
     try {
-      this.requests.set(await this.admin.passwordRequests());
+      const list = await this.admin.passwordRequests();
+      this.requests.set(list);
+      this.live.passwordRequests.set(list.length);
     } catch (failure) {
       this.error.set(toApiError(failure).message);
     } finally {
