@@ -29,9 +29,7 @@
   </div>
   <div class="panel">
     <h3>② Preferred order time</h3>
-    <p class="helper">
-      Business hours: {{ store.settings().open }}–{{ store.settings().close }} (admin configurable).
-    </p>
+    <p class="helper" role="status">{{ hoursNote() }}</p>
     <label
       >Preferred Date<input
         type="date"
@@ -107,13 +105,14 @@
     <p class="muted">EFT payments will be introduced later. No online payment is collected.</p>
     <p class="notice">Orders are subject to confirmation by Royal Treats.</p>
   </div>
+  <p class="pause-note" *ngIf="paused()" role="status">{{ pausedMessage() }}</p>
   <p class="error" *ngIf="checkoutError">{{ checkoutError }}</p>
   <div class="total">
     <b>Total</b><b>{{ total() | rand }}</b>
   </div>
   <button
     class="primary wide"
-    [disabled]="!cart().length || store.session()?.role !== 'customer' || submitting()"
+    [disabled]="!cart().length || store.session()?.role !== 'customer' || submitting() || paused()"
   >
     {{ submitting() ? 'Placing your order…' : 'Place Order' }}
   </button>

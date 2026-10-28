@@ -127,6 +127,11 @@
     </p>
   </div>
 </nav>
+<div class="pause-banner" role="status" *ngIf="store.settings().ordersPaused">
+  <b>Orders are paused.</b>
+  <span *ngIf="store.settings().pauseMessage as note">{{ note }}</span>
+  <span *ngIf="!store.settings().pauseMessage">We are not taking new orders right now.</span>
+</div>
 <div class="api-banner" role="status" *ngIf="store.catalogueStatus() === 'slow'">
   <span class="api-banner-spinner" aria-hidden="true"></span>
   Waking up the server. The first load can take up to a minute…

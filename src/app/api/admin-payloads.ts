@@ -1,6 +1,7 @@
 import { isDeliverableCategory } from '../catalogue-config';
 import type { CatalogueProduct, Settings } from '../commerce-state.service';
 import { randToCents } from '../money';
+import { weekProblem } from '../opening-hours';
 import type { CourierRequest, ProductPayload, SettingsPayload } from './api-types';
 
 const MAX_PRICE_CENTS = 10_000_000; // the API's per-variant ceiling (R100 000)
@@ -96,6 +97,12 @@ export function settingsProblem(s: Settings): string | null {
     return 'Enter a valid support email address, or leave it blank.';
   if (!TIME.test(s.open) || !TIME.test(s.close)) return 'Enter opening and closing times.';
   if (s.open === s.close) return 'Opening and closing time must differ.';
+  if ((s.pauseMessage ?? '').trim().length > 200)
+    return 'The pause message can be at most 200 characters.';
+  if (s.weeklyHours) {
+    const week = weekProblem(s.weeklyHours);
+    if (week) return week;
+  }
   const lat = s.latitude;
   const lng = s.longitude;
   if ((lat === null) !== (lng === null))
@@ -116,6 +123,9 @@ export function toSettingsPayload(s: Settings): SettingsPayload {
     close: s.close,
     latitude: s.latitude,
     longitude: s.longitude,
+    ordersPaused: !!s.ordersPaused,
+    pauseMessage: (s.pauseMessage ?? '').trim(),
+    ...(s.weeklyHours ? { weeklyHours: s.weeklyHours } : {}),
   };
 }
 

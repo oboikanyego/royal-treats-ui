@@ -14,6 +14,7 @@ import {
 import { CatalogueApi } from './api/catalogue-api.service';
 import { photoFileProblem } from './api/photo-file';
 import { SessionService } from './api/session.service';
+import { hoursOn, withinHours, type DayHours } from './opening-hours';
 import { DELIVERY_RADIUS_KM, isDeliverableCategory, type ProductOptions } from './catalogue-config';
 
 export type Role = 'admin' | 'customer' | 'courier';
@@ -50,6 +51,11 @@ export type Settings = {
   supportEmail: string;
   /** Set by the API: whether it can email a password reset link. */
   passwordResetEnabled?: boolean;
+  /** Set by the shop: new orders are refused while true. */
+  ordersPaused?: boolean;
+  pauseMessage?: string;
+  /** Seven days, Sunday first; null means every day uses open/close. */
+  weeklyHours?: DayHours[] | null;
 };
 export type DeliveryOrder = {
   id: string;
@@ -83,6 +89,8 @@ export type DeliveryOrder = {
   createdAt?: string;
   /** Statuses the signed-in user may move this order to (API orders). */
   allowedStatuses?: string[];
+  /** Why the order was cancelled, when the system did it (e.g. overdue). */
+  cancelNote?: string;
 };
 
 /** Shown while the API catalogue loads: 'slow' means the first request is taking a while (cold start). */
@@ -338,10 +346,13 @@ export class CommerceState {
       distance: d,
     };
   }
-  inHours(time: string): boolean {
+  /** Whether the shop takes orders for this time, on this date when one is chosen. */
+  inHours(time: string, date?: string): boolean {
     const s = this.settings();
-    return s.open <= s.close
-      ? time >= s.open && time <= s.close
-      : time >= s.open || time <= s.close;
+    return withinHours(date ? hoursOn(s, date) : { open: s.open, close: s.close }, time);
+  }
+  /** The hours on a date, or null when the shop is closed that day. */
+  hoursOn(date: string): { open: string; close: string } | null {
+    return hoursOn(this.settings(), date);
   }
 }
