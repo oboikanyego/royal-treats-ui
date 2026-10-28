@@ -3373,6 +3373,9 @@ app-root a {
   }
   footer {
     padding-bottom: calc(100px + env(safe-area-inset-bottom));
+  }
+}
+
 @media (max-width: 700px) {
   body.admin-shell .top,
   body.admin-shell .nav,

@@ -1534,6 +1534,9 @@ select:focus-visible {
   .settings-card {
     padding: 16px;
     border-radius: 16px;
+  }
+}
+
 /* Admin on phones: an app bar with the section title, an account menu and tabs for every section. */
 .admin-appbar {
   display: none;
