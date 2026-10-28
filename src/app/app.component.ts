@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, effect, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AdminLive } from './api/admin-live.service';
 import { Busy } from './busy.service';
@@ -39,6 +39,11 @@ export class AppComponent {
 
   constructor() {
     if (this.showWelcome()) setTimeout(() => this.dismissWelcome(), 2200);
+    // On phones the admin workspace has its own app bar, so the shop's header, tabs and footer step aside.
+    effect(() => {
+      const inAdmin = this.page() === 'portal' && this.store.session()?.role === 'admin';
+      document.body.classList.toggle('admin-shell', inAdmin);
+    });
     const sub = this.router.events.subscribe((e) => {
       if (!(e instanceof NavigationEnd)) return;
       let route = this.router.routerState.snapshot.root;
