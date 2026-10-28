@@ -74,6 +74,15 @@ export class AppComponent {
   /** From the menu or the bottom bar to one of the admin's own screens. */
   openAdmin(screen: string) {
     this.menu = false;
+    const wanted = screen === 'home' ? null : screen;
+    const current = this.router.parseUrl(this.router.url);
+    if (
+      current.root.children['primary']?.segments.join('/') === 'account' &&
+      (current.queryParams['screen'] ?? null) === wanted
+    ) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     void this.router.navigate(['/account'], {
       queryParams: { screen: screen === 'home' ? null : screen },
     });
@@ -83,6 +92,13 @@ export class AppComponent {
     this.go('home');
   }
   go(p: string) {
-    this.router.navigateByUrl(pagePaths[p] ?? '/');
+    const target = pagePaths[p] ?? '/';
+    // Tapping the tab you are already on does nothing to the router, so scroll to the top instead, as apps do.
+    if (this.router.url.split(/[?#]/)[0] === target) {
+      this.menu = false;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    void this.router.navigateByUrl(target);
   }
 }
