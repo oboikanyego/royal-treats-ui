@@ -1,31 +1,31 @@
 <div class="pane">
-  <div class="section-row">
-    <div>
-      <h2>Order management</h2>
-      <p class="helper">
-        Newest first. {{ loaded().length }} of {{ total() }} orders shown; refreshed every 30
-        seconds.
-      </p>
+  <div class="orders-toolbar">
+    <div class="filter-chips" role="group" aria-label="Show orders">
+      <button
+        type="button"
+        *ngFor="let f of filters"
+        [class.active]="filter() === f.value"
+        [attr.aria-pressed]="filter() === f.value"
+        (click)="setFilter(f.value)"
+      >
+        {{ f.label }}
+        <small class="chip-badge" *ngIf="f.value === 'pending' && live.pending()">{{
+          live.pending()
+        }}</small>
+      </button>
     </div>
-    <label class="check"
+    <label class="sound-toggle" title="Play a sound when a new order arrives"
       ><input
         type="checkbox"
         name="alertSound"
         [ngModel]="live.soundOn()"
         (ngModelChange)="live.setSound($event)"
-      />
-      Sound for new orders</label
-    >
-    <label
-      >Show<select name="orderFilter" [ngModel]="filter()" (ngModelChange)="setFilter($event)">
-        <option value="all">All orders</option>
-        <option value="pending">Waiting to confirm</option>
-        <option value="active">In progress</option>
-        <option value="completed">Collected / delivered</option>
-        <option value="cancelled">Cancelled</option>
-      </select></label
+      /><span aria-hidden="true" class="sound-dot"></span><span>Sound for new orders</span></label
     >
   </div>
+  <p class="orders-meta">
+    {{ loaded().length }} of {{ total() }} orders · newest first · refreshes every 30 seconds
+  </p>
   <div
     class="alert"
     [class.error]="message()?.kind === 'error'"
@@ -44,20 +44,40 @@
     No loaded orders match this filter.
   </p>
 
-  <div class="order-card" *ngFor="let order of orders()">
-    <div>
-      <b>{{ order.ref }}</b
-      ><span>{{ statusText(order) }} · {{ order.total | rand }}</span>
+  <div
+    class="order-card"
+    *ngFor="let order of orders()"
+    [attr.data-status]="order.status"
+    [attr.data-kind]="order.fulfillment"
+  >
+    <div class="oc-head">
+      <div class="oc-ref">
+        <b>{{ order.ref }}</b>
+        <small>{{ order.fulfillment === 'delivery' ? 'Delivery' : 'Collection' }}</small>
+      </div>
+      <div class="oc-right">
+        <span class="oc-status">{{ statusText(order) }}</span>
+        <b class="oc-total">{{ order.total | rand }}</b>
+      </div>
     </div>
-    <p>
-      {{ order.customer }} · <a [href]="'tel:' + order.phone">{{ order.phone }}</a> ·
-      {{ order.payment }}
-    </p>
-    <p>
-      {{
-        order.fulfillment === 'delivery' ? 'Delivery to ' + order.address : 'Collection at store'
-      }}
-    </p>
+    <div class="oc-customer">
+      <div>
+        <b>{{ order.customer }}</b>
+        <small>{{ order.payment }}</small>
+      </div>
+      <a class="oc-call" [href]="'tel:' + order.phone" [attr.aria-label]="'Call ' + order.customer"
+        ><span aria-hidden="true">☎</span> {{ order.phone }}</a
+      >
+    </div>
+    <div class="oc-when">
+      <span><span aria-hidden="true">◷</span> {{ order.date }} at {{ order.time }}</span>
+      <span *ngIf="order.fulfillment === 'delivery'" class="oc-where"
+        ><span aria-hidden="true">⌖</span> {{ order.address }}</span
+      >
+      <span *ngIf="order.fulfillment !== 'delivery'" class="oc-where"
+        ><span aria-hidden="true">⌂</span> Collection at store</span
+      >
+    </div>
     <div class="order-recipients">
       <ng-container *ngFor="let group of groupByRecipient(order.items)">
         <div *ngFor="let line of group.items">
@@ -71,9 +91,6 @@
         </div>
       </ng-container>
     </div>
-    <p>
-      <small>{{ order.date }} {{ order.time }}</small>
-    </p>
     <p *ngIf="order.notes">
       <small>Notes: {{ order.notes }}</small>
     </p>
