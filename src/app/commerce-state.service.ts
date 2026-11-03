@@ -14,6 +14,7 @@ import {
 import { CatalogueApi } from './api/catalogue-api.service';
 import { photoFileProblem } from './api/photo-file';
 import { SessionService } from './api/session.service';
+import { WakeUp } from './wake-up.service';
 import { hoursOn, withinHours, type DayHours } from './opening-hours';
 import { DELIVERY_RADIUS_KM, isDeliverableCategory, type ProductOptions } from './catalogue-config';
 
@@ -134,6 +135,25 @@ export class CommerceState {
     });
     void this.refreshCatalogue();
     void this.restoreSession();
+    // A tab left alone for a while may show an old menu, and its sign-in may have ended meanwhile.
+    const wake = inject(WakeUp);
+    effect(() => {
+      const woke = wake.woke();
+      untracked(() => {
+        if (!woke) return;
+        void this.refreshCatalogue(true);
+        void this.recheckSession();
+      });
+    });
+  }
+  /** After a wake-up: asks the API who we are. A rejected token ends the session (the interceptor does that). */
+  private async recheckSession(): Promise<void> {
+    if (!this.sessions.token() || this.sessions.restoring()) return;
+    try {
+      this.sessions.user.set(await this.authApi.me());
+    } catch {
+      // A 401 already cleared the session in the interceptor; a network failure keeps what we have.
+    }
   }
   /** After a reload, checks the token kept in sessionStorage; an invalid one ends the session. */
   private async restoreSession(): Promise<void> {
@@ -170,12 +190,15 @@ export class CommerceState {
     }
   }
   /** Loads products and settings from the API; retried from the banner after a failure. */
-  async refreshCatalogue(): Promise<void> {
-    this.catalogueStatus.set('loading');
-    const slow = setTimeout(
-      () => this.catalogueStatus.update((s) => (s === 'loading' ? 'slow' : s)),
-      SLOW_AFTER_MS,
-    );
+  async refreshCatalogue(quiet = false): Promise<void> {
+    // A quiet refresh (after a wake-up) keeps what is on screen: no spinner, and no error banner if it fails.
+    if (!quiet) this.catalogueStatus.set('loading');
+    const slow = quiet
+      ? undefined
+      : setTimeout(
+          () => this.catalogueStatus.update((s) => (s === 'loading' ? 'slow' : s)),
+          SLOW_AFTER_MS,
+        );
     try {
       const [products, settings] = await Promise.all([
         this.catalogueApi.products(),
@@ -185,7 +208,7 @@ export class CommerceState {
       this.settings.set(settings);
       this.catalogueStatus.set('ready');
     } catch {
-      this.catalogueStatus.set('error');
+      if (!quiet) this.catalogueStatus.set('error');
     } finally {
       clearTimeout(slow);
     }

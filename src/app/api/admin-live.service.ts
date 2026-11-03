@@ -2,6 +2,7 @@ import { Injectable, effect, inject, signal, untracked } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import type { Socket } from 'socket.io-client';
 import { environment } from '../../environments/environment';
+import { WakeUp } from '../wake-up.service';
 import { AdminApi } from './admin-api.service';
 import { SessionService } from './session.service';
 import {
@@ -48,6 +49,17 @@ export class AdminLive {
         const token = this.sessions.token();
         if (user?.role === 'admin' && token) void this.connect(token);
         else this.disconnect();
+      });
+    });
+    // A tab left alone has a stale count and a socket the browser may have dropped: reconnect and refresh.
+    const wake = inject(WakeUp);
+    effect(() => {
+      const woke = wake.woke();
+      untracked(() => {
+        const token = this.sessions.token();
+        if (!woke || this.sessions.user()?.role !== 'admin' || !token) return;
+        void this.connect(token);
+        this.changes.update((n) => n + 1);
       });
     });
     effect(() => {
