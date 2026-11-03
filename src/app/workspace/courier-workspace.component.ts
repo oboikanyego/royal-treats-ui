@@ -5,8 +5,10 @@ import {
   OnInit,
   ViewEncapsulation,
   computed,
+  effect,
   inject,
   signal,
+  untracked,
 } from '@angular/core';
 import { toApiError } from '../api/api-errors';
 import { fromApiOrder } from '../api/api-mappers';
@@ -25,6 +27,7 @@ import { OrdersApi } from '../api/orders-api.service';
 import type { DeliveryOrder } from '../commerce-state.service';
 import { groupByRecipient, mapsLink, statusLabel } from '../order-view';
 import { RandPipe } from '../rand.pipe';
+import { WakeUp } from '../wake-up.service';
 
 const REFRESH_MS = 30_000;
 const PAGE_SIZE = 50;
@@ -61,6 +64,16 @@ export class CourierWorkspaceComponent implements OnInit {
   readonly isSet = (value: string | undefined) => !!value;
 
   constructor() {
+    // Coming back to a tab that was left alone shows the latest jobs at once.
+    const wake = inject(WakeUp);
+    effect(() => {
+      const woke = wake.woke();
+      untracked(() => {
+        if (!woke) return;
+        void this.loadJobs(false);
+        void this.feed.refresh(false);
+      });
+    });
     const timer = setInterval(() => {
       if (document.visibilityState !== 'visible') return;
       void this.loadJobs(false);

@@ -10,6 +10,7 @@ import { CommerceState, DeliveryOrder } from '../commerce-state.service';
 import { groupByRecipient, statusLabel, stepDone, stepsFor } from '../order-view';
 import { RandPipe } from '../rand.pipe';
 import { ReceiptViewer } from '../receipt-viewer.service';
+import { WakeUp } from '../wake-up.service';
 
 const PAGE_SIZE = 20;
 const REFRESH_MS = 30_000;
@@ -53,6 +54,14 @@ export class OrdersComponent {
       untracked(() => {
         if (customer) void this.refresh(true);
         else this.clear();
+      });
+    });
+    // Coming back to a tab that was left alone shows the latest statuses at once.
+    const wake = inject(WakeUp);
+    effect(() => {
+      const woke = wake.woke();
+      untracked(() => {
+        if (woke && this.isCustomer()) void this.refresh(false);
       });
     });
     // Statuses change as the shop works on the order, so keep the list fresh while it is open.
