@@ -7,5 +7,39 @@
   Follow your order under <b>My Orders</b>. Confirmation messages are not sent automatically, and
   Royal Treats will confirm your date and time.
 </p>
+<aside class="home-screen-card" *ngIf="offer()" aria-label="Add Royal Treats to your Home Screen">
+  <img src="apple-touch-icon.png" alt="" width="48" height="48" />
+  <div>
+    <h2>Order faster next time</h2>
+    <p>Add Royal Treats to your Home Screen to open the shop in one tap, like an app.</p>
+    <ng-container *ngIf="install.nativeReady(); else steps">
+      <button type="button" class="primary" (click)="add()">Add to Home Screen</button>
+    </ng-container>
+    <ng-template #steps>
+      <ol class="home-screen-steps" *ngIf="install.platform() === 'ios'">
+        <li>
+          Tap the <b>Share</b> button
+          <svg class="share-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path
+              d="M12 3v12M8 7l4-4 4 4M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          at the bottom of Safari.
+        </li>
+        <li>Scroll down and tap <b>Add to Home Screen</b>, then <b>Add</b>.</li>
+      </ol>
+      <ol class="home-screen-steps" *ngIf="install.platform() === 'android'">
+        <li>Tap the <b>⋮</b> menu at the top of your browser.</li>
+        <li>Tap <b>Add to Home screen</b> (or <b>Install app</b>), then <b>Add</b>.</li>
+      </ol>
+    </ng-template>
+    <button type="button" class="link" (click)="notNow()">Not now</button>
+  </div>
+</aside>
 <button class="primary wide" routerLink="/orders">View My Orders</button
 ><button class="secondary wide" routerLink="/">Back to Home</button>

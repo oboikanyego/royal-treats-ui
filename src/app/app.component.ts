@@ -4,6 +4,7 @@ import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router
 import { AdminLive } from './api/admin-live.service';
 import { Busy } from './busy.service';
 import { CartService } from './cart.service';
+import { InstallPrompt } from './install-prompt.service';
 import { CommerceState } from './commerce-state.service';
 import { IconComponent } from './icon.component';
 import { ReceiptDialogComponent } from './receipt-dialog.component';
@@ -31,6 +32,8 @@ export class AppComponent {
   readonly store = inject(CommerceState);
   readonly count = inject(CartService).count;
   readonly live = inject(AdminLive);
+  /** Started here so the browser's install prompt, which fires early, is not missed. */
+  private readonly installPrompt = inject(InstallPrompt);
   readonly busy = inject(Busy);
   private readonly router = inject(Router);
 

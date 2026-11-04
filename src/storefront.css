@@ -3551,3 +3551,47 @@ app-root a {
     min-height: 0;
   }
 }
+
+/* ---- "Add to Home Screen" card on the order-placed page ---- */
+.home-screen-card {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  text-align: left;
+  max-width: 460px;
+  margin: 22px auto;
+  padding: 16px;
+  border: 1px solid #f3c6dc;
+  border-radius: 18px;
+  background: #fff7fb;
+}
+.home-screen-card img {
+  flex: 0 0 auto;
+  border-radius: 12px;
+}
+.home-screen-card h2 {
+  margin: 0 0 4px;
+  font-size: 17px;
+}
+.home-screen-card p {
+  margin: 0 0 10px;
+  font-size: 14px;
+}
+.home-screen-card button.primary {
+  min-height: 44px;
+}
+.home-screen-card button.link {
+  display: block;
+  margin-top: 6px;
+  min-height: 40px;
+}
+.home-screen-steps {
+  margin: 0 0 6px;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.share-icon {
+  vertical-align: -3px;
+  color: #ef1684;
+}
